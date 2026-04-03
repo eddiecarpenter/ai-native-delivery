@@ -83,24 +83,12 @@ Requirements Session (Phase 1).
 
 ## Syncing updates from the template
 
-Periodically pull updates into your agentic environment:
+Syncing is handled by the agent — do not do this manually.
 
-```bash
-# Clone template to a temp location
-git clone git@github.com:eddiecarpenter/agentic-development.git /tmp/agentic-dev-sync
-
-# Copy only base/ — all other files are untouched
-cp -r /tmp/agentic-dev-sync/base/ ./base/
-cp /tmp/agentic-dev-sync/TEMPLATE_VERSION ./TEMPLATE_VERSION
-
-# Clean up
-rm -rf /tmp/agentic-dev-sync
-
-# Review changes, then commit
-git diff
-git add base/ TEMPLATE_VERSION
-git commit -m "chore: sync base/ from agentic-development <version>"
-```
+1. Open an agent session in your agentic repo root
+2. Say: *"Sync template"*
+3. The agent will check for updates, show you a diff, and ask for confirmation
+4. Review the changes and confirm — the agent commits and cleans up
 
 Only `base/` and `TEMPLATE_VERSION` are ever updated by a sync.
 All local files (`AGENTS.local.md`, `REPOS.md`, `CLAUDE.md`, etc.) are never touched.

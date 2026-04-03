@@ -229,6 +229,39 @@ Commit and raise a PR to the agentic repo: `chore: register <repo-name> in REPOS
 
 ---
 
+### Template Sync Session
+
+Triggered by the human with a natural language instruction such as:
+> *"Sync template"* or *"Resync base"*
+
+Runs in the agentic repo root. Updates `base/` from the upstream template.
+The human reviews the diff and confirms before anything is committed.
+
+1. Read `TEMPLATE_SOURCE` to determine the upstream template repo
+2. Read `TEMPLATE_VERSION` to determine what was last synced
+3. Check the latest release tag on the template repo:
+   `gh release list --repo <template> --limit 1`
+4. If already up to date — inform the human and exit cleanly
+5. Clone the template to a temporary location:
+   `git clone git@github.com:<template>.git /tmp/agentic-sync`
+6. Copy `base/` from the template into the local repo:
+   `cp -r /tmp/agentic-sync/base/ ./base/`
+7. Show the human a diff of all changes:
+   `git diff base/`
+8. Ask for confirmation before proceeding:
+   > *"These changes will be committed to base/. Proceed? [y/N]"*
+   - If no — restore `base/` to its previous state and exit cleanly
+9. Update `TEMPLATE_VERSION` with the new version
+10. Stage and commit:
+    `chore: sync base/ from <template> <version>`
+11. Clean up: `rm -rf /tmp/agentic-sync`
+12. Inform the human — list what changed and remind them to raise a PR
+
+**Never sync without human confirmation of the diff.**
+**Never modify any local files** (`AGENTS.local.md`, `REPOS.md`, etc.) during a sync.
+
+---
+
 ### Requirements Session (Phase 1)
 
 Run interactively by a human. Captures business needs as Requirement issues
