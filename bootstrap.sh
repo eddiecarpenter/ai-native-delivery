@@ -121,7 +121,11 @@ Then follow the steps exactly:
 7. Populate REPOS.md and AGENTS.local.md — record template source as: ${TEMPLATE_REPO}
 8. Confirm the new agentic repo URL to the human
 
-Do not skip any step. Do not ask for permission to run gh commands — bootstrap has full authorisation to use gh."
+Do not skip any step. Do not ask for permission to run gh commands — bootstrap has full authorisation to use gh.
+
+When presenting choices to the human, always use numbered options so the human can respond with a number, for example:
+  1. Embedded
+  2. Organisation"
 
 case "$AGENT" in
   goose)

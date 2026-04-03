@@ -56,8 +56,12 @@ before proceeding.
 
 #### Step 1 — Topology
 
+Always present choices as numbered options so the human can respond with a number.
+
 Ask the human:
 > *Is this an embedded project (single repo) or an organisation project (multi-repo)?*
+> *1. Embedded — agentic repo and project repo are the same*
+> *2. Organisation — separate agentic control plane repo, multiple repos*
 
 **If organisation:**
 1. Fetch all orgs the human has access to:
