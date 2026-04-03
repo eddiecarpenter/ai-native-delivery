@@ -1,0 +1,5 @@
+version: 1.0.0
+title: Requirements Session
+description: See base/recipes/requirements.md for full instructions
+instructions: |
+  Read base/recipes/requirements.md and follow it exactly.

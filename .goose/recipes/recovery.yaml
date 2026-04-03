@@ -1,0 +1,5 @@
+version: 1.0.0
+title: Foreground Recovery Session
+description: See base/recipes/recovery.md for full instructions
+instructions: |
+  Read base/recipes/recovery.md and follow it exactly.

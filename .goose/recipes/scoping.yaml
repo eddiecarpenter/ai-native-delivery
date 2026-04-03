@@ -1,0 +1,5 @@
+version: 1.0.0
+title: Scoping Session
+description: See base/recipes/scoping.md for full instructions
+instructions: |
+  Read base/recipes/scoping.md and follow it exactly.
