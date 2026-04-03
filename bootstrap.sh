@@ -100,9 +100,7 @@ info "Launching Phase 0a — Environment Bootstrap Session..."
 info "Fetching protocol from template — this may take a moment..."
 echo ""
 
-BOOTSTRAP_PROMPT="IMPORTANT: You are running in a terminal (CLI). Do NOT use markdown formatting — no headers (##), no bold (**text**), no bullet points with *, no backtick code blocks. Use plain text only. Use simple indentation and dashes for lists.
-
-You are starting a Phase 0a Environment Bootstrap Session as defined in the agentic development protocol.
+BOOTSTRAP_PROMPT="You are starting a Phase 0a Environment Bootstrap Session as defined in the agentic development protocol.
 
 The template repo this environment is being bootstrapped from is: ${TEMPLATE_REPO}
 
@@ -131,7 +129,7 @@ case "$AGENT" in
     goose session --instructions "$BOOTSTRAP_PROMPT"
     ;;
   claude)
-    claude --dangerously-skip-permissions --output-format text -p "$BOOTSTRAP_PROMPT"
+    claude --dangerously-skip-permissions --system-prompt "$BOOTSTRAP_PROMPT"
     ;;
 esac
 
