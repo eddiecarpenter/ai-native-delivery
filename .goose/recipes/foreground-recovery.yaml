@@ -1,0 +1,103 @@
+version: "1.0.0"
+title: "Foreground Recovery"
+description: "Diagnose and fix a workflow failure on the current feature branch. Fix only what is failing — do not expand scope."
+
+extensions:
+  - type: builtin
+    name: developer
+    display_name: Developer
+    timeout: 600
+    bundled: true
+
+settings:
+  max_turns: 100
+
+instructions: |
+  You are running a Foreground Recovery session.
+  A GitHub Actions workflow has failed (build red, tests failing, or merge conflict).
+  Your job is to diagnose the root cause and fix exactly what is failing — nothing more.
+
+  ## Step 1 — Read Context
+
+  Complete Session Initialisation as defined in AGENTS.md.
+
+  ## Step 2 — Verify Branch
+
+  Confirm you are NOT on main before touching any code:
+    git branch --show-current
+
+  If on main — stop immediately and report. Never make changes on main.
+
+  ## Step 3 — Query Open Tasks
+
+  Before touching any code, query open Task sub-issues on the Feature:
+    gh issue list --label task --state open --json number,title,body
+
+  Understand which task was being implemented when the failure occurred.
+
+  ## Step 4 — Get the Exact Error
+
+  Ask the human for the exact error output if it is not already provided.
+  Do not guess the cause. Diagnose only from the exact error.
+
+  ## Step 5 — Diagnose
+
+  From the exact error output, identify:
+  - Which file and line is the root cause
+  - Whether it is a compile error, test failure, or dependency issue
+  - Whether the fix is within the scope of the current task
+
+  If the fix requires:
+  - A contract change — stop and raise it with the human before proceeding
+  - A broad refactor across multiple packages — stop and raise it with the human
+  - Changes outside the current task scope — stop and raise it with the human
+
+  ## Step 6 — Fix Only What Is Failing
+
+  Make the minimum change that resolves the reported error.
+  Do not refactor surrounding code. Do not clean up unrelated issues.
+  Do not expand scope.
+
+  ## Step 7 — Build and Test
+
+  Read base/standards/<stack>.md for the exact build and test commands.
+  Run the full build and test suite.
+  If new failures appear that were not in the original error — diagnose and fix those too,
+  but do not expand beyond what is failing.
+
+  ## Step 8 — Commit, Close, Push
+
+  If build and tests pass:
+    git add -A
+    git commit -m "fix: <description of what was fixed>"
+    gh issue close <task-number> --repo <repo> (if the task is now complete)
+    git push
+
+  ## Step 9 — Re-trigger If Needed
+
+  If the workflow does not automatically re-trigger after the push, apply
+  the `in-development` label again to re-trigger the Dev Session:
+    gh issue edit <feature-number> --remove-label "in-development" --add-label "backlog"
+    gh issue edit <feature-number> --remove-label "backlog" --add-label "in-development"
+
+  ## Step 10 — Report
+
+  Tell the human exactly:
+  - What was failing and why
+  - What was changed to fix it
+  - What the build and test results were
+  - Whether the workflow was re-triggered
+
+  ## Rules
+
+  - Never expand scope beyond the failing issue
+  - Never guess — always diagnose from exact error output
+  - Never make changes on main
+  - If the fix requires a contract change or broad refactor, stop and raise it with the human
+
+prompt: |
+  Foreground Recovery session ready. I have read the project context and confirmed
+  the current branch.
+
+  Please share the exact error output from the failing workflow so I can diagnose
+  the root cause.

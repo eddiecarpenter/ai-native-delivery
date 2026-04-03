@@ -429,16 +429,29 @@ Goose recipes live in two places:
 
 | Path | Editable | Purpose |
 |---|---|---|
-| `base/recipes/*.md` | ❌ Never | The prompt — what the agent does in each phase |
-| `.goose/*.yaml` | ✅ Model/provider/params only | How Goose runs the recipe |
+| `.goose/recipes/*.yaml` | ❌ Never (managed by template) | The complete recipe — instructions, parameters, model settings |
+| `base/recipes/*.md` | ❌ Never | Human-readable reference docs for each session type |
 
-**`base/recipes/*.md` are read-only.** Never modify them locally.
+**`.goose/recipes/*.yaml` files are managed by the `agentic-development` template.**
+**`base/recipes/*.md` files are read-only reference documentation.**
+Neither should ever be modified locally.
+
+The six standard recipes are:
+
+| File | Stage | Trigger |
+|---|---|---|
+| `requirements-session.yaml` | Stage 1 | Human (interactive) |
+| `feature-scoping.yaml` | Stage 2 | Human (interactive) |
+| `feature-design.yaml` | Stage 3 | Automatic — `in-design` label |
+| `dev-session.yaml` | Stage 4 | Automatic — `in-development` label |
+| `pr-review-session.yaml` | Stage 4b | Automatic — PR review submitted |
+| `issue-session.yaml` | Stage 4c | Automatic — issue assigned to agent |
+| `foreground-recovery.yaml` | Recovery | Human (interactive) — workflow failure |
 
 - Customisation of agent behaviour belongs in `AGENTS.local.md`
-- Customisation of how a recipe runs belongs in `.goose/*.yaml` (model, provider, params)
-- If a recipe prompt needs to change, raise it against `eddiecarpenter/agentic-development`
+- If a recipe needs to change, raise it against `eddiecarpenter/agentic-development`
   and let it flow in via `gh agentic sync`
-- `gh agentic verify` detects and flags any local modifications to `base/recipes/*.md`
+- `gh agentic verify` detects and flags any local modifications to recipe files
 
 ---
 

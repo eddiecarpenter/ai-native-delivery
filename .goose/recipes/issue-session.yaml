@@ -1,0 +1,134 @@
+version: "1.0.0"
+title: "Issue Session (Stage 4c)"
+description: "Stage 4c — Bug Fix / Question. Triggered when a GitHub Issue is assigned to the agent. Fixes bugs or answers questions depending on the issue label."
+
+parameters:
+  - key: issue_number
+    input_type: string
+    requirement: required
+    description: "GitHub issue number to process (e.g. 42)"
+
+  - key: repo
+    input_type: string
+    requirement: required
+    description: "GitHub repository in owner/name format (e.g. NewOpenBSS/charging-domain)"
+
+extensions:
+  - type: builtin
+    name: developer
+    display_name: Developer
+    timeout: 600
+    bundled: true
+
+settings:
+  max_turns: 200
+
+instructions: |
+  You are running an Issue Session — Stage 4c of the agentic development pipeline.
+  A human has assigned a GitHub Issue to you. Your job is to read the issue and
+  either fix the reported bug or answer the question, depending on the label.
+
+  ## Step 1 — Read the Issue
+
+  Fetch the issue details:
+    gh issue view {{ issue_number }} --repo {{ repo }} --json title,body,labels,assignees
+
+  Extract:
+  - Issue title
+  - Issue body (the bug description or question)
+  - Labels (look for "bug" or "question")
+
+  Post a comment acknowledging you have picked up the issue:
+    gh issue comment {{ issue_number }} --repo {{ repo }} \
+      --body "I have picked up this issue and am investigating. I will post an update shortly."
+
+  ## Step 2 — Read Context
+
+  Complete Session Initialisation as defined in AGENTS.md.
+
+  ## Step 3 — Route by Label
+
+  ### If label is "bug":
+
+  #### 3a — Understand the bug
+  Read the issue body carefully. Identify:
+  - Which file(s) are affected
+  - What the incorrect behaviour is
+  - What the correct behaviour should be
+
+  #### 3b — Locate and understand the code
+  Read the relevant source files. Do not make any changes until you fully
+  understand the problem.
+
+  #### 3c — Scope check
+  Before making ANY change, verify the fix is within safe scope:
+  - Only modify files directly related to the bug
+  - Do NOT refactor unrelated code
+  - Do NOT add new dependencies without human approval
+  - Do NOT modify any contract
+
+  If the fix requires contract changes, broad refactors, or new dependencies:
+    gh issue comment {{ issue_number }} --repo {{ repo }} \
+      --body "This fix requires changes outside safe scope: [explain]. Human action required."
+    gh issue edit {{ issue_number }} --repo {{ repo }} --add-label "needs-human"
+  Stop and exit cleanly.
+
+  #### 3d — Create a fix branch
+    git fetch origin
+    git checkout main
+    git pull origin main
+    git checkout -b fix/issue-{{ issue_number }}-<short-description>
+
+  #### 3e — Implement the fix
+  Make the minimal change that fixes the reported bug.
+  Stage new files immediately after creating them.
+
+  #### 3f — Build and test
+  Read base/standards/<stack>.md for the exact build and test commands.
+  Run the full build and test suite.
+  If build or tests fail — diagnose and fix before continuing.
+  If you cannot fix the failure — post a comment, add "needs-human" label, stop.
+
+  #### 3g — Commit
+    git add -A
+    git commit -m "fix: <description> — closes #{{ issue_number }}"
+
+  #### 3h — Exit cleanly
+  Do NOT push — the workflow handles this after you exit cleanly.
+  Exit with a success message describing what was fixed.
+  The workflow will push the branch and open a PR referencing the issue.
+
+  ### If label is "question":
+
+  #### 3a — Understand the question
+  Read the issue body carefully. Identify exactly what is being asked.
+
+  #### 3b — Research the answer
+  Read the relevant source files, documentation, and context.
+  Find a complete, accurate answer.
+
+  #### 3c — Post the answer
+    gh issue comment {{ issue_number }} --repo {{ repo }} \
+      --body "<your detailed answer>"
+
+  #### 3d — Label the issue
+  Add the "answered" label — do NOT close (the human may want to follow up):
+    gh issue edit {{ issue_number }} --repo {{ repo }} --add-label "answered"
+
+  Exit cleanly — no code changes, no branch, no PR needed.
+
+  ### If label is neither "bug" nor "question":
+    gh issue comment {{ issue_number }} --repo {{ repo }} \
+      --body "I don't know how to handle this issue type. Please add a 'bug' or 'question' label and reassign me."
+  Exit cleanly.
+
+  ## Rules
+
+  - Narrow scope only — fix exactly what the issue describes, nothing more
+  - Always post a comment before starting and after finishing
+  - If in doubt — stop and ask via a comment rather than guessing
+  - If a fix requires a contract change or broad refactor, stop and raise it with the human
+
+prompt: |
+  Issue session starting for issue #{{ issue_number }} in {{ repo }}.
+  Reading issue details and routing by label.

@@ -1,0 +1,111 @@
+version: "1.0.0"
+title: "PR Review Session (Stage 4b)"
+description: "Stage 4b — PR Feedback. Reads open review comments on a PR and either responds to questions or fixes reported issues, depending on comment type."
+
+parameters:
+  - key: pr_number
+    input_type: string
+    requirement: required
+    description: "PR number to process review comments for (e.g. 14)"
+
+  - key: branch_name
+    input_type: string
+    requirement: required
+    description: "Feature branch the PR is open on (e.g. feature/12-charging-trace)"
+
+  - key: repo
+    input_type: string
+    requirement: required
+    description: "GitHub repository in owner/name format (e.g. NewOpenBSS/charging-domain)"
+
+extensions:
+  - type: builtin
+    name: developer
+    display_name: Developer
+    timeout: 600
+    bundled: true
+
+settings:
+  max_turns: 200
+
+instructions: |
+  You are running a PR Review Session — Stage 4b of the agentic development pipeline.
+  A human has reviewed a PR and left review comments. Your job is to read those
+  comments and respond appropriately — either answering questions or fixing issues.
+  You do NOT push — the workflow handles that after you exit cleanly.
+
+  ## Step 1 — Verify Branch
+
+    git branch --show-current
+  If not on {{ branch_name }}:
+    git checkout {{ branch_name }} 2>/dev/null || \
+    git checkout -b {{ branch_name }} origin/{{ branch_name }}
+
+  ## Step 2 — Read Context
+
+  Complete Session Initialisation as defined in AGENTS.md.
+
+  ## Step 3 — Fetch All Review Comments
+
+  Fetch the PR review state and all inline review comments:
+
+    gh pr view {{ pr_number }} --repo {{ repo }} --json reviews,title,headRefName
+    gh api repos/{{ repo }}/pulls/{{ pr_number }}/comments
+    gh api repos/{{ repo }}/pulls/{{ pr_number }}/reviews
+
+  For each review comment, extract:
+  - comment body
+  - file path and line number
+  - comment id (needed to reply)
+
+  ## Step 4 — Classify and Process Each Comment
+
+  For each unresolved inline comment, determine its intent:
+
+  ### If the comment is a QUESTION or EXPLANATION REQUEST:
+  The human is asking why something was done, or wants clarification.
+  - Read the relevant file and line
+  - Formulate a clear, concise response explaining the reasoning
+  - Reply to the comment:
+      gh api repos/{{ repo }}/pulls/{{ pr_number }}/comments \
+        --method POST \
+        --field body="<your response>" \
+        --field in_reply_to=<comment_id>
+  - Do NOT modify any code for question-type comments
+
+  ### If the comment is a CHANGE REQUEST or BUG REPORT:
+  The human wants something fixed or changed.
+  - Read the relevant file and surrounding context
+  - Understand exactly what change is needed
+  - Implement the fix
+  - Build and test (see base/standards/<stack>.md for commands):
+      If build or tests fail — diagnose and fix before continuing.
+      If you cannot fix — stop and exit with a clear error message.
+  - Reply to the comment confirming what was fixed:
+      gh api repos/{{ repo }}/pulls/{{ pr_number }}/comments \
+        --method POST \
+        --field body="Fixed: <brief description of what was changed>" \
+        --field in_reply_to=<comment_id>
+  - Commit the fix:
+      git add -A
+      git commit -m "fix: <description> — PR #{{ pr_number }} review feedback"
+
+  ## Step 5 — Summary
+
+  After processing all comments:
+  - If any code was changed: exit cleanly — the workflow will push
+  - If only questions were answered: exit cleanly — no push needed
+  - Report a summary: what was answered, what was fixed
+
+  ## Rules
+
+  - Process ALL unresolved comments — do not skip any
+  - For ambiguous comments, default to treating them as a change request
+  - If a fix is not straightforward, reply to the comment explaining the complexity
+    and what information is needed from the human before proceeding
+  - Never merge the PR — leave that for human review
+  - If a fix requires a contract change or broad refactor, stop and raise it with the human
+
+prompt: |
+  PR review session starting for PR #{{ pr_number }} on {{ branch_name }} in {{ repo }}.
+  Reading review comments and processing each one.

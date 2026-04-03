@@ -1,0 +1,129 @@
+version: "1.0.0"
+title: "Feature Design (Stage 3)"
+description: "Stage 3 — Feature Design. Triggered automatically when a Feature issue is labelled in-design. Decomposes the Feature into ordered Task sub-issues and creates the feature branch."
+
+parameters:
+  - key: feature_issue
+    input_type: string
+    requirement: optional
+    default: ""
+    description: "Feature issue number (e.g. 12). If not provided, presents interactive list of in-design features."
+
+  - key: repo
+    input_type: string
+    requirement: optional
+    default: ""
+    description: "Domain repo in owner/name format (e.g. NewOpenBSS/charging-domain). If not provided, derived from REPOS.md."
+
+extensions:
+  - type: builtin
+    name: developer
+    display_name: Developer
+    timeout: 600
+    bundled: true
+
+settings:
+  max_turns: 100
+
+instructions: |
+  You are running a Feature Design session — Stage 3 of the agentic development pipeline.
+  Your job is to decompose a Feature into ordered Task sub-issues and create the feature branch.
+  The Dev Session will process those tasks sequentially.
+
+  Do NOT write code. Do NOT push files. Do NOT open a PR.
+
+  ## Step 1 — Read Context
+
+  Complete Session Initialisation as defined in AGENTS.md.
+
+  ## Step 2 — Identify the Feature
+
+  IF feature_issue is provided (automated mode):
+    Read the Feature issue in full:
+      gh issue view {{ feature_issue }} --repo {{ repo }}
+    Verify the issue has label "in-design". If not — stop and report.
+
+  IF feature_issue NOT provided (interactive mode):
+    List all Feature issues labelled "in-design":
+      gh issue list --label "in-design" --label "feature" --state open --json number,title,body
+    Present the list and wait for human selection.
+
+  ## Step 3 — Analyse the Codebase
+
+  Read the relevant source files to understand what exists.
+  Identify:
+  - What needs to be built
+  - What can be reused or extended
+  - Where new files belong
+  - What dependencies exist between tasks
+  - Minimum number of tasks needed and their correct sequence
+
+  ## Step 4 — Create Task Sub-Issues
+
+  Create one GitHub Issue per task, ordered by implementation sequence.
+  Each task must be completable independently in that sequence.
+  Every task that adds logic must include test requirements.
+
+  For each task:
+
+    gh issue create \
+      --repo {{ repo }} \
+      --label "task,backlog" \
+      --title "<specific task title>" \
+      --body "## Task
+
+  <specific implementation work>
+
+  ## Files
+
+  - \`path/to/file.go\` — what to create or change
+
+  ## Acceptance criteria
+
+  - [ ] <specific testable condition>
+  - [ ] Tests pass"
+
+  After creating each task issue, wire it as a sub-issue of the Feature:
+    gh api graphql -f query='
+      mutation {
+        addSubIssue(input: {issueId: "<feature-node-id>", subIssueId: "<task-node-id>"}) {
+          issue { number }
+        }
+      }'
+
+  ## Step 5 — Create the Feature Branch
+
+  Branch name: feature/<feature-issue-number>-<short-description>
+  This auto-links the branch to the Feature issue in GitHub.
+
+    git fetch origin
+    git checkout main
+    git pull origin main
+    git checkout -b feature/{{ feature_issue }}-<short-description>
+    git push -u origin feature/{{ feature_issue }}-<short-description>
+
+  ## Step 6 — Trigger the Dev Session
+
+  Apply "in-development" label on the Feature issue.
+  This triggers the Dev Session GitHub Actions workflow automatically.
+
+    gh issue edit {{ feature_issue }} --repo {{ repo }} \
+      --remove-label "in-design" \
+      --add-label "in-development"
+
+  ## Step 7 — Report Completion
+
+  List the task issues created with a one-line description of each.
+  State the total number of tasks and their sequence.
+  Confirm: "Task sub-issues created. Dev Session will trigger automatically on branch feature/{{ feature_issue }}-*."
+
+  ## Rules
+
+  - Tasks must be ordered — each must be completable independently in sequence
+  - Every task that adds logic must include a test task or test requirement
+  - Do not begin implementation — design only
+  - Exit cleanly — do not push files, do not open a PR
+
+prompt: |
+  Starting Feature Design session for feature #{{ feature_issue }} in {{ repo }}.
+  Reading context, analysing codebase, creating task sub-issues.
