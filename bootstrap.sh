@@ -129,7 +129,7 @@ case "$AGENT" in
     goose session --instructions "$BOOTSTRAP_PROMPT"
     ;;
   claude)
-    claude --dangerously-skip-permissions --system-prompt "$BOOTSTRAP_PROMPT"
+    claude --dangerously-skip-permissions --system-prompt "$BOOTSTRAP_PROMPT" "Begin the Phase 0a Environment Bootstrap Session now. Pre-flight checks are complete. Start at Step 1 — ask the topology question."
     ;;
 esac
 
