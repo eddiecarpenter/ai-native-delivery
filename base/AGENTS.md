@@ -423,6 +423,25 @@ Always ask a human before:
 
 ---
 
+## Recipe Rules
+
+Goose recipes live in two places:
+
+| Path | Editable | Purpose |
+|---|---|---|
+| `base/recipes/*.md` | ❌ Never | The prompt — what the agent does in each phase |
+| `.goose/*.yaml` | ✅ Model/provider/params only | How Goose runs the recipe |
+
+**`base/recipes/*.md` are read-only.** Never modify them locally.
+
+- Customisation of agent behaviour belongs in `AGENTS.local.md`
+- Customisation of how a recipe runs belongs in `.goose/*.yaml` (model, provider, params)
+- If a recipe prompt needs to change, raise it against `eddiecarpenter/agentic-development`
+  and let it flow in via `gh agentic sync`
+- `gh agentic verify` detects and flags any local modifications to `base/recipes/*.md`
+
+---
+
 ## Contract Rules
 
 A **contract** is any structure or schema shared with an external system or process.
