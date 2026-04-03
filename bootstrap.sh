@@ -311,7 +311,10 @@ Execute steps 3-7 now. Do not ask for permission to run gh commands — you have
 
 case "$AGENT" in
   goose)
-    goose run -t "$BOOTSTRAP_PROMPT" --interactive
+    PROMPT_FILE=$(mktemp /tmp/goose-bootstrap-XXXX.md)
+    echo "$BOOTSTRAP_PROMPT" > "$PROMPT_FILE"
+    goose run -i "$PROMPT_FILE" --interactive
+    rm -f "$PROMPT_FILE"
     ;;
   claude)
     claude --dangerously-skip-permissions --system-prompt "$BOOTSTRAP_PROMPT" "Execute the bootstrap now."
