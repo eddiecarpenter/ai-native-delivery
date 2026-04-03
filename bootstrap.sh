@@ -12,6 +12,7 @@ set -euo pipefail
 
 TEMPLATE_REPO="eddiecarpenter/agentic-development"
 TEMPLATE_RAW="https://raw.githubusercontent.com/${TEMPLATE_REPO}/main"
+WORKING_DIR="$(pwd)"
 
 # ── Colours ────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -89,6 +90,7 @@ info "Pre-flight checks passed. Ready to bootstrap."
 echo ""
 echo -e "  Template repo : ${CYAN}${TEMPLATE_REPO}${NC}"
 echo -e "  Agent         : ${CYAN}${AGENT}${NC}"
+echo -e "  Working dir   : ${CYAN}${WORKING_DIR}${NC}"
 echo ""
 read -rp "Proceed? [y/N]: " confirm
 [[ "$confirm" =~ ^[Yy]$ ]] || { warn "Aborted."; exit 0; }
@@ -108,6 +110,8 @@ Begin by reading the Phase 0a session steps from:
 
 Note: pre-flight checks (gh auth, git) have already been completed by bootstrap.sh.
 Tell the human the pre-flight checks passed and proceed directly to step 2.
+
+The new agentic repo must be cloned into: ${WORKING_DIR}/<repo-name>
 
 Then follow the steps exactly:
 1. ✔ Pre-flight checks complete (done by bootstrap.sh)

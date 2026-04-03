@@ -19,25 +19,36 @@ Before running the bootstrap you will need:
 
 ### Bootstrap a new environment
 
-Download the bootstrap script, verify its integrity, then run it:
+**First, navigate to the folder where you want the new agentic repo to be created:**
+```bash
+cd ~/Development/my-projects   # or wherever you keep your repos
+```
+
+Then download the bootstrap script, verify its integrity, and run it:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh -o /tmp/bootstrap.sh \
-  && curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh.md5 -o /tmp/bootstrap.sh.md5 \
+gh api repos/eddiecarpenter/agentic-development/contents/bootstrap.sh \
+  --jq '.content' | base64 -d > /tmp/bootstrap.sh \
+  && gh api repos/eddiecarpenter/agentic-development/contents/bootstrap.sh.md5 \
+  --jq '.content' | base64 -d > /tmp/bootstrap.sh.md5 \
   && md5sum -c /tmp/bootstrap.sh.md5 \
   && bash /tmp/bootstrap.sh
 ```
 
 > **Tip:** Inspect the script before running it:
 > ```bash
-> curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh | less
+> gh api repos/eddiecarpenter/agentic-development/contents/bootstrap.sh --jq '.content' | base64 -d | less
 > ```
+
+> **Note:** There will be a short pause after the agent launches while it fetches
+> the protocol from the template — this is expected.
 
 The script will:
 1. Verify prerequisites are in place
 2. Ask whether to use Goose or Claude Code
 3. Launch the Phase 0a Environment Bootstrap Session
 4. Guide you through creating and configuring your new agentic environment
+5. Clone the new agentic repo into your current directory
 
 Once complete, open the new agentic repo in your desktop agent and start a
 Requirements Session (Phase 1).
