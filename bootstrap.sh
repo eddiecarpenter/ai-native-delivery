@@ -311,7 +311,7 @@ Execute steps 3-7 now. Do not ask for permission to run gh commands — you have
 
 case "$AGENT" in
   goose)
-    PROMPT_FILE=$(mktemp /tmp/goose-bootstrap-XXXX.md)
+    PROMPT_FILE=$(mktemp /tmp/goose-bootstrap-XXXX)
     echo "$BOOTSTRAP_PROMPT" > "$PROMPT_FILE"
     goose run -i "$PROMPT_FILE" --interactive
     rm -f "$PROMPT_FILE"
