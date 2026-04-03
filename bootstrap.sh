@@ -3,9 +3,7 @@
 # Fetched from: https://github.com/eddiecarpenter/agentic-development
 #
 # Usage (verify then run):
-#   gh api repos/eddiecarpenter/agentic-development/contents/bootstrap.sh \
-#     --jq '.content' | base64 -d > /tmp/bootstrap.sh \
-#     && bash /tmp/bootstrap.sh
+#   curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh | bash
 
 set -euo pipefail
 

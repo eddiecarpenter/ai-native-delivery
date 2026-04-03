@@ -27,21 +27,20 @@ cd ~/Development/my-projects   # or wherever you keep your repos
 Then download and run the bootstrap script:
 
 ```bash
-gh api repos/eddiecarpenter/agentic-development/contents/bootstrap.sh \
-  --jq '.content' | base64 -d > /tmp/bootstrap.sh \
-  && bash /tmp/bootstrap.sh
+curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh | bash
 ```
 
 > **Tip:** Inspect the script before running it:
 > ```bash
-> gh api repos/eddiecarpenter/agentic-development/contents/bootstrap.sh --jq '.content' | base64 -d | less
+> curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh | less
 > ```
 
 > **Optional — verify script integrity before running:**
 > ```bash
-> gh api repos/eddiecarpenter/agentic-development/contents/bootstrap.sh.md5 \
->   --jq '.content' | base64 -d > /tmp/bootstrap.sh.md5 \
->   && (cd /tmp && md5sum -c bootstrap.sh.md5)
+> curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh -o /tmp/bootstrap.sh \
+>   && curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh.md5 -o /tmp/bootstrap.sh.md5 \
+>   && (cd /tmp && md5sum -c bootstrap.sh.md5) \
+>   && bash /tmp/bootstrap.sh
 > ```
 
 > **Note:** There will be a short pause after the agent launches while it fetches
