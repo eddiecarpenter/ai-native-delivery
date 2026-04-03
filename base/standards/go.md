@@ -4,6 +4,26 @@ Apply these rules when working in any Go package in this repository.
 
 ---
 
+## Project Initialisation
+
+Run these commands to scaffold a new Go project. Do not create files by hand.
+
+```bash
+go mod init github.com/<owner>/<repo-name>
+mkdir -p cmd/<repo-name> internal
+cat > cmd/<repo-name>/main.go << 'EOF'
+package main
+
+func main() {}
+EOF
+git add go.mod cmd/ internal/
+```
+
+- `go mod init` writes the correct installed Go version into `go.mod` automatically — never edit `go.mod` by hand.
+- Commit: `chore: scaffold Go project structure`
+
+---
+
 ## Build Verification
 
 After any change to Go source, imports, or dependencies — run in this order:

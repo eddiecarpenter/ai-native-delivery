@@ -79,24 +79,17 @@ git commit -m "chore: remove template bootstrap files"
 
 #### Step 5 — Scaffold Project Structure
 
-Create the initial project structure based on the stack provided.
+Read the **Project Initialisation** section of the relevant standards file in `base/standards/`
+and follow the instructions there exactly.
 
-**Go:**
-```bash
-go mod init github.com/<owner>/<repo-name>
-mkdir -p cmd/<repo-name> internal
-cat > cmd/<repo-name>/main.go << 'EOF'
-package main
-
-func main() {}
-EOF
-```
-Run `go mod init` — do not create `go.mod` by hand. The command writes the correct installed Go version automatically.
-
-**Java / Quarkus or Spring Boot:** create `src/main/java/` and `pom.xml` scaffold.
-**TypeScript / Node.js:** create `src/` and `package.json` scaffold.
-**Python:** create `src/` and `pyproject.toml` scaffold.
-**Rust:** run `cargo init`.
+| Stack | Standards file |
+|---|---|
+| Go | `base/standards/go.md` |
+| Java / Quarkus | `base/standards/java-quarkus.md` |
+| Java / Spring Boot | `base/standards/java-spring.md` |
+| TypeScript / Node.js | `base/standards/typescript.md` |
+| Python | `base/standards/python.md` |
+| Rust | `base/standards/rust.md` |
 
 Commit: `chore: scaffold <stack> project structure`
 
