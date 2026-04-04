@@ -27,6 +27,14 @@ Triggered automatically by GitHub Actions when a PR review is submitted with
 - Never merge the PR — leave that for human review
 - If a fix requires a contract change or broad refactor, stop and raise it with the human
 
+## Notification
+
+Before exiting, fire a macOS desktop notification so the human knows the PR has been updated:
+
+```bash
+osascript -e 'display notification "PR updated — please re-review and merge if approved" with title "Agentic Pipeline" sound name "Glass"'
+```
+
 ## Next Step
 
 After the agent pushes its fixes, the human re-reviews the PR.
