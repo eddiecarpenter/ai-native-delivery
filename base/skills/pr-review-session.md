@@ -29,10 +29,7 @@ Triggered automatically by GitHub Actions when a PR review is submitted with
 
 ## Notification
 
-Before exiting, notify the system owner that the PR has been updated and needs re-review.
-Use the **Notify User** skill (`base/skills/notify-user.md`) with the message:
-
-> "PR #N has been updated — please re-review and merge if approved"
+Before exiting, notify the user: "PR #N has been updated — please re-review and merge if approved."
 
 ## Next Step
 

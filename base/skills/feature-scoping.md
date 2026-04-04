@@ -46,10 +46,7 @@ Open Goose and select the **Feature Scoping (Stage 2)** recipe.
 
 ## Notification
 
-After applying `in-design`, notify the system owner that automation has taken over and no action is needed yet.
-Use the **Notify User** skill (`base/skills/notify-user.md`) with the message:
-
-> "Feature #N sent to design — automation running, no action needed yet"
+After applying `in-design`, notify the user: "Feature #N sent to design — automation running, no action needed yet."
 
 ## Next Step
 

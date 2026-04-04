@@ -38,10 +38,7 @@ Open Goose and select the **Foreground Recovery** recipe.
 
 ## Notification
 
-After pushing the fix, notify the system owner to confirm the workflow has restarted.
-Use the **Notify User** skill (`base/skills/notify-user.md`) with the message:
-
-> "Fix pushed for Feature #N — please confirm the Dev Session workflow has restarted"
+After pushing the fix, notify the user: "Fix pushed for Feature #N — please confirm the Dev Session workflow has restarted."
 
 ## Next Step
 

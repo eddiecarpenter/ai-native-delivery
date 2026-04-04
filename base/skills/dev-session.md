@@ -32,10 +32,7 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
 
 ## Notification
 
-Before exiting, notify the system owner that the PR is ready for review.
-Use the **Notify User** skill (`base/skills/notify-user.md`) with the message:
-
-> "PR #N is ready for your review — [repo]"
+Before exiting, notify the user: "PR #N is ready for your review."
 
 ## Next Step
 
