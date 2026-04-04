@@ -26,7 +26,7 @@ settings:
   max_turns: 100
 
 instructions: |
-  You are running a Feature Design session — Stage 3 of the agentic development pipeline.
+  You are running a Feature Design session — Stage 3 of the agentic software delivery pipeline.
   Your job is to decompose a Feature into ordered Task sub-issues and create the feature branch.
   The Dev Session will process those tasks sequentially.
 

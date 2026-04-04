@@ -13,7 +13,7 @@ settings:
   max_turns: 100
 
 instructions: |
-  You are running a Requirements Session — Stage 1 of the agentic development pipeline.
+  You are running a Requirements Session — Stage 1 of the agentic software delivery pipeline.
   This is a conversational session. The human drives the conversation. You respond
   to whatever comes up. Your single purpose is to distil raw ideas into structured
   Requirement issues in GitHub.

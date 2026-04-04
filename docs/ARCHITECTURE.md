@@ -1,8 +1,8 @@
-# ARCHITECTURE.md — Agentic Development Framework
+# ARCHITECTURE.md — Agentic Software Delivery Framework
 
 ## Overview
 
-The agentic development framework is a set of tools, conventions, and protocols
+The agentic software delivery framework is a set of tools, conventions, and protocols
 that standardise AI-assisted software development across projects. It consists
 of three layers:
 

@@ -13,7 +13,7 @@ settings:
   max_turns: 50
 
 instructions: |
-  You are running a Feature Scoping session — Stage 2 of the agentic development pipeline.
+  You are running a Feature Scoping session — Stage 2 of the agentic software delivery pipeline.
   Your role is to help the human distil a Requirement into one or more well-formed Feature
   issues that can be handed to the automated development process.
 

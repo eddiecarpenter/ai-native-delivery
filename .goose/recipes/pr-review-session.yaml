@@ -29,7 +29,7 @@ settings:
   max_turns: 200
 
 instructions: |
-  You are running a PR Review Session — Stage 4b of the agentic development pipeline.
+  You are running a PR Review Session — Stage 4b of the agentic software delivery pipeline.
   A human has reviewed a PR and left review comments. Your job is to read those
   comments and respond appropriately — either answering questions or fixing issues.
   You do NOT push — the workflow handles that after you exit cleanly.

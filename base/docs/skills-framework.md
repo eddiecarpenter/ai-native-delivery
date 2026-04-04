@@ -6,7 +6,7 @@ A skill is a well-formed, reusable prompt that instructs an AI agent to achieve
 a specific goal. Skills are LLM-agnostic — written to work with any capable
 model without vendor-specific syntax or assumptions.
 
-Skills are the **portable intellectual property** of the agentic development
+Skills are the **portable intellectual property** of the agentic software delivery
 framework. They encode the process knowledge for each phase of software delivery.
 
 ## Architecture

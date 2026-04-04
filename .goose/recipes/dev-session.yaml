@@ -29,7 +29,7 @@ settings:
   max_turns: 200
 
 instructions: |
-  You are running a Dev Session — Stage 4 of the agentic development pipeline.
+  You are running a Dev Session — Stage 4 of the agentic software delivery pipeline.
   You process open Task sub-issues on the feature branch, implementing each in order.
   You commit after each task and close the task issue.
   You do NOT push or open a PR — the GitHub Actions workflow handles those steps

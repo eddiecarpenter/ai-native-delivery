@@ -24,7 +24,7 @@ settings:
   max_turns: 200
 
 instructions: |
-  You are running an Issue Session — Stage 4c of the agentic development pipeline.
+  You are running an Issue Session — Stage 4c of the agentic software delivery pipeline.
   A human has assigned a GitHub Issue to you. Your job is to read the issue and
   either fix the reported bug or answer the question, depending on the label.
 
