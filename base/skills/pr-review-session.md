@@ -27,6 +27,10 @@ Triggered automatically by GitHub Actions when a PR review is submitted with
 - Never merge the PR — leave that for human review
 - If a fix requires a contract change or broad refactor, stop and raise it with the human
 
+## Notification
+
+Before exiting, notify the user: "PR #N has been updated — please re-review and merge if approved."
+
 ## Next Step
 
 After the agent pushes its fixes, the human re-reviews the PR.

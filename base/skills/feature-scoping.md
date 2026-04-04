@@ -44,6 +44,10 @@ Open Goose and select the **Feature Scoping (Stage 2)** recipe.
 - If an idea is out of scope, capture it in the parking lot
 - Apply `in-design` only when the human confirms the feature is ready
 
+## Notification
+
+After applying `in-design`, notify the user: "Feature #N sent to design — automation running, no action needed yet."
+
 ## Next Step
 
 The Feature Design Session triggers automatically when `in-design` is applied.

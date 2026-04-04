@@ -30,6 +30,10 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
 - Report exact command output on any failure
 - Follow the standards in `base/standards/<stack>.md` exactly
 
+## Notification
+
+Before exiting, notify the user: "PR #N is ready for your review."
+
 ## Next Step
 
 The workflow pushes the branch and opens a PR with `Closes #N`.

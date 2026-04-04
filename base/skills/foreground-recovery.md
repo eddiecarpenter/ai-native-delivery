@@ -36,6 +36,10 @@ Open Goose and select the **Foreground Recovery** recipe.
 - If the fix requires a contract change or broad refactor, stop and raise it with the human
 - If the workflow does not auto-restart after the push, apply `in-development` label again
 
+## Notification
+
+After pushing the fix, notify the user: "Fix pushed for Feature #N — please confirm the Dev Session workflow has restarted."
+
 ## Next Step
 
 Once the fix is pushed, the Dev Session workflow re-triggers automatically.
