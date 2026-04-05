@@ -1,4 +1,6 @@
 {
+  "shortDescription": "Agentic software delivery — automated requirements-to-code pipeline driven by an agentic AI process",
+  "readme": "## Agentic Software Delivery\n\nThis project tracks the full delivery lifecycle for the `agentic-development` framework — a label-driven, fully automated software delivery pipeline built on GitHub Issues and GitHub Actions.\n\n### How it works\n\nWork moves through the pipeline by applying labels to issues. GitHub Actions recipes handle each phase automatically, from design through to a merged pull request.\n\n### Status columns\n\n| Status | Colour | Meaning |\n|---|---|---|\n| **Backlog** | Gray | Captured and prioritised, ready to be scoped |\n| **Scoping** | Purple | Requirement or feature is being decomposed in a scoping conversation |\n| **Scheduled** | Blue | Scoped and queued — waiting for the Feature Design session to begin |\n| **In Design** | Pink | Feature Design session active — tasks are being created |\n| **In Development** | Yellow | Dev Session active — code is being written and tested |\n| **In Review** | Orange | Pull request open and awaiting human review |\n| **Done** | Green | Merged, closed, and delivered |\n\n### Pipeline phases\n\n1. **Requirements** (Phase 1) — Human captures a business need as a `requirement` issue\n2. **Scoping** (Phase 2) — Human decomposes the requirement into `feature` issues\n3. **Feature Design** (Phase 3) — Triggered automatically by `in-design` label; agent creates task sub-issues and the feature branch\n4. **Dev Session** (Phase 4) — Triggered automatically by `in-development` label; agent implements all tasks, commits, and exits cleanly\n5. **PR Review** (Phase 4b) — Triggered automatically when a PR review is submitted; agent processes feedback\n6. **Done** — Human merges the PR; issue is closed and status set to Done\n\n### Labels\n\n`requirement` `feature` `task` `backlog` `scoping` `scheduled` `in-design` `in-development` `in-review` `done`\n\n### Tools\n\n- [`gh-agentic`](https://github.com/eddiecarpenter/gh-agentic) — GitHub CLI extension for bootstrapping, syncing and diagnosing agentic environments\n- [Goose](https://github.com/block/goose) — AI agent runner that executes the pipeline recipes",
   "statusField": {
     "options": [
       { "name": "Backlog", "color": "GRAY", "description": "Prioritised, ready to start" },
@@ -9,5 +11,10 @@
       { "name": "In Review", "color": "ORANGE", "description": "PR open, awaiting review" },
       { "name": "Done", "color": "GREEN", "description": "Merged and closed" }
     ]
-  }
+  },
+  "views": [
+    { "name": "Requirements", "layout": "TABLE_LAYOUT", "filter": "-status:Done" },
+    { "name": "Requirements Kanban", "layout": "BOARD_LAYOUT", "filter": "label:requirement -status:\"In Design\",\"In Development\",Done" },
+    { "name": "Features Kanban", "layout": "BOARD_LAYOUT", "filter": "label:feature -status:Scoping,Scheduled,Done" }
+  ]
 }
