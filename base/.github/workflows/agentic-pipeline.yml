@@ -334,7 +334,7 @@ jobs:
 
       - name: Apply done label and close feature issue
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
         run: |
           ISSUE="${{ steps.feature.outputs.issue_number }}"
           if [ -z "${ISSUE}" ]; then
