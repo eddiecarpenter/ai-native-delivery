@@ -49,8 +49,8 @@ jobs:
       - name: Configure environment
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          git config user.name "goose-agent"
-          git config user.email "270002424+goose-agent@users.noreply.github.com"
+          git config user.name "${{ vars.AGENT_USER }}"
+          git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
       - name: Run feature-design recipe
         run: |
@@ -109,8 +109,8 @@ jobs:
       - name: Configure environment
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          git config user.name "goose-agent"
-          git config user.email "270002424+goose-agent@users.noreply.github.com"
+          git config user.name "${{ vars.AGENT_USER }}"
+          git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
       - name: Run dev-session recipe
         id: goose
@@ -177,7 +177,7 @@ jobs:
     if: |
       github.event_name == 'workflow_dispatch' || (
         github.event_name == 'pull_request_review' &&
-        github.event.review.user.login != 'goose-agent' &&
+        github.event.review.user.login != vars.AGENT_USER &&
         startsWith(github.event.pull_request.head.ref, 'feature/') &&
         (github.event.review.state == 'commented' || github.event.review.state == 'changes_requested')
       )
@@ -200,8 +200,8 @@ jobs:
       - name: Configure environment
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          git config user.name "goose-agent"
-          git config user.email "270002424+goose-agent@users.noreply.github.com"
+          git config user.name "${{ vars.AGENT_USER }}"
+          git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
       - name: Run PR review recipe
         env:
@@ -236,14 +236,14 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Stage 4c — Issue Session
-  # Trigger: issue assigned to goose-agent
+  # Trigger: issue assigned to the agent user
   # ---------------------------------------------------------------------------
   issue-session:
     name: Issue Session (Stage 4c)
     if: |
       github.event_name == 'issues' &&
       github.event.action == 'assigned' &&
-      github.event.assignee.login == 'goose-agent'
+      github.event.assignee.login == vars.AGENT_USER
     runs-on: self-hosted
     permissions:
       contents: write
@@ -264,8 +264,8 @@ jobs:
       - name: Configure environment
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          git config user.name "goose-agent"
-          git config user.email "270002424+goose-agent@users.noreply.github.com"
+          git config user.name "${{ vars.AGENT_USER }}"
+          git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
       - name: Run issue session recipe
         run: |
