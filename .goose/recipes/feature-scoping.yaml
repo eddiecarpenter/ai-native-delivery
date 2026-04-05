@@ -78,6 +78,13 @@ instructions: |
   Ask: "What is the minimum version that delivers real value?"
   Challenge: "If we removed X, would the core problem still be solved?"
 
+  ### Parallel/Serial Checkpoint
+  After defining MVP scope, decide how the work should be decomposed:
+  Ask: "Can all parts of this work be built and merged independently, or must some parts wait for others?"
+  - Independent → proceed with multiple features (run in parallel)
+  - Sequential → consolidate into one feature with ordered tasks (same branch, same PR)
+  - Never create multiple features with implied serial dependencies
+
   ### Artefact 5 — Acceptance Criteria
   Ask: "How will we know the implementation is correct?"
   Apply the solution bias test to every criterion.
@@ -102,9 +109,14 @@ instructions: |
   0. The user story statement is present and complete (As a / I want / so that)
   1. "Can the design session decompose this without inventing requirements?"
   2. "Would you recognise the correct implementation when you see it in a PR?"
+  3. The parallel/serial decomposition decision has been made and is consistent with
+     the proposed feature structure — if multiple features exist, confirm none have
+     implied serial dependencies. If sequential work was identified, confirm it has
+     been consolidated into one feature with ordered tasks.
 
   If the user story is missing or incomplete — return to Artefact 3.
-  If the answers to both questions are yes — proceed. Otherwise return to the failing artefact.
+  If the answers to both questions are yes and the decomposition is consistent — proceed.
+  Otherwise return to the failing artefact or the Parallel/Serial Checkpoint.
 
   ## Creating Feature Issues
 
