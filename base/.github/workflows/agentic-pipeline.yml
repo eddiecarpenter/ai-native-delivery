@@ -348,3 +348,36 @@ jobs:
           gh issue close ${ISSUE} \
             --repo ${{ github.repository }} \
             --comment "Feature implemented and merged via PR #${{ github.event.pull_request.number }}."
+
+      - name: Parse parent requirement
+        id: parent
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          ISSUE="${{ steps.feature.outputs.issue_number }}"
+          if [ -z "${ISSUE}" ]; then
+            echo "No feature issue number — skipping parent requirement check"
+            exit 0
+          fi
+
+          # Read the feature issue body
+          BODY=$(gh issue view ${ISSUE} --repo ${{ github.repository }} --json body --jq '.body')
+
+          # Extract parent requirement number from "Closes #N" or "Parent Requirement: #N"
+          PARENT=$(echo "${BODY}" | grep -oP '(?:Closes\s+#|Parent Requirement:\s*#)(\d+)' | head -1 | grep -oP '\d+$')
+
+          if [ -z "${PARENT}" ]; then
+            echo "No parent requirement reference found in feature issue body — skipping"
+            exit 0
+          fi
+
+          # Verify the referenced issue has the 'requirement' label
+          HAS_LABEL=$(gh issue view ${PARENT} --repo ${{ github.repository }} --json labels --jq '.labels[].name' | grep -c '^requirement$' || true)
+
+          if [ "${HAS_LABEL}" -eq 0 ]; then
+            echo "Referenced issue #${PARENT} is not labelled 'requirement' — skipping"
+            exit 0
+          fi
+
+          echo "Parent requirement issue: #${PARENT}"
+          echo "requirement_number=${PARENT}" >> $GITHUB_OUTPUT
