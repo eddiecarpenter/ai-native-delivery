@@ -414,3 +414,10 @@ jobs:
           gh issue close ${PARENT} \
             --repo ${{ github.repository }} \
             --comment "All child feature issues are now complete. Auto-closing requirement."
+
+      - name: Delete feature branch
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          gh api repos/${{ github.repository }}/git/refs/heads/${{ github.head_ref }} --method DELETE
+          echo "Deleted branch ${{ github.head_ref }}"
