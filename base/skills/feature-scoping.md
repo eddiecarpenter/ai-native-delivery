@@ -14,11 +14,21 @@ Run this before Feature Design — you cannot design what has not been scoped.
 
 Open Goose and select the **Feature Scoping (Stage 2)** recipe.
 
+## Requirement Label Transitions
+
+During a scoping session, the agent manages the parent requirement's lifecycle labels:
+
+1. **Session start** (after loading the requirement): removes `backlog`, applies `scoping`
+2. **Session end** (after all features created and `in-design` applied): removes `scoping`, applies `scheduled`
+
+The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Done**
+
 ## What the Agent Does
 
 1. Lists available requirements in `backlog` state
 2. Waits for the human to select a requirement
-3. Works through seven artefacts to define the feature:
+3. Transitions the requirement from `backlog` to `scoping`
+4. Works through seven artefacts to define the feature:
    - Raw idea summary
    - Problem statement
    - Feature definition — includes a user story statement in `As a [user], I want [goal], so that [benefit]` format
@@ -26,10 +36,11 @@ Open Goose and select the **Feature Scoping (Stage 2)** recipe.
    - Acceptance criteria (checkboxes, outcome-based)
    - UX design (if applicable)
    - Parking lot review
-4. Verifies user story is present and complete before creating the issue
-5. Creates Feature issues in the domain repo with `feature` + `backlog` labels
-6. Wires sub-issue relationship: Feature → parent Requirement
-7. Applies `in-design` label to trigger the Feature Design workflow
+5. Verifies user story is present and complete before creating the issue
+6. Creates Feature issues in the domain repo with `feature` + `backlog` labels
+7. Wires sub-issue relationship: Feature → parent Requirement
+8. Applies `in-design` label to trigger the Feature Design workflow
+9. Transitions the requirement from `scoping` to `scheduled`
 
 ## Outputs
 
@@ -41,6 +52,7 @@ Open Goose and select the **Feature Scoping (Stage 2)** recipe.
   - `## UX Design` (if applicable) with ASCII mockups, flow, error states
   - `## Parent Requirement` linking back to the originating requirement
 - `in-design` label applied — triggers automatic Feature Design Session
+- Parent requirement transitioned from `scoping` to `scheduled`
 
 ## Rules
 
