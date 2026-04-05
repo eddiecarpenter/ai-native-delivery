@@ -402,6 +402,10 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
 - Correctness and maintainability take precedence over cleverness
 - Do not make changes outside the scope of the current task
 - Propose large refactors before implementing them — never execute without approval
+- **SDLC phase sequence — never skip a phase without human approval.**
+  The pipeline must follow phases in order: Requirements → Scoping → Design → Implementation.
+  If the agent believes a phase can be skipped, it must stop and ask the human before proceeding.
+  The human decides whether to skip; the agent never skips a phase unilaterally.
 
 ---
 
