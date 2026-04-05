@@ -65,6 +65,9 @@ instructions: |
   Ask: "What capability, when delivered, resolves this problem?"
   The goal must be a single sentence. If it contains "and" — it is two features.
   Name the feature with a short descriptive title.
+  Produce a user story statement in the format:
+    "As a [user/role], I want [goal], so that [benefit]."
+  This statement becomes the `## User Story` section of the feature issue.
 
   ### Artefact 4 — MVP Scope
   Ask: "What is the minimum version that delivers real value?"
@@ -90,11 +93,13 @@ instructions: |
 
   ## The Two-Question Checkpoint
 
-  Before creating the Feature issue:
+  Before creating the Feature issue, verify:
+  0. The user story statement is present and complete (As a / I want / so that)
   1. "Can the design session decompose this without inventing requirements?"
   2. "Would you recognise the correct implementation when you see it in a PR?"
 
-  If the answers are both yes — proceed. Otherwise return to the failing artefact.
+  If the user story is missing or incomplete — return to Artefact 3.
+  If the answers to both questions are yes — proceed. Otherwise return to the failing artefact.
 
   ## Creating Feature Issues
 
@@ -104,24 +109,32 @@ instructions: |
       --repo <owner>/<domain-repo> \
       --label "feature,backlog" \
       --title "<feature title>" \
-      --body "## Feature
+      --body "## User Story
 
-  <what this feature delivers>
+  As a [user/role], I want [goal], so that [benefit].
+
+  ## Context
+
+  <background and motivation>
 
   ## Scope
 
   <files to create or modify, key functions, data structures>
 
+  ## Out of Scope
+
+  <what is explicitly excluded>
+
+  ## Acceptance Criteria
+
+  - [ ] <testable condition 1>
+  - [ ] <testable condition 2>
+
   ## UX Design (if applicable)
 
   <ASCII mockups, flow description, field layout, error states>
 
-  ## Acceptance criteria
-
-  - <testable condition 1>
-  - <testable condition 2>
-
-  ## Parent requirement
+  ## Parent Requirement
   Closes #<requirement-issue-number>"
 
   Wire the sub-issue relationship using the GitHub GraphQL API:

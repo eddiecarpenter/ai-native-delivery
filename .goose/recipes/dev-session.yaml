@@ -51,10 +51,14 @@ instructions: |
   Complete Session Initialisation as defined in AGENTS.md. Then:
   1. Read the Feature issue in full:
      gh issue view {{ feature_issue }} --repo {{ repo }}
-  2. Query open Task sub-issues ordered by issue number:
+  2. Extract the `## Acceptance Criteria` section from the feature issue.
+     List each criterion explicitly — these will be verified at the end.
+     If no acceptance criteria are found, note this and proceed (older issues
+     may predate the user story format).
+  3. Query open Task sub-issues ordered by issue number:
      gh issue list --repo {{ repo }} --label task --state open \
        --json number,title,body --jq 'sort_by(.number)'
-  3. Verify there are open tasks — if none, report and exit cleanly.
+  4. Verify there are open tasks — if none, report and exit cleanly.
 
   ## Step 3 — Process the Task Queue
 
@@ -92,9 +96,20 @@ instructions: |
 
   Proceed to the next task.
 
-  ## Step 4 — All Tasks Complete
+  ## Step 4 — Verify Acceptance Criteria Coverage
 
-  When all task issues are closed:
+  When all task issues are closed, verify acceptance criteria before declaring complete:
+  1. Review each acceptance criterion extracted in Step 2
+  2. For each criterion, verify that at least one test exists that covers it
+  3. If any criterion lacks test coverage, stop and report which criteria are uncovered
+     — do NOT exit cleanly until all criteria are covered by passing tests
+  4. A feature is not complete until all acceptance criteria are covered by passing tests
+
+  If the feature issue had no acceptance criteria section (older format), skip this step.
+
+  ## Step 5 — All Tasks Complete
+
+  When all task issues are closed and acceptance criteria are verified:
   1. Exit cleanly with a success message listing what was built
   2. Do NOT push — the workflow pushes after this recipe exits
   3. Do NOT open a PR — the workflow opens the PR with "Closes #{{ feature_issue }}"

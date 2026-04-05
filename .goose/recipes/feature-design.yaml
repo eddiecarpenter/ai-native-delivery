@@ -48,8 +48,15 @@ instructions: |
       gh issue list --label "in-design" --label "feature" --state open --json number,title,body
     Present the list and wait for human selection.
 
-  ## Step 3 — Analyse the Codebase
+  ## Step 3 — Read Acceptance Criteria and Analyse the Codebase
 
+  ### 3a — Extract Acceptance Criteria
+  Read the feature issue and extract the `## Acceptance Criteria` section.
+  List each criterion explicitly in the session output.
+  If no acceptance criteria are found, stop and report that the feature issue
+  is malformed — it must be fixed in a Scoping Session before design can proceed.
+
+  ### 3b — Analyse the Codebase
   Read the relevant source files to understand what exists.
   Identify:
   - What needs to be built
@@ -63,6 +70,11 @@ instructions: |
   Create one GitHub Issue per task, ordered by implementation sequence.
   Each task must be completable independently in that sequence.
   Every task that adds logic must include test requirements.
+
+  **Acceptance criteria traceability:** every acceptance criterion from the feature
+  issue must be covered by at least one task. If a criterion has no task covering
+  it, create one. After planning all tasks, verify full coverage by listing each
+  criterion and its corresponding task(s).
 
   For each task:
 
@@ -78,10 +90,13 @@ instructions: |
 
   - \`path/to/file.go\` — what to create or change
 
-  ## Acceptance criteria
+  ## Acceptance Criteria
 
   - [ ] <specific testable condition>
-  - [ ] Tests pass"
+  - [ ] Tests pass
+
+  **Satisfies feature acceptance criteria:**
+  - <which criterion/criteria this task covers>"
 
   After creating each task issue, wire it as a sub-issue of the Feature:
     gh api graphql -f query='
@@ -96,6 +111,13 @@ instructions: |
   them only after implementing and committing each one.
   Closing a task here will cause the Dev Session to find nothing to do,
   produce no code, and fail when attempting to open a PR with no commits.
+
+  ## Step 4b — Verify Acceptance Criteria Coverage
+
+  Before proceeding, verify that every acceptance criterion from the feature issue
+  is covered by at least one task. List each criterion and which task(s) satisfy it.
+  If any criterion is uncovered — create an additional task to cover it.
+  Do not proceed to branch creation until full coverage is confirmed.
 
   ## Step 5 — Create the Feature Branch
 

@@ -12,21 +12,24 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
 ## What the Agent Does
 
 1. Verifies it is on the correct feature branch — never works on main
-2. Queries open Task sub-issues on the Feature, ordered by issue number
-3. For each Task in order:
+2. Reads the Feature issue and extracts acceptance criteria for end-of-session verification
+3. Queries open Task sub-issues on the Feature, ordered by issue number
+4. For each Task in order:
    - Reads the task issue and understands what must be built
    - Implements the work described
    - Builds and tests — stops immediately on failure and reports the exact error
    - Commits: `feat: [task description] — task N of N (#feature-issue)`
    - Closes the task issue
-4. When all tasks are closed — exits cleanly
-5. The workflow pushes and opens the PR automatically
+5. Verifies each acceptance criterion has test coverage — stops if any criterion is uncovered
+6. When all tasks are closed and criteria verified — exits cleanly
+7. The workflow pushes and opens the PR automatically
 
 ## Rules
 
 - Never commit on main
 - Never skip a failing test — fix it before moving to the next task
 - Never claim a task complete without running build and tests
+- A feature is not complete until all acceptance criteria have test coverage
 - Report exact command output on any failure
 - Follow the standards in `base/standards/<stack>.md` exactly
 

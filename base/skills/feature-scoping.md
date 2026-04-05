@@ -21,24 +21,32 @@ Open Goose and select the **Feature Scoping (Stage 2)** recipe.
 3. Works through seven artefacts to define the feature:
    - Raw idea summary
    - Problem statement
-   - Feature definition (single capability)
+   - Feature definition — includes a user story statement in `As a [user], I want [goal], so that [benefit]` format
    - MVP scope
-   - Acceptance criteria
+   - Acceptance criteria (checkboxes, outcome-based)
    - UX design (if applicable)
    - Parking lot review
-4. Creates Feature issues in the domain repo with `feature` + `backlog` labels
-5. Wires sub-issue relationship: Feature → parent Requirement
-6. Applies `in-design` label to trigger the Feature Design workflow
+4. Verifies user story is present and complete before creating the issue
+5. Creates Feature issues in the domain repo with `feature` + `backlog` labels
+6. Wires sub-issue relationship: Feature → parent Requirement
+7. Applies `in-design` label to trigger the Feature Design workflow
 
 ## Outputs
 
-- One or more Feature issues in the domain repo
-- UX design (ASCII mockups, flow, error states) included in the feature issue body where applicable
+- One or more Feature issues in the domain repo, each containing:
+  - `## User Story` section with `As a / I want / so that` structure
+  - `## Context` with background and motivation
+  - `## Scope` and `## Out of Scope` sections
+  - `## Acceptance Criteria` with checkboxes (`- [ ]` format)
+  - `## UX Design` (if applicable) with ASCII mockups, flow, error states
+  - `## Parent Requirement` linking back to the originating requirement
 - `in-design` label applied — triggers automatic Feature Design Session
 
 ## Rules
 
 - Push toward MVP — smallest version that delivers real value
+- User story format is mandatory — every feature issue must include `As a / I want / so that`
+- Acceptance criteria must use checkbox format (`- [ ]`) and be outcome-based
 - UX design must be done now, not deferred to implementation
 - Never accept solution criteria — convert to outcome criteria
 - If an idea is out of scope, capture it in the parking lot
