@@ -1,0 +1,350 @@
+name: Agentic Pipeline
+
+on:
+  issues:
+    types: [labeled, assigned]
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  pull_request_review:
+    types: [submitted]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to process review comments for'
+        required: true
+        type: string
+      branch_name:
+        description: 'Feature branch the PR is open on'
+        required: true
+        type: string
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # Stage 3 — Feature Design
+  # Trigger: feature issue labelled 'in-design'
+  # ---------------------------------------------------------------------------
+  feature-design:
+    name: Feature Design (Stage 3)
+    if: |
+      github.event_name == 'issues' &&
+      github.event.action == 'labeled' &&
+      contains(github.event.issue.labels.*.name, 'feature') &&
+      github.event.label.name == 'in-design'
+    runs-on: self-hosted
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Configure environment
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          git config user.name "goose-agent"
+          git config user.email "270002424+goose-agent@users.noreply.github.com"
+
+      - name: Run feature-design recipe
+        run: |
+          goose run \
+            --recipe .goose/recipes/feature-design.yaml \
+            --params feature_issue=${{ github.event.issue.number }} \
+            --params repo=${{ github.repository }}
+        env:
+          GOOSE_PATH_ROOT: ${{ github.workspace }}/.goose
+          GOOSE_PROVIDER: claude-code
+          GOOSE_MODEL: default
+          GOOSE_MODE: auto
+          GOOSE_DISABLE_SESSION_NAMING: "true"
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+
+  # ---------------------------------------------------------------------------
+  # Stage 4 — Dev Session
+  # Trigger: feature issue labelled 'in-development'
+  # ---------------------------------------------------------------------------
+  dev-session:
+    name: Dev Session (Stage 4)
+    if: |
+      github.event_name == 'issues' &&
+      github.event.action == 'labeled' &&
+      contains(github.event.issue.labels.*.name, 'feature') &&
+      github.event.label.name == 'in-development'
+    runs-on: self-hosted
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Resolve feature branch
+        id: branch
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          ISSUE=${{ github.event.issue.number }}
+          BRANCH=$(gh api repos/${{ github.repository }}/branches \
+            --jq ".[] | .name | select(startswith(\"feature/${ISSUE}-\"))" \
+            | head -1)
+          if [ -z "$BRANCH" ]; then
+            echo "No branch found matching feature/${ISSUE}-*"
+            exit 1
+          fi
+          echo "name=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.branch.outputs.name }}
+          fetch-depth: 0
+          token: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Configure environment
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          git config user.name "goose-agent"
+          git config user.email "270002424+goose-agent@users.noreply.github.com"
+
+      - name: Run dev-session recipe
+        id: goose
+        run: |
+          BRANCH="${{ steps.branch.outputs.name }}"
+          # Retry up to 3 times to handle transient Claude Code rate-limit errors.
+          # Each retry picks up from the last committed task.
+          for attempt in 1 2 3; do
+            echo "--- Dev session attempt ${attempt} ---"
+            goose run \
+              --recipe .goose/recipes/dev-session.yaml \
+              --params feature_issue=${{ github.event.issue.number }} \
+              --params branch_name=${BRANCH} \
+              --params repo=${{ github.repository }} && break
+            EXIT_CODE=$?
+            if [ $attempt -lt 3 ]; then
+              echo "Attempt ${attempt} failed (exit ${EXIT_CODE}). Waiting 60s before retry..."
+              sleep 60
+            else
+              echo "All ${attempt} attempts failed."
+              exit $EXIT_CODE
+            fi
+          done
+        env:
+          GOOSE_PATH_ROOT: ${{ github.workspace }}/.goose
+          GOOSE_PROVIDER: claude-code
+          GOOSE_MODEL: default
+          GOOSE_MODE: auto
+          GOOSE_DISABLE_SESSION_NAMING: "true"
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Push branch
+        if: success()
+        run: git push origin ${{ steps.branch.outputs.name }}
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Open PR
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          gh pr create \
+            --title "feat: ${{ github.event.issue.title }}" \
+            --body "Closes #${{ github.event.issue.number }}" \
+            --base main \
+            --head ${{ steps.branch.outputs.name }}
+
+      - name: Apply in-review label
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} \
+            --remove-label "in-development" \
+            --add-label "in-review"
+
+  # ---------------------------------------------------------------------------
+  # Stage 4b — PR Review Session
+  # Trigger: PR review submitted (comments or changes requested)
+  # ---------------------------------------------------------------------------
+  pr-review-session:
+    name: PR Review Session (Stage 4b)
+    if: |
+      github.event_name == 'workflow_dispatch' || (
+        github.event_name == 'pull_request_review' &&
+        github.event.review.user.login != 'goose-agent' &&
+        startsWith(github.event.pull_request.head.ref, 'feature/') &&
+        (github.event.review.state == 'commented' || github.event.review.state == 'changes_requested')
+      )
+    runs-on: self-hosted
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: pr-review-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch_name || github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Configure environment
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          git config user.name "goose-agent"
+          git config user.email "270002424+goose-agent@users.noreply.github.com"
+
+      - name: Run PR review recipe
+        env:
+          PR_NUMBER: ${{ github.event.inputs.pr_number || github.event.pull_request.number }}
+          BRANCH: ${{ github.event.inputs.branch_name || github.event.pull_request.head.ref }}
+          GOOSE_PATH_ROOT: ${{ github.workspace }}/.goose
+          GOOSE_PROVIDER: claude-code
+          GOOSE_MODEL: default
+          GOOSE_MODE: auto
+          GOOSE_DISABLE_SESSION_NAMING: "true"
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          goose run \
+            --recipe .goose/recipes/pr-review-session.yaml \
+            --params pr_number=${PR_NUMBER} \
+            --params branch_name=${BRANCH} \
+            --params repo=${{ github.repository }}
+
+      - name: Push fixes
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+          BRANCH: ${{ github.event.inputs.branch_name || github.event.pull_request.head.ref }}
+        run: |
+          LOCAL=$(git rev-parse HEAD)
+          REMOTE=$(git rev-parse origin/${BRANCH})
+          if [ "$LOCAL" != "$REMOTE" ]; then
+            git push origin ${BRANCH}
+          else
+            echo "No code changes — only review replies posted, no push needed"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Stage 4c — Issue Session
+  # Trigger: issue assigned to goose-agent
+  # ---------------------------------------------------------------------------
+  issue-session:
+    name: Issue Session (Stage 4c)
+    if: |
+      github.event_name == 'issues' &&
+      github.event.action == 'assigned' &&
+      github.event.assignee.login == 'goose-agent'
+    runs-on: self-hosted
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    concurrency:
+      group: issue-${{ github.event.issue.number }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Configure environment
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          git config user.name "goose-agent"
+          git config user.email "270002424+goose-agent@users.noreply.github.com"
+
+      - name: Run issue session recipe
+        run: |
+          goose run \
+            --recipe .goose/recipes/issue-session.yaml \
+            --params issue_number=${{ github.event.issue.number }} \
+            --params repo=${{ github.repository }}
+        env:
+          GOOSE_PATH_ROOT: ${{ github.workspace }}/.goose
+          GOOSE_PROVIDER: claude-code
+          GOOSE_MODEL: default
+          GOOSE_MODE: auto
+          GOOSE_DISABLE_SESSION_NAMING: "true"
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Push fix branch
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          BRANCH=$(git branch --show-current)
+          if [[ "${BRANCH}" == fix/issue-* ]]; then
+            git push origin ${BRANCH}
+          else
+            echo "No fix branch — question answered or issue skipped"
+          fi
+
+      - name: Open PR
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          BRANCH=$(git branch --show-current)
+          if [[ "${BRANCH}" == fix/issue-* ]]; then
+            ISSUE_TITLE=$(gh issue view ${{ github.event.issue.number }} \
+              --repo ${{ github.repository }} --json title --jq '.title')
+            gh pr create \
+              --title "fix: ${ISSUE_TITLE}" \
+              --body "Fixes #${{ github.event.issue.number }}" \
+              --base main \
+              --head ${BRANCH}
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Stage 5 — Feature Complete
+  # Trigger: feature branch PR merged to main
+  # ---------------------------------------------------------------------------
+  feature-complete:
+    name: Feature Complete (Stage 5)
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'feature/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Extract feature issue number
+        id: feature
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          ISSUE_NUMBER=$(echo "${BRANCH}" | sed 's|feature/\([0-9]*\)-.*|\1|')
+          echo "issue_number=${ISSUE_NUMBER}" >> $GITHUB_OUTPUT
+
+      - name: Apply done label and close feature issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE="${{ steps.feature.outputs.issue_number }}"
+          if [ -z "${ISSUE}" ]; then
+            echo "Could not extract issue number from branch — skipping"
+            exit 0
+          fi
+          gh issue edit ${ISSUE} \
+            --repo ${{ github.repository }} \
+            --remove-label "in-review" \
+            --add-label "done"
+          gh issue close ${ISSUE} \
+            --repo ${{ github.repository }} \
+            --comment "Feature implemented and merged via PR #${{ github.event.pull_request.number }}."
