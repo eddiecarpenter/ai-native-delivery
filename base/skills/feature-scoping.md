@@ -33,6 +33,7 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
    - Problem statement
    - Feature definition — includes a user story statement in `As a [user], I want [goal], so that [benefit]` format
    - MVP scope
+   - **Parallel/serial checkpoint** — asks whether all parts can be built independently or must be sequenced. Independent work → multiple features (parallel). Sequential work → one feature with ordered tasks (same branch, same PR). Never creates multiple features with implied serial dependencies.
    - Acceptance criteria (checkboxes, outcome-based)
    - UX design (if applicable)
    - Parking lot review
@@ -56,6 +57,7 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 
 ## Rules
 
+- Serial vs parallel decomposition: independent capabilities → separate features; sequential capabilities → one feature with ordered tasks; never create multiple features with implied serial dependencies
 - Push toward MVP — smallest version that delivers real value
 - User story format is mandatory — every feature issue must include `As a / I want / so that`
 - Acceptance criteria must use checkbox format (`- [ ]`) and be outcome-based
