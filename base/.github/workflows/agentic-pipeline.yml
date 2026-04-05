@@ -381,3 +381,36 @@ jobs:
 
           echo "Parent requirement issue: #${PARENT}"
           echo "requirement_number=${PARENT}" >> $GITHUB_OUTPUT
+
+      - name: Auto-close parent requirement if all features complete
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          PARENT="${{ steps.parent.outputs.requirement_number }}"
+          if [ -z "${PARENT}" ]; then
+            echo "No parent requirement number — skipping"
+            exit 0
+          fi
+
+          # Search for all feature issues whose body references "Closes #N"
+          # where N is the parent requirement number
+          OPEN_COUNT=$(gh issue list \
+            --repo ${{ github.repository }} \
+            --label feature \
+            --state open \
+            --search "Closes #${PARENT}" \
+            --json number \
+            --jq 'length')
+
+          if [ "${OPEN_COUNT}" -gt 0 ]; then
+            echo "${OPEN_COUNT} sibling feature(s) still open — leaving requirement #${PARENT} open"
+            exit 0
+          fi
+
+          echo "All child features are closed — closing requirement #${PARENT}"
+          gh issue edit ${PARENT} \
+            --repo ${{ github.repository }} \
+            --add-label "done"
+          gh issue close ${PARENT} \
+            --repo ${{ github.repository }} \
+            --comment "All child feature issues are now complete. Auto-closing requirement."
