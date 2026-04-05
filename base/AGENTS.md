@@ -29,6 +29,9 @@ At the start of every session, read these sources in order before doing anything
    `gh issue list --label feature --state open --json number,title,labels,body`
 5. Read the relevant standards file from `base/standards/` for the domain language
    (e.g. `base/standards/go.md` for Go domains)
+6. Load skills from `base/skills/` (template-managed, read-only) and `skills/`
+   (local, project-specific, if the directory exists). Local skills in `skills/`
+   take precedence over template skills in `base/skills/` of the same name.
 
 Do not skip any step. Do not begin work until all steps are complete.
 
@@ -431,10 +434,15 @@ Goose recipes live in two places:
 |---|---|---|
 | `.goose/recipes/*.yaml` | ❌ Never (managed by template) | The complete recipe — instructions, parameters, model settings |
 | `base/skills/*.md` | ❌ Never | Human-readable reference docs for each session type (the skills) |
+| `skills/*.md` | ✅ Yes (local, project-specific) | Local skills that extend or override template skills |
 
 **`.goose/recipes/*.yaml` files are managed by the `agentic-development` template.**
 **`base/skills/*.md` files are read-only reference documentation.**
 Neither should ever be modified locally.
+
+**`skills/*.md` files are local, project-specific skills.** They are not synced
+by the template and can be freely created and edited. A local skill with the same
+filename as a template skill in `base/skills/` takes precedence.
 
 The six standard recipes are:
 
