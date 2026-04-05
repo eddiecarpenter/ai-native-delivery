@@ -58,8 +58,8 @@ gh repo create <owner>/<repo-name> \
 ```
 
 Repo naming:
-- Embedded: `<project-name>` — no suffix, this is the project repo
-- Organisation: `<project-name>-agentic` — control plane repo
+- Single: `<project-name>` — no suffix, this is the project repo
+- Federated: `<project-name>-agentic` — control plane repo
 
 Clone into the working directory provided by bootstrap.sh:
 ```bash
@@ -118,8 +118,8 @@ done
 ```
 
 **Secrets** — if PAT is needed for workflows:
-- Organisation: guide human to add PAT as an org secret in GitHub Settings
-- Embedded: guide human to add PAT as a repo secret
+- Federated: guide human to add PAT as an org secret in GitHub Settings
+- Single: guide human to add PAT as a repo secret
 
 #### Step 7 — Populate the Repo
 
@@ -148,9 +148,9 @@ Confirm to the human:
 - GitHub Project URL
 - Local clone path
 
-For organisation topology: offer to proceed to Repo Inception Session (Phase 0b)
+For federated topology: offer to proceed to Repo Inception Session (Phase 0b)
 to register the first domain or tool repo.
-For embedded topology: offer to proceed to Requirements Session (Phase 1).
+For single topology: offer to proceed to Requirements Session (Phase 1).
 
 ---
 
