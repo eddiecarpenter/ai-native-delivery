@@ -111,11 +111,11 @@ gh api repos/<owner>/<repo>/branches/main/protection \
 ```
 
 **Standard labels** — create if not present:
-`requirement`, `feature`, `task`, `backlog`, `draft`, `in-design`,
-`in-development`, `in-review`, `done`
+`requirement`, `feature`, `task`, `backlog`, `draft`, `scoping`, `scheduled`,
+`in-design`, `in-development`, `in-review`, `done`
 
 ```bash
-for label in requirement feature task backlog draft in-design in-development in-review done; do
+for label in requirement feature task backlog draft scoping scheduled in-design in-development in-review done; do
   gh label create "$label" --repo <owner>/<repo> --force
 done
 ```
@@ -143,6 +143,9 @@ In the cloned repo:
 ```bash
 gh project create --owner <owner> --title "<project-name>"
 ```
+
+Configure the project board with the standard status columns:
+**Backlog**, **Scoping**, **Scheduled**, **In Design**, **In Development**, **In Review**, **Done**
 
 #### Step 9 — Hand Off
 
