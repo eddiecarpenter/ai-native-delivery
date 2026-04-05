@@ -1,0 +1,137 @@
+name: Sync Status to Label
+
+# Synchronises GitHub Project V2 status column changes back to issue labels.
+# When a project item's status field is edited, this workflow resolves the
+# linked issue and updates its pipeline labels to match the new status.
+#
+# Note: This workflow requires an organisation account — the projects_v2_item
+# event is not available for personal (user-owned) projects.
+
+on:
+  projects_v2_item:
+    types: [edited]
+
+jobs:
+  sync-status-to-label:
+    name: Sync project status to label
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      # -----------------------------------------------------------------------
+      # Step 1 — Extract the new status value from the event payload
+      # -----------------------------------------------------------------------
+      - name: Extract new status
+        id: status
+        run: |
+          NEW_STATUS="${{ github.event.changes.field_value.to.name }}"
+          if [ -z "${NEW_STATUS}" ]; then
+            echo "No status change detected — skipping"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "value=${NEW_STATUS}" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------------
+      # Step 2 — Map the status column name to a pipeline label
+      # Only pipeline statuses are mapped; all others are ignored silently
+      # -----------------------------------------------------------------------
+      - name: Map status to label
+        if: steps.status.outputs.skip != 'true'
+        id: map
+        run: |
+          STATUS="${{ steps.status.outputs.value }}"
+          case "${STATUS}" in
+            Backlog)            LABEL="backlog" ;;
+            "In Design")        LABEL="in-design" ;;
+            "In Development")   LABEL="in-development" ;;
+            "In Review")        LABEL="in-review" ;;
+            Done)               LABEL="done" ;;
+            *)
+              echo "Status '${STATUS}' is not a pipeline status — skipping"
+              echo "skip=true" >> $GITHUB_OUTPUT
+              exit 0
+              ;;
+          esac
+          echo "label=${LABEL}" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------------
+      # Step 3 — Resolve the linked issue from the project item
+      # -----------------------------------------------------------------------
+      - name: Resolve linked issue
+        if: steps.status.outputs.skip != 'true' && steps.map.outputs.skip != 'true'
+        id: issue
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          ITEM_NODE_ID="${{ github.event.projects_v2_item.node_id }}"
+
+          # Query the project item to get its linked content (issue)
+          RESULT=$(gh api graphql -f query='
+            query($itemId: ID!) {
+              node(id: $itemId) {
+                ... on ProjectV2Item {
+                  content {
+                    ... on Issue {
+                      number
+                      repository {
+                        nameWithOwner
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f itemId="${ITEM_NODE_ID}")
+
+          ISSUE_NUMBER=$(echo "${RESULT}" | jq -r '.data.node.content.number // empty')
+          REPO=$(echo "${RESULT}" | jq -r '.data.node.content.repository.nameWithOwner // empty')
+
+          if [ -z "${ISSUE_NUMBER}" ] || [ -z "${REPO}" ]; then
+            echo "Project item is not linked to an issue — skipping"
+            exit 0
+          fi
+
+          echo "number=${ISSUE_NUMBER}" >> $GITHUB_OUTPUT
+          echo "repo=${REPO}" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------------
+      # Step 4 — Remove existing pipeline labels and apply the new one
+      # -----------------------------------------------------------------------
+      - name: Update issue labels
+        if: steps.status.outputs.skip != 'true' && steps.map.outputs.skip != 'true' && steps.issue.outputs.number
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          ISSUE="${{ steps.issue.outputs.number }}"
+          REPO="${{ steps.issue.outputs.repo }}"
+          TARGET_LABEL="${{ steps.map.outputs.label }}"
+
+          # All pipeline labels — remove any that are currently applied
+          PIPELINE_LABELS="backlog in-design in-development in-review done"
+
+          # Get current labels on the issue
+          CURRENT_LABELS=$(gh issue view "${ISSUE}" --repo "${REPO}" \
+            --json labels --jq '.labels[].name')
+
+          # Remove pipeline labels that are not the target
+          for label in ${PIPELINE_LABELS}; do
+            if [ "${label}" != "${TARGET_LABEL}" ] && echo "${CURRENT_LABELS}" | grep -q "^${label}$"; then
+              echo "Removing label '${label}'"
+              gh issue edit "${ISSUE}" --repo "${REPO}" --remove-label "${label}"
+            fi
+          done
+
+          # Apply the target label if not already present
+          if ! echo "${CURRENT_LABELS}" | grep -q "^${TARGET_LABEL}$"; then
+            echo "Adding label '${TARGET_LABEL}'"
+            gh issue edit "${ISSUE}" --repo "${REPO}" --add-label "${TARGET_LABEL}"
+          else
+            echo "Label '${TARGET_LABEL}' already present"
+          fi
+
+          echo "Issue ${REPO}#${ISSUE} labels synced to status '${TARGET_LABEL}'"

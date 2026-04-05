@@ -1,0 +1,188 @@
+name: Sync Label to Status
+
+# Synchronises issue labels to GitHub Project V2 status columns.
+# When a pipeline label is applied to an issue, this workflow finds the
+# corresponding ProjectV2 item and updates its status field to match.
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  sync-label-to-status:
+    name: Sync label to project status
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+
+    steps:
+      # -----------------------------------------------------------------------
+      # Step 1 — Check if project sync is configured
+      # Exit silently if AGENTIC_PROJECT_ID is not set (graceful no-op)
+      # -----------------------------------------------------------------------
+      - name: Check project configuration
+        id: config
+        run: |
+          if [ -z "${{ vars.AGENTIC_PROJECT_ID }}" ]; then
+            echo "AGENTIC_PROJECT_ID not set — skipping project sync"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      # -----------------------------------------------------------------------
+      # Step 2 — Map the applied label to a project status column name
+      # Only pipeline labels are mapped; all others are ignored silently
+      # -----------------------------------------------------------------------
+      - name: Map label to status
+        if: steps.config.outputs.skip != 'true'
+        id: map
+        run: |
+          LABEL="${{ github.event.label.name }}"
+          case "${LABEL}" in
+            backlog)          STATUS="Backlog" ;;
+            in-design)        STATUS="In Design" ;;
+            in-development)   STATUS="In Development" ;;
+            in-review)        STATUS="In Review" ;;
+            done)             STATUS="Done" ;;
+            *)
+              echo "Label '${LABEL}' is not a pipeline label — skipping"
+              echo "skip=true" >> $GITHUB_OUTPUT
+              exit 0
+              ;;
+          esac
+          echo "status=${STATUS}" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------------
+      # Step 3 — Find the ProjectV2 item linked to this issue
+      # -----------------------------------------------------------------------
+      - name: Find project item
+        if: steps.config.outputs.skip != 'true' && steps.map.outputs.skip != 'true'
+        id: item
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          ISSUE_NODE_ID="${{ github.event.issue.node_id }}"
+          PROJECT_ID="${{ vars.AGENTIC_PROJECT_ID }}"
+
+          # Query the project item linked to this issue
+          RESULT=$(gh api graphql -f query='
+            query($issueId: ID!) {
+              node(id: $issueId) {
+                ... on Issue {
+                  projectItems(first: 100) {
+                    nodes {
+                      id
+                      project {
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f issueId="${ISSUE_NODE_ID}")
+
+          # Find the item that belongs to our project
+          ITEM_ID=$(echo "${RESULT}" | jq -r \
+            --arg pid "${PROJECT_ID}" \
+            '.data.node.projectItems.nodes[] | select(.project.id == $pid) | .id')
+
+          if [ -z "${ITEM_ID}" ]; then
+            echo "Issue is not linked to project ${PROJECT_ID} — skipping"
+            exit 0
+          fi
+
+          echo "item_id=${ITEM_ID}" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------------
+      # Step 4 — Get the Status field ID and option ID for the target status
+      # -----------------------------------------------------------------------
+      - name: Get status field and option
+        if: steps.config.outputs.skip != 'true' && steps.map.outputs.skip != 'true' && steps.item.outputs.item_id
+        id: field
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          PROJECT_ID="${{ vars.AGENTIC_PROJECT_ID }}"
+          TARGET_STATUS="${{ steps.map.outputs.status }}"
+
+          # Query project fields to find the Status field and its options
+          RESULT=$(gh api graphql -f query='
+            query($projectId: ID!) {
+              node(id: $projectId) {
+                ... on ProjectV2 {
+                  fields(first: 50) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f projectId="${PROJECT_ID}")
+
+          # Extract the Status field ID
+          FIELD_ID=$(echo "${RESULT}" | jq -r \
+            '.data.node.fields.nodes[] | select(.name == "Status") | .id')
+
+          if [ -z "${FIELD_ID}" ]; then
+            echo "::error::Status field not found on project"
+            exit 1
+          fi
+
+          # Extract the option ID for the target status
+          OPTION_ID=$(echo "${RESULT}" | jq -r \
+            --arg status "${TARGET_STATUS}" \
+            '.data.node.fields.nodes[] | select(.name == "Status") | .options[] | select(.name == $status) | .id')
+
+          if [ -z "${OPTION_ID}" ]; then
+            echo "::error::Status option '${TARGET_STATUS}' not found on project"
+            exit 1
+          fi
+
+          echo "field_id=${FIELD_ID}" >> $GITHUB_OUTPUT
+          echo "option_id=${OPTION_ID}" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------------
+      # Step 5 — Update the project item status
+      # -----------------------------------------------------------------------
+      - name: Update project status
+        if: steps.config.outputs.skip != 'true' && steps.map.outputs.skip != 'true' && steps.item.outputs.item_id && steps.field.outputs.field_id
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+        run: |
+          PROJECT_ID="${{ vars.AGENTIC_PROJECT_ID }}"
+          ITEM_ID="${{ steps.item.outputs.item_id }}"
+          FIELD_ID="${{ steps.field.outputs.field_id }}"
+          OPTION_ID="${{ steps.field.outputs.option_id }}"
+
+          gh api graphql -f query='
+            mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $projectId
+                itemId: $itemId
+                fieldId: $fieldId
+                value: { singleSelectOptionId: $optionId }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }
+          ' \
+            -f projectId="${PROJECT_ID}" \
+            -f itemId="${ITEM_ID}" \
+            -f fieldId="${FIELD_ID}" \
+            -f optionId="${OPTION_ID}"
+
+          echo "Updated project status to '${{ steps.map.outputs.status }}'"
