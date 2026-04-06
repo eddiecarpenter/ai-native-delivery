@@ -389,6 +389,14 @@ For the URL Shortener, the agent might create tasks like:
 
 **Board transition:** Feature moves to **In Development**.
 
+> [!TIP]
+> **If something goes wrong:** If the design workflow fails or never triggers,
+> check the Actions tab for error details. Common causes: the `in-design`
+> label was not applied, the workflow file is missing, or the runner is not
+> available. If the workflow ran but failed, copy the error output and open a
+> **[Foreground Recovery](#troubleshooting)** session — it will diagnose and
+> fix the issue.
+
 ---
 
 ### Phase 4 — Development (automated)
@@ -428,6 +436,14 @@ that launches the agent with the **Dev Session**.
 > targeting `main`. The Project board should show the feature in **In Review**.
 
 **Board transition:** Feature moves to **In Review**.
+
+> [!TIP]
+> **If something goes wrong:** If the development workflow turns red, the
+> agent hit a build or test failure it could not resolve. Go to the Actions
+> tab, expand the failed step, and copy the error output. Then open a
+> **[Foreground Recovery](#troubleshooting)** session — it will pick up where
+> the agent left off and fix the issue. See
+> [Troubleshooting](#troubleshooting) for more detail.
 
 ---
 
@@ -646,6 +662,13 @@ gh issue list --label task --state closed
 > not rewriting them. The commit history should show incremental changes
 > within the established architecture.
 
+> [!TIP]
+> **If something goes wrong:** Day-2 features are more likely to encounter
+> build failures than greenfield — the agent is modifying existing code and
+> may introduce regressions. If the workflow turns red, check the Actions tab
+> for the specific test or build error. Open a
+> **[Foreground Recovery](#troubleshooting)** session with the error output.
+
 ---
 
 ### Merge
@@ -814,6 +837,14 @@ gh pr list
 > 3. The PR contains a minimal change (not a refactor)
 > 4. A regression test exists for the specific bug
 
+> [!TIP]
+> **If something goes wrong:** If the workflow does not trigger after
+> assignment, check that the `bug` label is present on the issue and the
+> assignee matches the `AGENT_USER` variable. If the agent posts a comment
+> saying the fix requires broader changes and adds `needs-human`, the bug is
+> outside the safe scope for automated fixing — you will need to fix it
+> manually or open a **[Foreground Recovery](#troubleshooting)** session.
+
 ---
 
 ### Merge
@@ -857,3 +888,118 @@ reviewed PR. The governance is the same — only the path through the pipeline
 is shorter.
 
 ---
+
+## Troubleshooting
+
+The automated pipeline is robust, but not infallible. Builds fail, tests
+break, workflows fail to trigger, and merge conflicts arise. This section
+covers the most common failure modes and how to recover.
+
+### Foreground Recovery — the escape hatch
+
+**Foreground Recovery** is the universal escape hatch for any blocked or
+unrecoverable state in the pipeline. It is not limited to build failures —
+use it for any situation where the automated pipeline has stopped and you
+need manual intervention.
+
+```
+goose session
+# Select: Foreground Recovery
+```
+
+The agent will:
+
+1. Ask for the exact error output — it never guesses the cause
+2. Diagnose the root cause from the error
+3. Fix only what is failing — no refactoring, no scope expansion
+4. Build and test to confirm the fix
+5. Commit and push the fix
+6. Re-trigger the pipeline if needed
+
+For the full Foreground Recovery protocol, see
+[`base/skills/foreground-recovery.md`](base/skills/foreground-recovery.md).
+
+### Common failure modes
+
+| Symptom | Likely cause | What to do |
+|---|---|---|
+| Workflow never triggers | Label not applied, workflow file missing, or runner unavailable | Check the Actions tab. Verify the label is on the issue. Check that `.github/workflows/` has the expected workflow files. Verify your runner is online. |
+| Workflow triggers but fails immediately | Missing secrets or variables (`GOOSE_AGENT_PAT`, `AGENT_USER`) | Go to repo Settings → Secrets and variables → Actions. Verify all required secrets and variables are set. |
+| Build fails during Dev Session | Compile error or dependency issue the agent could not resolve | Copy the error from the Actions log. Open a Foreground Recovery session with the error. |
+| Tests fail during Dev Session | Test logic error or flaky test | Copy the failing test output. Open a Foreground Recovery session. The agent will diagnose whether the test or the code is wrong. |
+| PR Review workflow does not trigger | Review submitted as "Approve" instead of "Request changes" or "Comment" | The PR Review workflow only triggers on `CHANGES_REQUESTED` or `COMMENTED` review events. Submit a new review with the correct type. |
+| Agent posts `needs-human` on a bug issue | The fix requires changes outside the bug's direct scope | The agent correctly stopped. Review the agent's comment to understand why, then fix manually or expand the scope. |
+| Merge conflict on feature branch | `main` has changed since the branch was created | Open a Foreground Recovery session — the agent can rebase or merge `main` into the feature branch. |
+| Workflow is stuck / running too long | LLM timeout, runner issue, or agent in a loop | Cancel the workflow run from the Actions tab. Check the logs to understand where it got stuck. Open a Foreground Recovery session. |
+
+### How to recognise a stalled workflow
+
+A healthy workflow progresses visibly: task issues close, commits appear,
+and the run completes within minutes. If you see:
+
+- **No task issues closing** for several minutes — the agent may be stuck
+- **The workflow run shows no new log output** — the runner may have
+  disconnected
+- **The same error appears repeatedly in the logs** — the agent is in a
+  retry loop it cannot escape
+
+In any of these cases, cancel the workflow run and open a Foreground Recovery
+session with the relevant log output.
+
+---
+
+## What's Next
+
+You have completed all three stages. You have experienced planned delivery
+(Stages 1 and 2), reactive bug fixing (Stage 3), and the review loop
+(Phase 4b). Here is where to go from here.
+
+### Your own project
+
+Bootstrap a fresh environment for a real project:
+
+```bash
+gh agentic bootstrap
+```
+
+Run a requirement through the full pipeline. The protocol works the same
+regardless of what you are building — the URL Shortener was just the
+training ground.
+
+### The rulebook and playbooks
+
+Understand the framework in depth:
+
+- **[`base/AGENTS.md`](base/AGENTS.md)** — the rulebook. Git rules, testing
+  standards, contract safety, working principles. Always active in every
+  session.
+- **[`base/skills/`](base/skills/)** — the playbooks. Step-by-step
+  procedures for each session type: requirements, scoping, design,
+  development, PR review, foreground recovery, and more.
+
+### Adding local rules and skills
+
+Customise the framework for your project:
+
+- **[`AGENTS.local.md`](AGENTS.local.md)** — project-specific rules that
+  extend the global protocol. Team conventions, prohibited actions, domain
+  glossary, links to external systems. Always active.
+- **[`skills/`](skills/)** — project-specific skills (named procedures).
+  Your release process, deployment checklist, incident runbook templates.
+  A local skill with the same filename as a base skill overrides it.
+
+See [Extending the framework](README.md#extending-the-framework) in the
+README.
+
+### Further reading
+
+- **[README.md](README.md)** — full framework overview, pipeline diagram,
+  topology options, configuration model
+- **[`base/standards/`](base/standards/)** — language-specific coding
+  standards (Go, and more to come)
+- **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — system architecture
+  documentation (if present in your project)
+- **[gh-agentic](https://github.com/eddiecarpenter/gh-agentic)** — the
+  companion CLI extension for bootstrap, inception, sync, and verify
+- **[GitHub Discussions](https://github.com/eddiecarpenter/ai-native-delivery/discussions)**
+  — questions, ideas, and war stories from the community
