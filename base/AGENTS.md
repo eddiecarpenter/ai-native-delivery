@@ -1,7 +1,10 @@
-# AGENTS.md — Agent Protocol
+# AGENTS.md — Agent Rulebook
 
-This file governs how AI agents behave in this repository and all domain repos.
-It is language-agnostic and reusable across projects.
+This file is the **rulebook** for all AI agents operating in this repository and all
+domain repos. Rules here are always active — they govern every session, every phase,
+and every action, regardless of which skill is being executed.
+
+For the **playbooks** — the step-by-step procedures for each session type — see `base/skills/`.
 
 **This file is managed by the `ai-native-delivery` template. Do not edit manually.
 Local overrides belong in `AGENTS.local.md`.**
@@ -10,368 +13,24 @@ Local overrides belong in `AGENTS.local.md`.**
 
 ## Session Initialisation
 
-At the start of every session, read these sources in order before doing anything else:
-
-1. `docs/PROJECT_BRIEF.md` — what the agentic system is and how it works
-2. Read `REPOS.md`. For each repo with status `active`, derive its local directory as
-   `<type>s/<name>` (e.g. `type: domain` → `domains/<name>`, `type: tool` → `tools/<name>`).
-   For each unique type, ensure the type folder (`<type>s/`) exists — if not:
-   a. Create the folder with a `.gitkeep` file
-   b. Stage it: `git add <type>s/.gitkeep`
-   c. Add `<type>s/*/` to `.gitignore` and stage that too: `git add .gitignore`
-   d. Commit both: `chore: bootstrap <type>s/ directory`
-   Check whether each `<type>s/<name>` directory exists locally. If any repos are
-   missing, list them and ask the user whether to clone them before proceeding.
-   Clone command: `git clone <repo> <type>s/<name>`
-   If the user declines to clone missing repos, continue the session but limit all
-   work to repos that are present locally. Do not reference, modify, or make
-   assumptions about the content of repos that were not cloned.
-3. Query open Requirement issues in the agentic repo:
-   `gh issue list --repo <agentic-repo> --label requirement --state open --json number,title,labels`
-4. For domain sessions — query open Feature issues in the domain repo:
-   `gh issue list --label feature --state open --json number,title,labels,body`
-5. Read the relevant standards file from `base/standards/` for the domain language
-   (e.g. `base/standards/go.md` for Go domains)
-6. Load skills from `base/skills/` (template-managed, read-only) and `skills/`
-   (local, project-specific, if the directory exists). Local skills in `skills/`
-   take precedence over template skills in `base/skills/` of the same name.
-   Template-managed skills include `update-project-template` (extract live
-   project config into `base/project-template.json`).
-
-Do not skip any step. Do not begin work until all steps are complete.
-
-There is no STATUS.md. Current state is derived from GitHub Issues.
-
----
-
-## Session Types
-
-### Environment Bootstrap Session (Phase 0a)
-
-Run interactively by a human. Creates a brand new agentic environment from scratch.
-This session is run once per project. The output is a fully configured agentic repo
-ready for Phase 1.
-
-All pre-flight checks, topology selection, owner/org selection, and project details
-are collected by `bootstrap.sh` before the agent is invoked. The agent receives all
-confirmed values and executes steps 3-7 only. Do not ask the human for any information
-that has already been provided — proceed directly to repo creation.
-
-#### Step 3 — Create the Repo
-
-```bash
-gh repo create <owner>/<repo-name> \
-  --template eddiecarpenter/ai-native-delivery \
-  --private
-```
-
-Repo naming:
-- Single: `<project-name>` — no suffix, this is the project repo
-- Federated: `<project-name>-agentic` — control plane repo
-
-Clone into the working directory provided by bootstrap.sh:
-```bash
-git clone git@github.com:<owner>/<repo-name>.git <working-dir>/<repo-name>
-```
-
-#### Step 4 — Clean Up Template Files
-
-The template includes files that belong only in the template itself.
-Remove them from the newly cloned repo:
-
-```bash
-cd <working-dir>/<repo-name>
-git rm bootstrap.sh bootstrap.sh.md5
-git commit -m "chore: remove template bootstrap files"
-```
-
-#### Step 5 — Scaffold Project Structure
-
-Read the **Project Initialisation** section of the relevant standards file in `base/standards/`
-and follow the instructions there exactly.
-
-| Stack | Standards file |
-|---|---|
-| Go | `base/standards/go.md` |
-| Java / Quarkus | `base/standards/java-quarkus.md` |
-| Java / Spring Boot | `base/standards/java-spring.md` |
-| TypeScript / Node.js | `base/standards/typescript.md` |
-| Python | `base/standards/python.md` |
-| Rust | `base/standards/rust.md` |
-
-Commit: `chore: scaffold <stack> project structure`
-
-#### Step 6 — Configure the Repo
-
-Apply standard configuration:
-
-**Branch protection on `main`:**
-```bash
-gh api repos/<owner>/<repo>/branches/main/protection \
-  --method PUT \
-  --field required_pull_request_reviews=null \
-  --field enforce_admins=false \
-  --field restrictions=null \
-  --field required_status_checks=null
-```
-
-**Standard labels** — create if not present:
-`requirement`, `feature`, `task`, `backlog`, `draft`, `scoping`, `scheduled`,
-`in-design`, `in-development`, `in-review`, `done`
-
-```bash
-for label in requirement feature task backlog draft scoping scheduled in-design in-development in-review done; do
-  gh label create "$label" --repo <owner>/<repo> --force
-done
-```
-
-**Secrets** — if PAT is needed for workflows:
-- Federated: guide human to add PAT as an org secret in GitHub Settings
-- Single: guide human to add PAT as a repo secret
-
-#### Step 7 — Populate the Repo
-
-In the cloned repo:
-1. Update `REPOS.md` with the project description
-2. Update `AGENTS.local.md` with the template source and any project-specific notes:
-   ```
-   ## Template Source
-   Template: eddiecarpenter/ai-native-delivery
-   ```
-3. Update `README.md` with the project name and description
-4. If Antora — scaffold `docs/` AsciiDoc module structure and `antora-playbook.yml`
-5. Commit: `chore: bootstrap <project-name>`
-6. Push: `git push origin main`
-
-#### Step 8 — Create the GitHub Project
-
-```bash
-gh project create --owner <owner> --title "<project-name>"
-```
-
-Configure the project board with the standard status columns:
-**Backlog**, **Scoping**, **Scheduled**, **In Design**, **In Development**, **In Review**, **Done**
-
-#### Step 9 — Hand Off
-
-Confirm to the human:
-- Agentic repo URL
-- GitHub Project URL
-- Local clone path
-
-For federated topology: offer to proceed to Repo Inception Session (Phase 0b)
-to register the first domain or tool repo.
-For single topology: offer to proceed to Requirements Session (Phase 1).
-
----
-
-### Repo Inception Session (Phase 0b)
-
-Run interactively by a human. Adds a new repo (domain, tool, or other type) to an
-existing agentic environment. No code is written — the output is a bootstrapped repo
-registered in `REPOS.md` and ready for Phase 1.
-
-#### Step 1 — Read Context
-
-Follow Session Initialisation. Confirm the agentic environment is healthy before
-proceeding.
-
-#### Step 2 — Repo Questions
-
-Collect the following:
-- **Repo type** — domain, tool, or other (determines local clone directory `<type>s/`)
-- **Repo name** — follows convention `<name>-<type>` for domains (e.g. `charging-domain`)
-  or just `<name>` for tools (e.g. `ocs-testbench`)
-- **Description** — one or two sentences, goes into REPOS.md
-- **Stack** — drives which `base/standards/` file applies
-
-#### Step 3 — Scoping Conversation
-
-Have a methodology-agnostic scoping conversation with the human to establish:
-- What problem does this repo solve?
-- What are its boundaries — what is in scope, what is explicitly out of scope?
-- How does it relate to other repos in the environment?
-- What are the key interfaces or contracts with other systems?
-
-The output of this conversation is captured as the repo's `docs/PROJECT_BRIEF.md`.
-
-#### Step 4 — Create the GitHub Repo
-
-```bash
-gh repo create <org>/<repo-name> --private
-```
-
-Apply standard configuration:
-- Branch protection on `main` (same as Phase 0a Step 4)
-- Standard labels
-- Link to the org GitHub Project
-
-#### Step 5 — Bootstrap the Repo Structure
-
-Initialise the repo with:
-- `CLAUDE.md` — referencing the agentic repo's `base/AGENTS.md`
-- `AGENTS.local.md` — placeholder for local overrides
-- `docs/PROJECT_BRIEF.md` — output of the scoping conversation (Step 3)
-- `README.md` — operational detail (how to run, setup, environment config)
-- `.github/workflows/` — thin caller workflows referencing the agentic template
-
-Commit: `chore: bootstrap <repo-name>`
-
-#### Step 6 — Register in REPOS.md
-
-Add the new repo entry to `REPOS.md` in the agentic repo:
-```
-## <repo-name>
-
-- **Repo:** git@github.com:<org>/<repo-name>.git
-- **Stack:** <stack>
-- **Type:** <type>
-- **Status:** active
-- **Description:** <description>
-```
-
-Commit and raise a PR to the agentic repo: `chore: register <repo-name> in REPOS.md`
-
-#### Step 7 — Hand Off
-
-- Confirm the repo URL to the human
-- Proceed to Requirements Session (Phase 1)
-
----
-
-### Template Sync Session
-
-Triggered by the human with a natural language instruction such as:
-> *"Sync template"* or *"Resync base"*
-
-Runs in the agentic repo root. Updates `base/` from the upstream template.
-The human reviews the diff and confirms before anything is committed.
-
-1. Read `TEMPLATE_SOURCE` to determine the upstream template repo
-2. Read `TEMPLATE_VERSION` to determine what was last synced
-3. Check the latest release tag on the template repo:
-   `gh release list --repo <template> --limit 1`
-4. If already up to date — inform the human and exit cleanly
-5. Clone the template to a temporary location:
-   `git clone git@github.com:<template>.git /tmp/agentic-sync`
-6. Copy `base/` from the template into the local repo:
-   `cp -r /tmp/agentic-sync/base/ ./base/`
-7. Show the human a diff of all changes:
-   `git diff base/`
-8. Ask for confirmation before proceeding:
-   > *"These changes will be committed to base/. Proceed? [y/N]"*
-   - If no — restore `base/` to its previous state and exit cleanly
-9. Update `TEMPLATE_VERSION` with the new version
-10. Stage and commit:
-    `chore: sync base/ from <template> <version>`
-11. Clean up: `rm -rf /tmp/agentic-sync`
-12. Inform the human — list what changed and remind them to raise a PR
-
-**Never sync without human confirmation of the diff.**
-**Never modify any local files** (`AGENTS.local.md`, `REPOS.md`, etc.) during a sync.
-**The sync intentionally overwrites all files under `base/`.** If `gh agentic verify`
-reports drift in `base/`, it means files have been accidentally modified. The sync will
-discard those changes — this is correct behaviour. Local customisations belong in
-`AGENTS.local.md` and `skills/`, not in `base/`.
-
----
-
-### Requirements Session (Phase 1)
-
-Run interactively by a human. Captures business needs as Requirement issues
-in the agentic repo. No branch, no commit, no PR — the issue is the artefact.
-
-1. Read context (see Session Initialisation)
-2. Converse with the human to distil the requirement
-3. Create a GitHub Issue in the agentic repo with `requirement` + `backlog` or `draft` label
-4. Confirm the issue URL to the human
-
-### Scoping Session (Phase 2)
-
-Run interactively by a human. Decomposes a Requirement into Feature issues
-in the relevant domain repo(s). No branch, no commit, no PR.
-
-1. Read context (see Session Initialisation)
-2. Read the target Requirement issue in full
-3. Converse with the human to scope the Feature(s)
-4. Decide serial vs parallel decomposition:
-   - If capabilities can be built and merged independently → create separate features (run in parallel)
-   - If capabilities must be built in sequence → create one feature with ordered tasks (same branch, same PR)
-   - Never create multiple features with implied serial dependencies
-   - **Cross-repo sequencing (federated topology):** if Feature B in repo-B depends on
-     Feature A in repo-A being merged first (e.g. Feature A introduces an API that
-     Feature B consumes), document the dependency explicitly in both feature issues and
-     agree the order with the human before applying `in-design` to either. Never trigger
-     Feature B's design session until Feature A's PR is merged.
-5. Identify whether the Feature has UI/UX impact:
-   - Not every requirement has a UI impact
-   - A single requirement may produce multiple features, some with UI impact and some without
-   - For any feature with UI impact: design the UX now — ASCII mockups, flow descriptions,
-     field layout, error states, colour/theming decisions — and include it in the feature issue
-   - Do not leave UX decisions to the Feature Design Session or implementation
-6. Create Feature issue(s) in the domain repo with `feature` + `backlog` label.
-   Apply the `capture-feature` skill for the issue body structure.
-7. Wire sub-issue relationship: Feature → parent Requirement
-8. Add Feature to org Project
-9. When human confirms ready: apply `in-design` label → triggers Feature Design Session
-
-### Feature Design Session (Phase 3)
-
-Triggered automatically by GitHub Actions when a Feature issue is labelled `in-design`.
-Runs in the domain repo context. Decomposes the Feature into Task sub-issues.
-
-1. Read context (see Session Initialisation)
-2. Read the Feature issue spec in full
-3. Analyse the codebase to understand what exists and what must be built
-4. Create Task sub-issues under the Feature issue (ordered by creation sequence)
-5. Create the feature branch: `feature/N-description` where N is the Feature issue number
-   — this auto-links the branch to the Feature issue
-6. Apply `in-development` label on the Feature issue → triggers Dev Session
-7. Exit cleanly — do not push files, do not open a PR
-
-### Dev Session (Phase 4)
-
-Triggered automatically by GitHub Actions when a Feature issue is labelled `in-development`.
-Runs on the feature branch in the domain repo. Processes Task sub-issues to completion.
-
-1. Read context (see Session Initialisation)
-2. Query open Task sub-issues on the Feature issue, ordered by issue number
-3. For each Task:
-   - Implement the work described in the Task issue
-   - Build and test — if either fails, stop immediately and exit with error
-   - Commit: `feat: [task description] — task N of N (#feature-issue)`
-   - Close the Task issue: `gh issue close <task-number>`
-4. When all Tasks are closed — exit cleanly
-5. The workflow handles: push, PR creation with `Closes #N`, applying `in-review` label
-
-### Interactive Session
-
-Run manually by a human, typically to investigate or recover from a workflow failure,
-or for exploration and manual work outside the automated pipeline.
-
-1. Read context (see Session Initialisation)
-2. Confirm not on `main` before making any changes
-3. Follow the same build/test discipline as Dev Session
-
-### Foreground Recovery
-
-The **Foreground Recovery** session is the emergency escape hatch for anything the
-automated pipeline cannot handle on its own. It is the correct response to any failure
-or unexpected situation — not just build failures. The protocol evolves as new failure
-modes are discovered through it.
-
-When the GitHub Actions workflow fails (build red, tests failing, conflict, or any other
-unrecoverable state), the human opens a Foreground Recovery session to diagnose and fix.
-The following rules apply:
-
-- Query open Task sub-issues on the Feature issue before touching any code
-- Diagnose the root cause from the exact error output — do not guess
-- Fix only what is failing; do not expand scope or refactor surrounding code
-- After fixing: build, test, commit, close the Task issue, and push
-- Inform the human what was fixed
-- If the automatic re-trigger does not start the workflow, apply `in-development`
-  label again to re-trigger the Dev Session
-- If the fix requires a contract change or broad refactor, stop and raise it before proceeding
+At the start of every session, invoke the `session-init` skill before doing anything else.
+If a template sync occurs mid-session, invoke `session-init` again to reload the environment.
+
+### Session Types
+
+Each session type has a dedicated skill in `base/skills/`. Load the relevant skill for
+the session being run.
+
+| Session | Skill | Trigger |
+|---|---|---|
+| Session Init | `session-init.md` | Every session start; post-template-sync |
+| Requirements | `requirements-session.md` | Human (interactive) |
+| Feature Scoping | `feature-scoping.md` | Human (interactive) |
+| Feature Design | `feature-design.md` | Automatic — `in-design` label |
+| Dev Session | `dev-session.md` | Automatic — `in-development` label |
+| PR Review | `pr-review-session.md` | Automatic — PR review submitted |
+| Issue Session | `issue-session.md` | Automatic — issue assigned to agent |
+| Foreground Recovery | `foreground-recovery.md` | Human (interactive) — any blocked state |
 
 ---
 
@@ -379,7 +38,6 @@ The following rules apply:
 
 One branch per Feature. Tasks are commits on that branch, not separate branches.
 
-**Rules:**
 - Never commit or make changes on `main` — unconditional
 - Never push from within a recipe — the workflow pushes after the recipe exits cleanly
 - Never open a PR from within a recipe — the workflow handles this
@@ -426,17 +84,19 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
 - **To cancel a requirement or feature, delete the GitHub Issue.** The agent will detect
   its absence during the next session and will not attempt work against it. Clean up any
   associated feature branch manually if one was already created.
-- **SDLC phase sequence — never skip a phase without human approval.**
-  The pipeline must follow phases in order: Requirements → Scoping → Design → Implementation.
-  If the agent believes a phase can be skipped, it must stop and ask the human before proceeding.
-  The human decides whether to skip; the agent never skips a phase unilaterally.
-  - When a phase is skipped (with human approval):
-    - Labels and status must still transition through the skipped phase — the board
-      must reflect the correct state for the phase the work is actually in
-    - If scoping is skipped: the requirement transitions `backlog` → `scoping` →
-      `scheduled`. The feature is still created (using the `capture-feature` skill)
-      and `in-design` is applied immediately — skipping scoping means skipping the
-      conversation, not skipping feature creation or pipeline triggering.
+- **Every phase must be completed before the next begins. Phases are mandatory; sessions
+  are flexible** — a phase may be completed within an earlier session. Never defer a phase
+  without human approval. The pipeline follows:
+  Requirements → Scoping → Design → Implementation.
+  Each phase produces a specific artefact. Scoping produces a Feature issue with a defined
+  scope. That artefact must exist before design begins, regardless of which session produced it.
+
+  **Completing a phase early:** When the work of a later phase is apparent during an earlier
+  session, complete it then — no separate session is needed. This is completing early, not
+  skipping. All artefacts must still be produced.
+
+  **Deferring a phase:** If a phase genuinely cannot proceed yet, the agent must stop and
+  ask the human before deferring. The human decides; the agent never defers unilaterally.
 
 ---
 
@@ -449,10 +109,14 @@ If a change to the global protocol or standards is needed:
 1. Clone `eddiecarpenter/ai-native-delivery` locally
 2. Make and test the changes there
 3. Push and raise a PR for human review
-4. Once merged and tagged, sync `base/` into this repo using the sync process
+4. Once merged and tagged, use `gh agentic sync` to pull the update into this repo
 
-For project-specific overrides that cannot wait for a template sync, add them to
-`AGENTS.local.md` instead — that is what it is for.
+For project-specific overrides, add them to `AGENTS.local.md` — that is what it is for.
+
+The sync intentionally overwrites all files under `base/`. If `gh agentic verify` reports
+drift in `base/`, it means files have been accidentally modified. The sync will discard
+those changes — this is correct behaviour. Local customisations belong in `AGENTS.local.md`
+and `skills/`, not in `base/`.
 
 ---
 
@@ -470,33 +134,18 @@ Always ask a human before:
 
 ## Recipe Rules
 
-Goose recipes live in two places:
-
 | Path | Editable | Purpose |
 |---|---|---|
-| `.goose/recipes/*.yaml` | ❌ Never (managed by template) | The complete recipe — instructions, parameters, model settings |
-| `base/skills/*.md` | ❌ Never | Human-readable reference docs for each session type (the skills) |
-| `skills/*.md` | ✅ Yes (local, project-specific) | Local skills that extend or override template skills |
+| `.goose/recipes/*.yaml` | ❌ Never (managed by template) | Complete recipe — instructions, parameters, model settings |
+| `base/skills/*.md` | ❌ Never | Template-managed playbooks — read-only |
+| `skills/*.md` | ✅ Yes (local, project-specific) | Local playbooks — override base skills of the same name |
 
-**`.goose/recipes/*.yaml` files are managed by the `ai-native-delivery` template.**
-**`base/skills/*.md` files are read-only reference documentation.**
+**`.goose/recipes/*.yaml` and `base/skills/*.md` are managed by the template.**
 Neither should ever be modified locally.
 
-**`skills/*.md` files are local, project-specific skills.** They are not synced
+**`skills/*.md` files are local, project-specific playbooks.** They are not synced
 by the template and can be freely created and edited. A local skill with the same
 filename as a template skill in `base/skills/` takes precedence.
-
-The six standard recipes are:
-
-| File | Stage | Trigger |
-|---|---|---|
-| `requirements-session.yaml` | Stage 1 | Human (interactive) |
-| `feature-scoping.yaml` | Stage 2 | Human (interactive) |
-| `feature-design.yaml` | Stage 3 | Automatic — `in-design` label |
-| `dev-session.yaml` | Stage 4 | Automatic — `in-development` label |
-| `pr-review-session.yaml` | Stage 4b | Automatic — PR review submitted |
-| `issue-session.yaml` | Stage 4c | Automatic — issue assigned to agent |
-| `foreground-recovery.yaml` | Recovery | Human (interactive) — workflow failure |
 
 - Customisation of agent behaviour belongs in `AGENTS.local.md`
 - If a recipe needs to change, raise it against `eddiecarpenter/ai-native-delivery`

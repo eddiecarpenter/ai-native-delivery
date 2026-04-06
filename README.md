@@ -216,38 +216,53 @@ and tool repos registered in `REPOS.md`. Best for multi-service systems or team 
 
 ---
 
-## Skills
+## Rulebook and Playbooks
 
-Skills are reusable, named procedures that agents invoke for specific tasks. They are
-distinct from rules: a rule is always active and constrains behaviour; a skill is invoked
-explicitly when a particular task needs to be performed.
+The framework separates **rules** from **procedures** into two distinct layers:
 
-Examples of built-in skills:
-- **`capture-feature`** — the canonical structure for a Feature issue body (user story,
-  Given/When/Then acceptance criteria, parent link). Applied every time a feature is scoped.
-- **`pr-review-session`** — the procedure an agent follows when a PR review is submitted.
-- **`foreground-recovery`** — the diagnostic and recovery process for a failed workflow.
-- **`notify-user`** — how and when the agent communicates status back to the human.
+**`base/AGENTS.md` is the rulebook.** It is always active — every rule in it applies to
+every agent, every session, every phase. It governs git discipline, testing, build
+verification, contract safety, and working principles. Agents read it once at session
+start and operate within its boundaries for the entire session.
+
+**Skills are the playbooks.** Each skill is a named, step-by-step procedure for a
+specific session type or task. Skills are invoked explicitly when needed — they are not
+always active. A skill tells the agent what to do; the rulebook tells the agent how to
+behave while doing it.
+
+| | Rulebook (`base/AGENTS.md`) | Playbooks (`base/skills/`) |
+|---|---|---|
+| **When active** | Always — every session | Invoked explicitly for a specific session or task |
+| **Contains** | Rules, constraints, universal principles | Step-by-step procedures, templates, named workflows |
+| **Use for** | Git rules, testing standards, contract safety | Session procedures, issue templates, named workflows |
+| **Override** | Local rules in `AGENTS.local.md` extend it | Local skills in `skills/` override base skills of the same name |
+| **Example** | Never commit directly to `main` | How to run a Feature Design session |
+
+If it is a constraint that must always apply, it belongs in the rulebook (`AGENTS.local.md`
+for project-specific rules). If it is a procedure invoked for a specific task, it belongs
+in a skill.
+
+### Built-in skills
+
+| Skill | Purpose |
+|---|---|
+| `session-init` | Load the environment at session start or after a template sync |
+| `requirements-session` | Capture business needs as Requirement issues |
+| `feature-scoping` | Decompose a Requirement into Feature issues |
+| `feature-design` | Decompose a Feature into ordered Task sub-issues |
+| `dev-session` | Implement Task sub-issues to completion |
+| `pr-review-session` | Process review comments on a PR |
+| `issue-session` | Handle a bug or question assigned to the agent |
+| `foreground-recovery` | Emergency escape hatch for any blocked pipeline state |
+| `capture-feature` | Canonical structure for a Feature issue body |
+| `notify-user` | How and when the agent communicates status to the human |
 
 Skills live in two places:
 
 | Path | Managed by | Purpose |
 |---|---|---|
-| `base/skills/` | Template (read-only) | Global skills, available to all projects |
-| `skills/` | You | Local skills — project-specific, override base skills of the same name |
-
-### Skills vs rules — when to use which
-
-| | Skills | Rules |
-|---|---|---|
-| **Where** | `skills/` | `AGENTS.local.md` |
-| **When active** | Invoked explicitly for a specific task | Always active, every session |
-| **Use for** | Reusable procedures, templates, named workflows | Team conventions, prohibited actions, project-specific standards |
-| **Override** | A local skill overrides a base skill of the same filename | Local rules extend global rules in `base/AGENTS.md` |
-| **Example** | How to structure a release PR | Never commit directly to `main` |
-
-If you find yourself writing the same instructions in multiple sessions, it belongs in a
-skill. If it is a constraint that must always apply, it belongs in `AGENTS.local.md`.
+| `base/skills/` | Template (read-only) | Global playbooks, available to all projects |
+| `skills/` | You | Local playbooks — project-specific, override base skills of the same name |
 
 ---
 

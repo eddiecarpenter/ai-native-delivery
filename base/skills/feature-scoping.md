@@ -5,9 +5,12 @@
 Decompose a Requirement into one or more well-formed Feature issues.
 Design any UX/UI impact now — not during implementation.
 
+Scoping is a mandatory phase — it produces the Feature issue artefact that design depends on.
+This session is used when scoping was not completed inline during the Requirements Session.
+
 ## When to Run
 
-After at least one Requirement issue has been moved to `backlog` status.
+When a Requirement issue is in `backlog` state and scoping was not completed inline.
 Run this before Feature Design — you cannot design what has not been scoped.
 
 ## How to Start
