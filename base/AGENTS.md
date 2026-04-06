@@ -3,7 +3,7 @@
 This file governs how AI agents behave in this repository and all domain repos.
 It is language-agnostic and reusable across projects.
 
-**This file is managed by the `agentic-development` template. Do not edit manually.
+**This file is managed by the `ai-native-delivery` template. Do not edit manually.
 Local overrides belong in `AGENTS.local.md`.**
 
 ---
@@ -58,7 +58,7 @@ that has already been provided — proceed directly to repo creation.
 
 ```bash
 gh repo create <owner>/<repo-name> \
-  --template eddiecarpenter/agentic-development \
+  --template eddiecarpenter/ai-native-delivery \
   --private
 ```
 
@@ -133,7 +133,7 @@ In the cloned repo:
 2. Update `AGENTS.local.md` with the template source and any project-specific notes:
    ```
    ## Template Source
-   Template: eddiecarpenter/agentic-development
+   Template: eddiecarpenter/ai-native-delivery
    ```
 3. Update `README.md` with the project name and description
 4. If Antora — scaffold `docs/` AsciiDoc module structure and `antora-playbook.yml`
@@ -419,11 +419,11 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
 
 ## Base Directory — Read Only
 
-The `base/` directory is managed exclusively by the `agentic-development` template.
+The `base/` directory is managed exclusively by the `ai-native-delivery` template.
 **Never modify any file under `base/` directly** — not even minor edits.
 
 If a change to the global protocol or standards is needed:
-1. Clone `eddiecarpenter/agentic-development` locally
+1. Clone `eddiecarpenter/ai-native-delivery` locally
 2. Make and test the changes there
 3. Push and raise a PR for human review
 4. Once merged and tagged, sync `base/` into this repo using the sync process
@@ -455,7 +455,7 @@ Goose recipes live in two places:
 | `base/skills/*.md` | ❌ Never | Human-readable reference docs for each session type (the skills) |
 | `skills/*.md` | ✅ Yes (local, project-specific) | Local skills that extend or override template skills |
 
-**`.goose/recipes/*.yaml` files are managed by the `agentic-development` template.**
+**`.goose/recipes/*.yaml` files are managed by the `ai-native-delivery` template.**
 **`base/skills/*.md` files are read-only reference documentation.**
 Neither should ever be modified locally.
 
@@ -476,7 +476,7 @@ The six standard recipes are:
 | `foreground-recovery.yaml` | Recovery | Human (interactive) — workflow failure |
 
 - Customisation of agent behaviour belongs in `AGENTS.local.md`
-- If a recipe needs to change, raise it against `eddiecarpenter/agentic-development`
+- If a recipe needs to change, raise it against `eddiecarpenter/ai-native-delivery`
   and let it flow in via `gh agentic sync`
 - `gh agentic verify` detects and flags any local modifications to recipe files
 
