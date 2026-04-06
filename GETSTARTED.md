@@ -178,3 +178,210 @@ You now have a fully configured agentic environment. The protocol is loaded, the
 automation is wired up, and the agent is ready to work.
 
 Next, you will open your first session and capture the URL Shortener requirement.
+
+---
+
+## 4 — Phase 1: Requirements
+
+Phase 1 is a conversation. You describe what you need; the agent listens, challenges
+vague descriptions, and structures your words into a formal Requirement issue with
+Given/When/Then acceptance criteria. The human drives — the agent captures and records.
+
+### Opening a Requirements Session
+
+Launch Goose and select the **Requirements Session (Stage 1)** recipe:
+
+```
+goose session
+# Select: Requirements Session (Stage 1)
+```
+
+The agent will print `=== Requirements Session (Phase 1) — Started ===` and then
+read the project brief and any existing open requirements to understand the current
+context. Then it asks you what you need.
+
+### The conversation
+
+Here is an example of what the conversation looks like for the URL Shortener:
+
+> **You:** I want to build a URL shortener. Users submit a long URL and get back a
+> short code. When someone visits the short URL, they get redirected to the original.
+> If the code doesn't exist, they should get a 404.
+>
+> **Agent:** Let me make sure I understand the scope. You want three behaviours:
+> 1. An endpoint that accepts a long URL and returns a generated short code
+> 2. An endpoint that takes a short code and redirects to the original URL
+> 3. A 404 response when a code is not found
+>
+> Is this a public service or internal? Do you need analytics, expiration, or
+> custom codes?
+>
+> **You:** Internal for now. No analytics, no expiration, no custom codes. Keep it
+> simple — I just want to see the pipeline work end to end.
+>
+> **Agent:** Understood — minimal MVP. I'll capture this as a requirement.
+
+Notice what the agent is doing here: it is not just recording your words. It is
+**actively challenging** the description to ensure the scope is clear and that
+nothing is assumed. If you said something vague like "a URL service", it would
+push back and ask for specifics.
+
+### What the agent does behind the scenes
+
+After the conversation, the agent:
+
+1. **Creates a Requirement issue** in the agentic repo with the `requirement` and
+   `backlog` labels
+2. **Structures the requirement** with a user story and Given/When/Then acceptance
+   criteria — even though you described it informally, the agent produces a formal
+   specification
+
+### The resulting Requirement issue
+
+The issue the agent creates looks like this:
+
+```markdown
+Title: URL Shortener service
+
+## User Story
+
+As an internal user, I want a URL shortening service, so that I can share
+short, memorable links that redirect to long URLs.
+
+## Acceptance Criteria
+
+- Given a valid long URL is submitted to POST /shorten,
+  when the request is processed,
+  then a unique short code is returned.
+
+- Given a valid short code,
+  when GET /:code is requested,
+  then the caller is redirected to the original URL.
+
+- Given a short code that does not exist,
+  when GET /:code is requested,
+  then a 404 response is returned.
+
+## Notes
+
+MVP scope — no analytics, expiration, or custom codes.
+```
+
+This issue is now the **source of truth** for the requirement. Everything downstream
+— feature scoping, design, implementation — traces back to this issue.
+
+### Scoping inline vs separate session
+
+If the scope is obvious (as it is for our URL Shortener), the agent will ask whether
+you want to complete scoping in the same session. This is not skipping a phase — the
+scoping artefact (a Feature issue) must still be produced. It simply avoids the
+overhead of a separate session when the answer is already clear.
+
+For a simple walkthrough like this one, say yes — let the agent complete scoping
+inline. The next section describes what happens during scoping, whether it runs
+inline or as a separate session.
+
+---
+
+## 5 — Phase 2: Feature Scoping
+
+Scoping decomposes a requirement into one or more Feature issues. Each Feature issue
+defines exactly what will be built, with acceptance criteria that the agent will
+implement and test against.
+
+For the URL Shortener, the requirement maps to a single feature. More complex
+requirements might decompose into multiple parallel or sequential features — the
+agent will guide that decision.
+
+### The scoping conversation
+
+If scoping runs as a separate session, open Goose and select the **Feature Scoping
+(Stage 2)** recipe. If it runs inline (as we recommended above), the conversation
+continues seamlessly.
+
+The agent works through a structured process:
+
+> **Agent:** The requirement is clear and self-contained. I recommend a single feature
+> with three acceptance criteria — one per endpoint behaviour. This can be built and
+> tested as one unit. Does that sound right, or would you like to split it differently?
+>
+> **You:** A single feature is fine.
+>
+> **Agent:** I'll define the feature with a user story and acceptance criteria. Let me
+> also confirm — is there any UX or UI impact? This is a backend API, so I'm assuming
+> no frontend work.
+>
+> **You:** Correct, API only.
+
+### What the agent does during scoping
+
+Behind the scenes, the agent is working through a structured checklist:
+
+1. **Summarises the raw idea** — confirms understanding with you
+2. **Defines the problem statement** — what problem does this solve?
+3. **Writes a user story** — `As a [user], I want [goal], so that [benefit]`
+4. **Determines MVP scope** — the smallest version that delivers real value
+5. **Checks parallel vs serial** — can all parts be built independently (multiple
+   features), or must they be sequenced (one feature with ordered tasks)?
+6. **Defines acceptance criteria** — outcome-based, in checkbox format
+7. **Checks for UX impact** — any design needed before implementation?
+8. **Reviews the parking lot** — anything out of scope that should be captured for later?
+
+This structure ensures nothing is missed. The agent is not just creating an issue —
+it is producing a complete, testable specification.
+
+### The resulting Feature issue
+
+The agent creates a Feature issue that looks like this:
+
+```markdown
+Title: URL Shortener — POST /shorten, GET /:code, 404
+
+## User Story
+
+As an internal user, I want a URL shortening API, so that I can create short
+codes for long URLs and redirect visitors to the original URL.
+
+## Acceptance Criteria
+
+- [ ] Given a valid long URL is submitted to POST /shorten,
+      when the request is processed,
+      then a unique short code is returned in the response.
+
+- [ ] Given a valid short code exists,
+      when GET /:code is requested,
+      then the caller is redirected (HTTP 301/302) to the original URL.
+
+- [ ] Given a short code that does not exist,
+      when GET /:code is requested,
+      then a 404 Not Found response is returned.
+
+## Parent
+
+Closes #<requirement-issue-number>
+```
+
+### The trigger — `in-design` label
+
+When you confirm the feature is ready, the agent applies the `in-design` label to
+the Feature issue. **This is the handoff from human to machine.** The label change
+triggers a GitHub Actions workflow that starts the automated pipeline.
+
+From this point forward, you do not need to do anything — the agent takes over.
+The `in-design` label is the bridge between the interactive phases (where you drive)
+and the automated phases (where GitHub Actions drives). This is why the pipeline
+diagram in the [README](README.md) shows Phases 1 and 2 on the left (interactive)
+and Phases 3 and 4 on the right (automated).
+
+The agent also transitions the parent requirement from `scoping` to `scheduled`,
+indicating that all features have been defined and queued for design.
+
+### What happens next
+
+The `in-design` label triggers the Feature Design Session automatically via GitHub
+Actions. You will watch this happen in the next section — but first, take a moment
+to appreciate what just happened: you described a URL shortener in plain English,
+and the agent produced a formally structured, testable feature specification with
+full traceability back to the original requirement.
+
+Next, the automated phases take over.
