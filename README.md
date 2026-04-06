@@ -133,6 +133,33 @@ Phases 1 and 2 are conversational — the human drives, the agent captures and s
 Phases 3 and 4 are automated — triggered by GitHub Actions when a label is applied.
 A recovery session handles workflow failures interactively.
 
+### Project board automation
+
+The project board is kept in sync automatically — no manual column moves needed.
+Two GitHub Actions workflows handle this:
+
+- **New issue opened** → added to the project board with its initial status column set
+  from the pipeline label (`backlog`, `scoping`, etc.)
+- **Pipeline label applied** → board status column updated to match
+
+The board columns map directly to pipeline labels: **Backlog**, **Scoping**,
+**Scheduled**, **In Design**, **In Development**, **In Review**, **Done**.
+
+This requires the `AGENTIC_PROJECT_ID` repo variable to be set to the GitHub Project's
+node ID. If the variable is not set, board sync is silently skipped — the pipeline
+still works, the board just won't update automatically.
+
+### Foreground Recovery — the escape hatch
+
+**Foreground Recovery** is the emergency escape hatch for anything the automated
+pipeline cannot handle on its own. It is not limited to build failures — it is the
+correct response to any blocked or unrecoverable state: workflow never triggered,
+merge conflict, silent failure, unexpected environment state, or any other situation
+requiring manual intervention.
+
+Run it by opening a Goose session and selecting the **Foreground Recovery** recipe.
+The protocol evolves as new failure modes are discovered and handled through it.
+
 ### Bug reports and questions
 
 Bugs and questions are first-class citizens in the pipeline, not exceptions to it.
@@ -150,6 +177,13 @@ The agent routes by label:
 The scope check is strict: only files directly related to the bug are touched. If the
 fix requires broader changes, the agent posts a comment and adds a `needs-human` label
 rather than proceeding.
+
+> [!IMPORTANT]
+> **Security vulnerabilities must not be assigned to the agent user until the vulnerability
+> has been disclosed and it is safe to discuss publicly.** The agent posts acknowledgement
+> comments immediately on assignment — assigning a security issue before disclosure risks
+> making the vulnerability public. Handle security issues through your normal private
+> disclosure process first; only assign to the agent once a public fix is appropriate.
 
 ---
 

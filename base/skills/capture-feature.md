@@ -45,6 +45,17 @@ Closes part of #<requirement>
 
 Use `Closes #<requirement>` instead of `Closes part of` when the requirement produces only a single feature.
 
+**Federated topology:** if the feature lives in a domain repo and the requirement lives
+in the agentic (control plane) repo, use the full cross-repo reference format:
+
+```
+Closes part of owner/agentic-repo#<requirement>
+```
+
+This is required so the `feature-complete` workflow can locate and auto-close the parent
+requirement across repos. Using `#N` alone in a domain repo refers to an issue in that
+same repo, not the agentic repo.
+
 ## Rules
 
 - User Story is mandatory — every feature issue must include one
@@ -52,3 +63,4 @@ Use `Closes #<requirement>` instead of `Closes part of` when the requirement pro
 - Minimum three criteria: success, failure, edge case — add more as needed
 - Notes capture context — never mix implementation detail into acceptance criteria
 - Parent link is mandatory — every feature traces back to a requirement
+- In federated topology, always use the full `owner/repo#N` format for the parent link

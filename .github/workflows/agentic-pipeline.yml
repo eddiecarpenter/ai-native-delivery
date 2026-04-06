@@ -112,6 +112,15 @@ jobs:
           git config user.name "${{ vars.AGENT_USER }}"
           git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
+      - name: Check branch is not behind main
+        run: |
+          git fetch origin main
+          BEHIND=$(git rev-list --count HEAD..origin/main)
+          if [ "${BEHIND}" -gt 0 ]; then
+            echo "::error::Feature branch is ${BEHIND} commit(s) behind main. Rebase onto main before re-triggering the dev session."
+            exit 1
+          fi
+
       - name: Run dev-session recipe
         id: goose
         run: |
@@ -312,6 +321,10 @@ jobs:
   # ---------------------------------------------------------------------------
   # Stage 5 — Feature Complete
   # Trigger: feature branch PR merged to main
+  #
+  # Federated topology: set the AGENTIC_REPO repo variable to the full
+  # "owner/repo" of the agentic (control plane) repo. If not set, defaults
+  # to the current repo (single-repo topology).
   # ---------------------------------------------------------------------------
   feature-complete:
     name: Feature Complete (Stage 5)
@@ -360,59 +373,84 @@ jobs:
             exit 0
           fi
 
+          # Resolve the agentic repo — AGENTIC_REPO variable for federated topology,
+          # falls back to current repo for single-repo topology.
+          AGENTIC_REPO="${{ vars.AGENTIC_REPO || github.repository }}"
+
           # Read the feature issue body
           BODY=$(gh issue view ${ISSUE} --repo ${{ github.repository }} --json body --jq '.body')
 
-          # Extract parent requirement number from "Closes #N" or "Parent Requirement: #N"
-          PARENT=$(echo "${BODY}" | grep -oP '(?:Closes\s+#|Parent Requirement:\s*#)(\d+)' | head -1 | grep -oP '\d+$')
+          # Extract parent requirement number.
+          # Matches: "Closes #N", "Closes part of #N",
+          #          "Closes owner/repo#N", "Closes part of owner/repo#N"
+          PARENT=$(echo "${BODY}" | \
+            grep -oP '(?:Closes(?:\s+part\s+of)?\s+(?:[a-zA-Z0-9_.\-]+/[a-zA-Z0-9_.\-]+#|#))(\d+)' | \
+            grep -oP '\d+$' | head -1)
 
           if [ -z "${PARENT}" ]; then
             echo "No parent requirement reference found in feature issue body — skipping"
             exit 0
           fi
 
-          # Verify the referenced issue has the 'requirement' label
-          HAS_LABEL=$(gh issue view ${PARENT} --repo ${{ github.repository }} --json labels --jq '.labels[].name' | grep -c '^requirement$' || true)
+          # Verify the referenced issue has the 'requirement' label in the agentic repo
+          HAS_LABEL=$(gh issue view ${PARENT} --repo ${AGENTIC_REPO} --json labels \
+            --jq '.labels[].name' | grep -c '^requirement$' || true)
 
           if [ "${HAS_LABEL}" -eq 0 ]; then
-            echo "Referenced issue #${PARENT} is not labelled 'requirement' — skipping"
+            echo "Issue #${PARENT} in ${AGENTIC_REPO} is not labelled 'requirement' — skipping"
             exit 0
           fi
 
-          echo "Parent requirement issue: #${PARENT}"
+          echo "Parent requirement: ${AGENTIC_REPO}#${PARENT}"
           echo "requirement_number=${PARENT}" >> $GITHUB_OUTPUT
+          echo "agentic_repo=${AGENTIC_REPO}" >> $GITHUB_OUTPUT
 
-      - name: Auto-close parent requirement if all features complete
+      - name: Auto-close parent requirement if all sub-issues complete
         env:
           GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
         run: |
           PARENT="${{ steps.parent.outputs.requirement_number }}"
+          AGENTIC_REPO="${{ steps.parent.outputs.agentic_repo }}"
           if [ -z "${PARENT}" ]; then
             echo "No parent requirement number — skipping"
             exit 0
           fi
 
-          # Search for all feature issues whose body references "Closes #N"
-          # where N is the parent requirement number
-          OPEN_COUNT=$(gh issue list \
-            --repo ${{ github.repository }} \
-            --label feature \
-            --state open \
-            --search "Closes #${PARENT}" \
-            --json number \
-            --jq 'length')
+          # Get the requirement's node ID for the sub-issues GraphQL query.
+          # Sub-issues are the authoritative cross-repo child list —
+          # more reliable than text search and works in federated topology.
+          REQ_NODE_ID=$(gh api repos/${AGENTIC_REPO}/issues/${PARENT} --jq '.node_id')
 
-          if [ "${OPEN_COUNT}" -gt 0 ]; then
-            echo "${OPEN_COUNT} sibling feature(s) still open — leaving requirement #${PARENT} open"
+          if [ -z "${REQ_NODE_ID}" ]; then
+            echo "Could not resolve node ID for ${AGENTIC_REPO}#${PARENT} — skipping"
             exit 0
           fi
 
-          echo "All child features are closed — closing requirement #${PARENT}"
+          # Count open sub-issues on the requirement
+          OPEN_COUNT=$(gh api graphql -f query='
+            query($issueId: ID!) {
+              node(id: $issueId) {
+                ... on Issue {
+                  subIssues(first: 100) {
+                    nodes { state }
+                  }
+                }
+              }
+            }
+          ' -f issueId="${REQ_NODE_ID}" \
+            --jq '[.data.node.subIssues.nodes[] | select(.state == "OPEN")] | length')
+
+          if [ "${OPEN_COUNT}" -gt 0 ]; then
+            echo "${OPEN_COUNT} sub-issue(s) still open — leaving requirement #${PARENT} open"
+            exit 0
+          fi
+
+          echo "All sub-issues closed — closing requirement ${AGENTIC_REPO}#${PARENT}"
           gh issue edit ${PARENT} \
-            --repo ${{ github.repository }} \
+            --repo ${AGENTIC_REPO} \
             --add-label "done"
           gh issue close ${PARENT} \
-            --repo ${{ github.repository }} \
+            --repo ${AGENTIC_REPO} \
             --comment "All child feature issues are now complete. Auto-closing requirement."
 
       - name: Delete feature branch

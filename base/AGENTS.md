@@ -23,6 +23,9 @@ At the start of every session, read these sources in order before doing anything
    Check whether each `<type>s/<name>` directory exists locally. If any repos are
    missing, list them and ask the user whether to clone them before proceeding.
    Clone command: `git clone <repo> <type>s/<name>`
+   If the user declines to clone missing repos, continue the session but limit all
+   work to repos that are present locally. Do not reference, modify, or make
+   assumptions about the content of repos that were not cloned.
 3. Query open Requirement issues in the agentic repo:
    `gh issue list --repo <agentic-repo> --label requirement --state open --json number,title,labels`
 4. For domain sessions — query open Feature issues in the domain repo:
@@ -266,6 +269,10 @@ The human reviews the diff and confirms before anything is committed.
 
 **Never sync without human confirmation of the diff.**
 **Never modify any local files** (`AGENTS.local.md`, `REPOS.md`, etc.) during a sync.
+**The sync intentionally overwrites all files under `base/`.** If `gh agentic verify`
+reports drift in `base/`, it means files have been accidentally modified. The sync will
+discard those changes — this is correct behaviour. Local customisations belong in
+`AGENTS.local.md` and `skills/`, not in `base/`.
 
 ---
 
@@ -291,6 +298,11 @@ in the relevant domain repo(s). No branch, no commit, no PR.
    - If capabilities can be built and merged independently → create separate features (run in parallel)
    - If capabilities must be built in sequence → create one feature with ordered tasks (same branch, same PR)
    - Never create multiple features with implied serial dependencies
+   - **Cross-repo sequencing (federated topology):** if Feature B in repo-B depends on
+     Feature A in repo-A being merged first (e.g. Feature A introduces an API that
+     Feature B consumes), document the dependency explicitly in both feature issues and
+     agree the order with the human before applying `in-design` to either. Never trigger
+     Feature B's design session until Feature A's PR is merged.
 5. Identify whether the Feature has UI/UX impact:
    - Not every requirement has a UI impact
    - A single requirement may produce multiple features, some with UI impact and some without
@@ -343,8 +355,14 @@ or for exploration and manual work outside the automated pipeline.
 
 ### Foreground Recovery
 
-When the GitHub Actions workflow fails (build red, tests failing, conflict), the human
-will open an Interactive Session to diagnose and fix. The following rules apply:
+The **Foreground Recovery** session is the emergency escape hatch for anything the
+automated pipeline cannot handle on its own. It is the correct response to any failure
+or unexpected situation — not just build failures. The protocol evolves as new failure
+modes are discovered through it.
+
+When the GitHub Actions workflow fails (build red, tests failing, conflict, or any other
+unrecoverable state), the human opens a Foreground Recovery session to diagnose and fix.
+The following rules apply:
 
 - Query open Task sub-issues on the Feature issue before touching any code
 - Diagnose the root cause from the exact error output — do not guess
@@ -405,6 +423,9 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
 - Correctness and maintainability take precedence over cleverness
 - Do not make changes outside the scope of the current task
 - Propose large refactors before implementing them — never execute without approval
+- **To cancel a requirement or feature, delete the GitHub Issue.** The agent will detect
+  its absence during the next session and will not attempt work against it. Clean up any
+  associated feature branch manually if one was already created.
 - **SDLC phase sequence — never skip a phase without human approval.**
   The pipeline must follow phases in order: Requirements → Scoping → Design → Implementation.
   If the agent believes a phase can be skipped, it must stop and ask the human before proceeding.
@@ -519,8 +540,9 @@ the GraphQL API. External clients depend on these names and shapes.
 
 4. **When in doubt, ask.** Stop and raise it with the human before making any change.
 
-5. **Document the reason** for any approved contract change in `DECISIONS.md`
-   with an ADR, including which consumers were checked and what the migration plan is.
+5. **Document the reason** for any approved contract change in a GitHub Issue labelled
+   `decision`, including which consumers were checked and what the migration plan is.
+   Link the decision issue to the feature that triggered the change.
 
 ---
 
@@ -537,20 +559,9 @@ the GraphQL API. External clients depend on these names and shapes.
 ## Task Lifecycle
 
 **After each task completes (before moving to the next):**
-1. Append significant decisions to `DECISIONS.md` in ADR format (if applicable)
-2. Close the Task issue: `gh issue close <task-number> --repo <domain-repo>`
-3. Commit: `feat: [task description] — task N of N (#feature-issue)`
+1. Close the Task issue: `gh issue close <task-number> --repo <domain-repo>`
+2. Commit: `feat: [task description] — task N of N (#feature-issue)`
 
 **When all tasks are complete:**
 1. Exit cleanly — do not push, do not open a PR
 2. The workflow pushes and opens the PR automatically
-
-**ADR format for DECISIONS.md:**
-```
-## ADR-NNN — Title
-**Status:** Accepted
-**Area:** Which part of the system
-**Decision:** What was decided
-**Rationale:** Why
-**Consequences:** What this means going forward
-```
