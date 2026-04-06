@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# bootstrap.sh — Agentic Development Environment Bootstrap
-# Fetched from: https://github.com/eddiecarpenter/agentic-development
+# bootstrap.sh — AI-Native Software Delivery Environment Bootstrap
+# Fetched from: https://github.com/eddiecarpenter/ai-native-delivery
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/agentic-development/main/bootstrap.sh -o /tmp/bootstrap.sh \
+#   curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/ai-native-delivery/main/bootstrap.sh -o /tmp/bootstrap.sh \
 #     && bash /tmp/bootstrap.sh
 
 set -euo pipefail
 
-TEMPLATE_REPO="eddiecarpenter/agentic-development"
+TEMPLATE_REPO="eddiecarpenter/ai-native-delivery"
 TEMPLATE_RAW="https://raw.githubusercontent.com/${TEMPLATE_REPO}/main"
 WORKING_DIR="$(pwd)"
 
