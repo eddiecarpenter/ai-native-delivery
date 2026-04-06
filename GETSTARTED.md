@@ -1,690 +1,97 @@
-# Getting Started — Build a URL Shortener with AI-Native Delivery
+# Getting Started — AI-Native Software Delivery
 
-This is a hands-on walkthrough. By the end, you will have taken a single requirement
-— a URL Shortener service — from a conversation with an AI agent all the way to a
-reviewed, merged pull request. Along the way, you will see every phase of the
-AI-native delivery pipeline in action and understand what the agent is doing at each step.
-
----
-
-## Table of Contents
-
-- [1 — Overview](#1--overview)
-- [2 — Prerequisites](#2--prerequisites)
-- [3 — Bootstrap Your Environment](#3--bootstrap-your-environment)
-- [4 — Phase 1: Requirements](#4--phase-1-requirements)
-- [5 — Phase 2: Feature Scoping](#5--phase-2-feature-scoping)
-- [6 — Phases 3 & 4: Automated Design and Development](#6--phases-3--4-automated-design-and-development)
-- [7 — Phase 4b: PR Review](#7--phase-4b-pr-review)
-- [8 — Merge](#8--merge)
-- [9 — What's Next](#9--whats-next)
+> A step-by-step walkthrough that takes you from zero to a working agentic
+> development environment. By the end you will have built, extended, and
+> bug-fixed a URL Shortener service — experiencing every phase of the delivery
+> pipeline along the way.
 
 ---
 
-## 1 — Overview
+## What you will learn
 
-### What you'll build
+This guide is organised into **three stages**, each building on the last:
 
-A URL Shortener service in Go with three behaviours:
-
-- **POST /shorten** — accepts a long URL and returns a short code
-- **GET /:code** — redirects the caller to the original URL
-- **404** — returns a not-found response if the code doesn't exist
-
-The application is deliberately simple. The goal is not to build a production URL
-shortener — it is to experience the full agentic delivery pipeline from end to end,
-with a codebase small enough that you can read and understand every line the agent produces.
-
-### What you'll learn
-
-You will work through every phase of the pipeline:
-
-1. **Requirements Capture** — a conversation with an AI agent that structures your
-   business need into a formal requirement with Given/When/Then acceptance criteria
-2. **Feature Scoping** — the agent decomposes the requirement into a feature with
-   clear scope and acceptance criteria
-3. **Automated Design** — GitHub Actions triggers the agent to break the feature
-   into ordered task sub-issues and create a feature branch
-4. **Automated Development** — the agent implements each task, writes tests, runs
-   the build, and opens a pull request
-5. **PR Review** — you review the agent's work, leave comments, and the agent
-   responds with fixes
-6. **Merge** — the feature is complete
-
-By the end, you will understand how the protocol, the agent, and GitHub Actions work
-together — and you will be ready to run your own features through the pipeline.
-
-For deeper context on any concept, the [README](README.md) covers the full framework
-in detail.
-
----
-
-## 2 — Prerequisites
-
-Before you begin, make sure the following tools and accounts are in place.
-
-### Tools
-
-| Tool | Purpose | Install |
+| Stage | What you do | What you experience |
 |---|---|---|
-| [git](https://git-scm.com) | Version control | [git-scm.com](https://git-scm.com) |
-| [GitHub CLI](https://cli.github.com) (`gh`) | GitHub operations from the terminal | [cli.github.com](https://cli.github.com) |
-| [Goose](https://block.goose.sh) | AI agent runtime — drives every session | [block.goose.sh](https://block.goose.sh) |
-| An LLM backend | The AI model Goose uses (OpenAI, Anthropic, Google Gemini, Ollama, etc.) | Configured in Goose settings |
-| [Claude Code](https://claude.ai/code) *(optional, recommended)* | Anthropic's agentic coding CLI — recommended as Goose's default provider | [claude.ai/code](https://claude.ai/code) |
+| [**Stage 1 — Greenfield**](#stage-1--build-the-base-greenfield) | Build a URL Shortener from scratch | Every pipeline phase: requirements → scoping → design → development → PR review → merge |
+| [**Stage 2 — Day-2 development**](#stage-2--change-request-day-2-development) | Add a feature to the existing codebase | How the agent adapts when code already exists |
+| [**Stage 3 — Bug fix**](#stage-3--bug-fix-phase-4c) | File a bug and assign it to the agent | The reactive Phase 4c workflow — no scoping, no design, straight to fix |
 
-### Accounts
+By the end of Stage 3 you will understand the full protocol — planned delivery,
+iterative enhancement, and reactive response — and be ready to use it on your
+own projects.
 
-- A **GitHub account** with a Personal Access Token (PAT) that has these scopes:
-  - `repo` — full access to repositories
-  - `workflow` — permission to trigger GitHub Actions workflows
-  - `admin:org` — required for creating project boards and configuring branch protection
+> **Scope:** This guide uses the **single-repo topology** only. Federated
+> (multi-repo) topology is not covered here — see the
+> [README](README.md#repository-topology) for an overview of both topologies.
 
-  > **Tip:** Create a fine-grained PAT scoped to the organisation or account where you
-  > will create the agentic repo. This avoids granting unnecessary access to unrelated repos.
-
-### Verify your setup
-
-Run these commands to confirm everything is installed and authenticated:
-
-```bash
-# Git
-git --version
-# Expected: git version 2.x.x
-
-# GitHub CLI — must be authenticated
-gh auth status
-# Expected: Logged in to github.com account <your-username>
-
-# Goose
-goose --version
-# Expected: goose x.x.x
-
-# Claude Code (optional)
-claude --version
-# Expected: claude x.x.x
-```
-
-If any command fails, install or authenticate the tool before continuing. The agent
-cannot compensate for missing prerequisites — these are the foundation everything
-else builds on.
+**Before you begin**, complete the [Setup](#setup) section below to ensure your
+environment is ready.
 
 ---
 
-## 3 — Bootstrap Your Environment
+## Setup
 
-With the prerequisites in place, you are ready to create your agentic environment.
-This is handled by the `gh-agentic` CLI extension — not by the AI agent.
+> [!NOTE]
+> **Placeholder section.** The detailed setup instructions depend on #117
+> (runner-agnostic workflows) landing first. The content below outlines what is
+> needed — full step-by-step detail will be added once #117 is complete and the
+> guide has been test-run end to end.
 
-### Why bootstrap is not AI-driven
+### Prerequisites
 
-Environment setup is deterministic. It creates repos, configures labels, sets branch
-protection rules, and scaffolds the project structure. These operations must succeed
-reliably every time — a misconfigured label or missing branch protection rule would
-cause silent failures later in the pipeline. Deterministic Go code is the right tool
-for this job; an AI agent is not.
+Before you begin, make sure the following are installed and working:
 
-The agent's strength is reasoning, not configuration. Bootstrap handles the
-configuration so the agent can focus on what it does well: understanding requirements,
-designing solutions, and writing code.
+- **[git](https://git-scm.com)** — version control
+- **[GitHub CLI (`gh`)](https://cli.github.com)** — authenticated (`gh auth login`)
+- **[Goose](https://block.goose.sh)** — the AI agent runtime
+- **A GitHub account** with permission to create repositories
 
-### Install the CLI extension
+For full prerequisite details — including optional tools like Claude Code — see
+the [Prerequisites section in the README](README.md#prerequisites).
 
-```bash
-gh extension install eddiecarpenter/gh-agentic
-```
+### Personal Access Token (PAT)
 
-### Run bootstrap
+> *Placeholder — exact scopes and creation steps to be confirmed after #117.*
 
-```bash
-gh agentic bootstrap
-```
+You will need a GitHub Personal Access Token (classic) with at least the
+following scopes:
 
-The command runs interactively. It will ask you for:
+- `repo` — full repository access
+- `workflow` — GitHub Actions workflow access
+- `admin:org` — organisation-level access (if using an org)
 
-- **Project name** — a short name for your project (e.g. `url-shortener-demo`)
-- **Topology** — choose **Single Repo** for this walkthrough (one repo contains both
-  the agentic control plane and your codebase — simplest for learning)
-- **Organisation or account** — where to create the repo
+Create one at **Settings → Developer settings → Personal access tokens →
+Tokens (classic)**.
 
-### What gets created
+### Goose provider configuration
 
-When bootstrap completes, you will have a new GitHub repository with:
+> *Placeholder — provider setup steps to be confirmed after #117.*
 
-| What | Why |
-|---|---|
-| **Pipeline labels** (`backlog`, `requirement`, `feature`, `task`, `in-design`, `in-development`, `in-review`, etc.) | The pipeline uses labels to track state and trigger automation — every phase transition is a label change |
-| **Branch protection on `main`** | Prevents direct pushes — all changes must go through a reviewed PR |
-| **GitHub Project board** | Visual tracking of issues through the pipeline columns (Backlog → Scoping → In Design → In Development → In Review → Done) |
-| **`base/` directory** | The framework's protocol, skills, and standards — synced from the template |
-| **`CLAUDE.md`** | Entry point that loads `base/AGENTS.md` and `AGENTS.local.md` — every agent session reads this first |
-| **`AGENTS.local.md`** | Your project-specific rules — starts empty, you fill it in as your project evolves |
-| **`REPOS.md`** | Registry of repos in the project (for federated topology — in single repo mode, this lists just the one repo) |
-| **`.goose/recipes/`** | Pre-configured agent session recipes for every phase of the pipeline |
-| **`.github/workflows/`** | GitHub Actions workflows that trigger automated phases (Design, Development, PR Review) |
+Goose needs an LLM backend configured. You can use any supported provider
+(OpenAI, Anthropic, Google Gemini, Ollama, etc.). If you are using Claude Code
+as the provider (recommended), ensure your Anthropic API key is set.
 
-### Verify and open the repo
+Refer to the [Goose documentation](https://block.goose.sh) for provider
+configuration.
 
-```bash
-cd url-shortener-demo   # or whatever you named the project
-ls base/
-# Expected: AGENTS.md  skills/  standards/  .github/
+### GitHub secrets and variables
 
-gh repo view --web
-# Opens the repo in your browser — check that labels and the project board exist
-```
+> *Placeholder — exact configuration steps to be confirmed after #117.*
 
-You now have a fully configured agentic environment. The protocol is loaded, the
-automation is wired up, and the agent is ready to work.
+Your agentic repository will need the following secrets and variables configured
+for GitHub Actions to trigger agent sessions automatically:
 
-Next, you will open your first session and capture the URL Shortener requirement.
+| Type | Name | Purpose |
+|---|---|---|
+| Secret | `GOOSE_AGENT_PAT` | PAT used by automated workflows to authenticate as the agent |
+| Variable | `AGENT_USER` | GitHub username the agent operates as |
+| Variable | `AGENTIC_PROJECT_ID` | Node ID of the GitHub Project board for automatic column sync |
+
+### Runner configuration
+
+> *Placeholder — runner setup depends on the outcome of #117. A self-hosted
+> runner or GitHub-hosted runner with the correct tooling must be available for
+> automated phases to execute. See [#117](https://github.com/eddiecarpenter/ai-native-delivery/issues/117) for details.*
 
 ---
-
-## 4 — Phase 1: Requirements
-
-Phase 1 is a conversation. You describe what you need; the agent listens, challenges
-vague descriptions, and structures your words into a formal Requirement issue with
-Given/When/Then acceptance criteria. The human drives — the agent captures and records.
-
-### Opening a Requirements Session
-
-Launch Goose and select the **Requirements Session (Stage 1)** recipe:
-
-```
-goose session
-# Select: Requirements Session (Stage 1)
-```
-
-The agent will print `=== Requirements Session (Phase 1) — Started ===` and then
-read the project brief and any existing open requirements to understand the current
-context. Then it asks you what you need.
-
-### The conversation
-
-Here is an example of what the conversation looks like for the URL Shortener:
-
-> **You:** I want to build a URL shortener. Users submit a long URL and get back a
-> short code. When someone visits the short URL, they get redirected to the original.
-> If the code doesn't exist, they should get a 404.
->
-> **Agent:** Let me make sure I understand the scope. You want three behaviours:
-> 1. An endpoint that accepts a long URL and returns a generated short code
-> 2. An endpoint that takes a short code and redirects to the original URL
-> 3. A 404 response when a code is not found
->
-> Is this a public service or internal? Do you need analytics, expiration, or
-> custom codes?
->
-> **You:** Internal for now. No analytics, no expiration, no custom codes. Keep it
-> simple — I just want to see the pipeline work end to end.
->
-> **Agent:** Understood — minimal MVP. I'll capture this as a requirement.
-
-Notice what the agent is doing here: it is not just recording your words. It is
-**actively challenging** the description to ensure the scope is clear and that
-nothing is assumed. If you said something vague like "a URL service", it would
-push back and ask for specifics.
-
-### What the agent does behind the scenes
-
-After the conversation, the agent:
-
-1. **Creates a Requirement issue** in the agentic repo with the `requirement` and
-   `backlog` labels
-2. **Structures the requirement** with a user story and Given/When/Then acceptance
-   criteria — even though you described it informally, the agent produces a formal
-   specification
-
-### The resulting Requirement issue
-
-The issue the agent creates looks like this:
-
-```markdown
-Title: URL Shortener service
-
-## User Story
-
-As an internal user, I want a URL shortening service, so that I can share
-short, memorable links that redirect to long URLs.
-
-## Acceptance Criteria
-
-- Given a valid long URL is submitted to POST /shorten,
-  when the request is processed,
-  then a unique short code is returned.
-
-- Given a valid short code,
-  when GET /:code is requested,
-  then the caller is redirected to the original URL.
-
-- Given a short code that does not exist,
-  when GET /:code is requested,
-  then a 404 response is returned.
-
-## Notes
-
-MVP scope — no analytics, expiration, or custom codes.
-```
-
-This issue is now the **source of truth** for the requirement. Everything downstream
-— feature scoping, design, implementation — traces back to this issue.
-
-### Scoping inline vs separate session
-
-If the scope is obvious (as it is for our URL Shortener), the agent will ask whether
-you want to complete scoping in the same session. This is not skipping a phase — the
-scoping artefact (a Feature issue) must still be produced. It simply avoids the
-overhead of a separate session when the answer is already clear.
-
-For a simple walkthrough like this one, say yes — let the agent complete scoping
-inline. The next section describes what happens during scoping, whether it runs
-inline or as a separate session.
-
----
-
-## 5 — Phase 2: Feature Scoping
-
-Scoping decomposes a requirement into one or more Feature issues. Each Feature issue
-defines exactly what will be built, with acceptance criteria that the agent will
-implement and test against.
-
-For the URL Shortener, the requirement maps to a single feature. More complex
-requirements might decompose into multiple parallel or sequential features — the
-agent will guide that decision.
-
-### The scoping conversation
-
-If scoping runs as a separate session, open Goose and select the **Feature Scoping
-(Stage 2)** recipe. If it runs inline (as we recommended above), the conversation
-continues seamlessly.
-
-The agent works through a structured process:
-
-> **Agent:** The requirement is clear and self-contained. I recommend a single feature
-> with three acceptance criteria — one per endpoint behaviour. This can be built and
-> tested as one unit. Does that sound right, or would you like to split it differently?
->
-> **You:** A single feature is fine.
->
-> **Agent:** I'll define the feature with a user story and acceptance criteria. Let me
-> also confirm — is there any UX or UI impact? This is a backend API, so I'm assuming
-> no frontend work.
->
-> **You:** Correct, API only.
-
-### What the agent does during scoping
-
-Behind the scenes, the agent is working through a structured checklist:
-
-1. **Summarises the raw idea** — confirms understanding with you
-2. **Defines the problem statement** — what problem does this solve?
-3. **Writes a user story** — `As a [user], I want [goal], so that [benefit]`
-4. **Determines MVP scope** — the smallest version that delivers real value
-5. **Checks parallel vs serial** — can all parts be built independently (multiple
-   features), or must they be sequenced (one feature with ordered tasks)?
-6. **Defines acceptance criteria** — outcome-based, in checkbox format
-7. **Checks for UX impact** — any design needed before implementation?
-8. **Reviews the parking lot** — anything out of scope that should be captured for later?
-
-This structure ensures nothing is missed. The agent is not just creating an issue —
-it is producing a complete, testable specification.
-
-### The resulting Feature issue
-
-The agent creates a Feature issue that looks like this:
-
-```markdown
-Title: URL Shortener — POST /shorten, GET /:code, 404
-
-## User Story
-
-As an internal user, I want a URL shortening API, so that I can create short
-codes for long URLs and redirect visitors to the original URL.
-
-## Acceptance Criteria
-
-- [ ] Given a valid long URL is submitted to POST /shorten,
-      when the request is processed,
-      then a unique short code is returned in the response.
-
-- [ ] Given a valid short code exists,
-      when GET /:code is requested,
-      then the caller is redirected (HTTP 301/302) to the original URL.
-
-- [ ] Given a short code that does not exist,
-      when GET /:code is requested,
-      then a 404 Not Found response is returned.
-
-## Parent
-
-Closes #<requirement-issue-number>
-```
-
-### The trigger — `in-design` label
-
-When you confirm the feature is ready, the agent applies the `in-design` label to
-the Feature issue. **This is the handoff from human to machine.** The label change
-triggers a GitHub Actions workflow that starts the automated pipeline.
-
-From this point forward, you do not need to do anything — the agent takes over.
-The `in-design` label is the bridge between the interactive phases (where you drive)
-and the automated phases (where GitHub Actions drives). This is why the pipeline
-diagram in the [README](README.md) shows Phases 1 and 2 on the left (interactive)
-and Phases 3 and 4 on the right (automated).
-
-The agent also transitions the parent requirement from `scoping` to `scheduled`,
-indicating that all features have been defined and queued for design.
-
-### What happens next
-
-The `in-design` label triggers the Feature Design Session automatically via GitHub
-Actions. You will watch this happen in the next section — but first, take a moment
-to appreciate what just happened: you described a URL shortener in plain English,
-and the agent produced a formally structured, testable feature specification with
-full traceability back to the original requirement.
-
-Next, the automated phases take over.
-
----
-
-## 6 — Phases 3 & 4: Automated Design and Development
-
-This is where the framework earns its keep. After the `in-design` label is applied,
-**you do not need to do anything**. GitHub Actions triggers the agent automatically,
-and it designs, implements, tests, and opens a pull request — all without human
-intervention.
-
-But understanding what happens behind the scenes is essential. When something goes
-wrong (and eventually it will), you need to know where the process was and what to
-look for.
-
-### Phase 3 — Feature Design
-
-**Trigger:** The `in-design` label on the Feature issue triggers a GitHub Actions
-workflow that launches the agent with the **Feature Design** session.
-
-**What the agent does:**
-
-1. **Reads the Feature issue** — extracts the user story, acceptance criteria, and
-   any context from the scoping phase
-2. **Analyses the codebase** — understands what already exists (project structure,
-   existing code, standards) to determine what needs to be built
-3. **Creates Task sub-issues** — ordered by implementation sequence, each with:
-   - A specific piece of work to perform
-   - Files to create or change
-   - Acceptance criteria (testable conditions)
-   - A mapping back to which feature-level acceptance criterion it satisfies
-4. **Verifies coverage** — every acceptance criterion from the Feature issue must
-   be covered by at least one task. If a criterion has no task, the agent stops
-   and reports the gap
-5. **Creates the feature branch** — `feature/<N>-<description>` (e.g.
-   `feature/42-url-shortener`)
-6. **Applies `in-development`** — this triggers the next phase
-
-For the URL Shortener, the agent might create tasks like:
-
-- Task 1: Scaffold Go project structure
-- Task 2: Implement POST /shorten endpoint with in-memory store
-- Task 3: Implement GET /:code redirect endpoint
-- Task 4: Add 404 handling for unknown codes
-- Task 5: Add integration tests for all endpoints
-
-**Important:** The Design Session writes no code. It produces only the plan (task
-issues) and the branch. Implementation happens in the next phase.
-
-### Phase 4 — Development
-
-**Trigger:** The `in-development` label triggers a GitHub Actions workflow that
-launches the agent with the **Dev Session**.
-
-**What the agent does:**
-
-1. **Checks out the feature branch** — verifies it is not on `main`
-2. **Reads the Feature issue** — extracts acceptance criteria for end-of-session
-   verification
-3. **Queries open Task sub-issues** — ordered by issue number
-4. **For each task, in order:**
-   - Reads the task issue to understand what must be built
-   - Implements the code described in the task
-   - Writes tests — every piece of logic must have tests covering success cases,
-     failure cases, and edge cases
-   - Runs the full build and test suite
-   - **If the build or tests fail** — diagnoses and fixes the issue before moving on.
-     The agent never skips a failing test
-   - Commits: `feat: [task description] — task N of N (#feature-issue)`
-   - Closes the task issue
-5. **Verifies acceptance criteria coverage** — every acceptance criterion from the
-   Feature issue must have at least one passing test. If any criterion lacks coverage,
-   the agent stops and reports which criteria are uncovered
-6. **Exits cleanly** — the workflow pushes the branch and opens a PR with
-   `Closes #<feature-issue-number>`
-
-For the URL Shortener, the agent will:
-- Create the Go project structure
-- Implement each endpoint with an in-memory store
-- Write tests for every acceptance criterion
-- Run `go build`, `go vet`, and `go test` after each change
-- Open a PR when all tasks pass
-
-### Monitoring progress
-
-While the automated phases run, you can watch from your terminal or browser:
-
-```bash
-# List recent workflow runs
-gh run list --limit 5
-
-# Watch a specific run in real time
-gh run watch <run-id>
-
-# View the Actions tab in your browser
-gh repo view --web
-# Navigate to the Actions tab
-```
-
-You can also watch task issues close in real time — each closed task means the
-agent has successfully implemented, tested, and committed that piece of work.
-
-The entire process — from `in-design` being applied to a PR being opened — typically
-takes a few minutes, depending on the complexity of the feature and the speed of the
-LLM backend.
-
-### When things go wrong — Foreground Recovery
-
-The automated pipeline is robust, but it is not infallible. Builds can fail, tests
-can break, workflows can fail to trigger, and merge conflicts can arise. When any of
-these happen, the pipeline stops and the workflow turns red.
-
-**Foreground Recovery** is the escape hatch. It is not limited to build failures —
-it is the correct response to any blocked or unexpected state:
-
-- Build is red
-- Tests are failing
-- Merge conflict on the feature branch
-- Workflow never triggered (silent failure)
-- Any other situation requiring manual intervention
-
-**How to use it:**
-
-```
-goose session
-# Select: Foreground Recovery
-```
-
-The agent will:
-
-1. **Ask for the exact error output** — it never guesses the cause
-2. **Diagnose the root cause** from the error
-3. **Fix only what is failing** — it does not refactor or expand scope
-4. **Build and test** to confirm the fix works
-5. **Commit and push** the fix
-6. **Re-trigger the Dev Session** if needed (by re-applying the `in-development`
-   label)
-
-After the fix is pushed, the automated pipeline resumes where it left off. The
-agent picks up the remaining tasks and continues.
-
-> **Key principle:** Foreground Recovery fixes the immediate problem and gets the
-> pipeline moving again. It does not redesign or re-scope. If the failure reveals
-> a fundamental design issue, the agent will stop and raise it with you rather than
-> attempting a broad fix.
-
-For more detail on Foreground Recovery, see
-[`base/skills/foreground-recovery.md`](base/skills/foreground-recovery.md).
-
-Next, the PR is ready for your review.
-
----
-
-## 7 — Phase 4b: PR Review
-
-When the Dev Session completes and the workflow pushes the branch, a pull request is
-opened automatically with `Closes #<feature-issue-number>` in the body. The
-`in-review` label is applied. This is where the human re-enters the process.
-
-### What to look for in the review
-
-Open the PR in your browser or from the terminal:
-
-```bash
-gh pr list
-gh pr view <pr-number> --web
-```
-
-Review the URL Shortener PR with these questions in mind:
-
-- **Does the code match the acceptance criteria?** Check that POST /shorten returns
-  a short code, GET /:code redirects, and unknown codes return 404
-- **Are there tests for every criterion?** The agent should have written tests for
-  success cases, failure cases, and edge cases
-- **Is the code clean and idiomatic?** The agent follows the standards in
-  `base/standards/`, but you should still check that the code reads well
-- **Does the commit history tell a story?** Each commit should correspond to one
-  task, in order — you can trace each commit back to a task issue
-
-### Leaving review comments
-
-When you find something to change, leave an inline comment on the relevant line.
-When you find something to ask about, leave a comment with your question.
-
-Submit your review as either:
-- **Request changes** — the agent will address all comments
-- **Comment** — the agent will respond to questions and fix issues
-
-### How review comments trigger the agent
-
-When you submit a review with `CHANGES_REQUESTED` or `COMMENTED`, a GitHub Actions
-workflow triggers the **PR Review Session** automatically. The agent:
-
-1. Fetches all unresolved inline comments from the PR
-2. Classifies each comment as a **question** or a **change request**
-3. **Questions** — the agent replies inline with an explanation, no code changes
-4. **Change requests** — the agent implements the fix, writes or updates tests,
-   builds, tests, commits, and replies to the comment
-5. Pushes the fixes — you see new commits appear on the PR
-
-You can then re-review the PR. This cycle continues until you are satisfied.
-
-### Approving the PR
-
-When you are happy with the code, approve the PR. The agent does not merge —
-that is always a human decision.
-
----
-
-## 8 — Merge
-
-Merge the PR using the GitHub UI or the terminal:
-
-```bash
-gh pr merge <pr-number> --squash  # or --merge, depending on your preference
-```
-
-When the PR merges:
-
-- The Feature issue is closed automatically (the PR body contains `Closes #N`)
-- The feature branch is cleaned up
-- The parent Requirement issue transitions to `done` when all its child features
-  are closed
-
-**Congratulations** — you have just delivered a feature through the full AI-native
-delivery pipeline. From a plain-English description of a URL shortener to a
-reviewed, tested, merged pull request — with full traceability from requirement
-to code.
-
-Take a moment to look at what the pipeline produced:
-
-- A **Requirement issue** with a formal user story and acceptance criteria
-- A **Feature issue** with scoped acceptance criteria linked to the requirement
-- **Task sub-issues** that decomposed the feature into ordered, implementable work
-- A **feature branch** with one commit per task
-- **Tests** covering every acceptance criterion
-- A **pull request** reviewed by you and fixed by the agent
-
-Every artefact traces back to the one before it. This is the governance that makes
-agentic development trustworthy.
-
----
-
-## 9 — What's Next
-
-Now that you have completed the walkthrough, here are concrete next steps to deepen
-your understanding and make the framework your own.
-
-### Run a second feature
-
-The best way to build confidence is repetition. Open a new Requirements Session and
-describe a second feature for the URL Shortener — perhaps analytics (track how many
-times each short URL is visited) or URL expiration. Watch the full pipeline run again,
-this time knowing what to expect at each phase.
-
-### Try the federated topology
-
-The walkthrough used the **Single Repo** topology — one repo for everything. For
-real-world projects with multiple services, the **Federated Topology** separates
-the agentic control plane from domain repos:
-
-```bash
-gh agentic inception
-```
-
-This adds a new domain or tool repo to your existing environment. Each domain repo
-has its own codebase, issues, and feature branches — while the agentic repo
-coordinates the pipeline. See the [Repository topology](README.md#repository-topology)
-section in the README for details.
-
-### Add local standards and rules
-
-Customise the framework for your project:
-
-- **`AGENTS.local.md`** — add project-specific rules that extend the global protocol.
-  Team conventions, prohibited actions, domain glossary, links to external systems.
-  These are always active — every agent session reads them.
-
-- **`skills/`** — add project-specific skills (named procedures). Your release
-  process, deployment checklist, incident runbook templates. A local skill with the
-  same filename as a base skill overrides it.
-
-See [Extending the framework](README.md#extending-the-framework) in the README.
-
-### Explore the framework in depth
-
-- **[README.md](README.md)** — full framework overview, pipeline diagram, topology
-  options, configuration model
-- **[`base/AGENTS.md`](base/AGENTS.md)** — the rulebook: git rules, testing
-  standards, contract safety, working principles
-- **[`base/skills/`](base/skills/)** — all built-in session playbooks: requirements,
-  scoping, design, development, PR review, foreground recovery
-- **[`base/standards/`](base/standards/)** — language-specific coding standards
-
-### Join the community
-
-This framework is open source and actively evolving. Your experience using it makes
-it better.
-
-- **[GitHub Discussions](https://github.com/eddiecarpenter/ai-native-delivery/discussions)**
-  — questions, ideas, and war stories
-- **[Open an issue](https://github.com/eddiecarpenter/ai-native-delivery/issues)**
-  — report gaps where the protocol fell short
-- **Contribute** — propose improvements to the protocol, standards, or skills
