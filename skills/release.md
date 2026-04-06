@@ -1,6 +1,6 @@
 # Release Process
 
-This is the `agentic-development` template repo. Releasing a new version is a deliberate
+This is the `ai-native-delivery` template repo. Releasing a new version is a deliberate
 human action — not every merge needs a release.
 
 ## When to release

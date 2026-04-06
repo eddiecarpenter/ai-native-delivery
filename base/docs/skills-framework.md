@@ -49,7 +49,7 @@ requires only rewrapping the skills. The skills themselves remain unchanged.
 **Skills are read-only.** Never modify a skill locally.
 
 - Customisation of agent behaviour belongs in `AGENTS.local.md`
-- If a skill needs to change, raise it against `eddiecarpenter/agentic-development`
+- If a skill needs to change, raise it against `eddiecarpenter/ai-native-delivery`
   and let it flow in via `gh agentic sync`
 - `gh agentic verify` detects and flags any local modifications to `base/skills/*.md`
 

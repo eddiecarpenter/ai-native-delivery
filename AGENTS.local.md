@@ -11,7 +11,7 @@ This file is never overwritten by a template sync.
 
 ## GitHub Actions Sync
 
-This is the `agentic-development` template repo. Unlike downstream repos, there is no
+This is the `ai-native-delivery` template repo. Unlike downstream repos, there is no
 upstream to sync from — `.github/workflows/` must be kept in sync with `base/.github/workflows/`
 manually whenever a workflow file is added or changed.
 

@@ -138,7 +138,7 @@ this priority order to determine the correct status for each item:
 
 ## Rules
 
-- **Template repo only** — this operation belongs in the `agentic-development`
+- **Template repo only** — this operation belongs in the `ai-native-delivery`
   template repo. Never modify `base/` in downstream repos. Downstream repos
   receive `base/project-template.json` via `gh agentic sync`.
 - Do not modify the live project during this skill — it is read-only extraction.
