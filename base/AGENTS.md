@@ -434,7 +434,9 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
     - Labels and status must still transition through the skipped phase — the board
       must reflect the correct state for the phase the work is actually in
     - If scoping is skipped: the requirement transitions `backlog` → `scoping` →
-      `scheduled`, and any features created start at `backlog` (not `in-design`)
+      `scheduled`. The feature is still created (using the `capture-feature` skill)
+      and `in-design` is applied immediately — skipping scoping means skipping the
+      conversation, not skipping feature creation or pipeline triggering.
 
 ---
 

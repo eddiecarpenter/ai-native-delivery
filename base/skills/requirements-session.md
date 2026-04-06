@@ -16,11 +16,24 @@ Open Goose and select the **Requirements Session (Stage 1)** recipe.
 
 ## What the Agent Does
 
-1. Reads the project brief and existing open requirements
-2. Converses with the human to distil raw ideas into clear needs
-3. Challenges vague descriptions and solution-framed requirements
-4. Creates GitHub Issues with `requirement` + `backlog` or `draft` labels
-5. Summarises what was captured and suggests next steps
+1. Prints: `=== Requirements Session (Phase 1) — Started ===`
+2. Reads the project brief and existing open requirements
+3. Converses with the human to distil raw ideas into clear needs
+4. Challenges vague descriptions and solution-framed requirements
+5. Creates GitHub Issues with `requirement` + `backlog` or `draft` labels
+6. If the requirement is small and self-contained, recommend skipping scoping per the
+   phase-skip protocol in `base/AGENTS.md` (never skip unilaterally — wait for human
+   confirmation). If confirmed:
+   - Transition requirement: `backlog` → `scoping` → `scheduled`
+   - Create the Feature issue using the `capture-feature` skill
+   - Wire sub-issue: Feature → parent Requirement
+   - Apply `in-design` to trigger the Feature Design workflow
+   - Print:
+     ```
+     --- Scoping phase skipped (confirmed) ---
+     Feature #N created and triggered for design — automation running, no action needed yet.
+     ```
+7. Prints: `=== Requirements Session (Phase 1) — Completed ===`
 
 ## Outputs
 
