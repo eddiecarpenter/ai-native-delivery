@@ -297,7 +297,8 @@ in the relevant domain repo(s). No branch, no commit, no PR.
    - For any feature with UI impact: design the UX now — ASCII mockups, flow descriptions,
      field layout, error states, colour/theming decisions — and include it in the feature issue
    - Do not leave UX decisions to the Feature Design Session or implementation
-6. Create Feature issue(s) in the domain repo with `feature` + `backlog` label
+6. Create Feature issue(s) in the domain repo with `feature` + `backlog` label.
+   Apply the `capture-feature` skill for the issue body structure.
 7. Wire sub-issue relationship: Feature → parent Requirement
 8. Add Feature to org Project
 9. When human confirms ready: apply `in-design` label → triggers Feature Design Session
