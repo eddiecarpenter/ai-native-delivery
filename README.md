@@ -25,7 +25,8 @@ The solution is not a better prompt. It is a protocol.
 This framework gives AI agents a structured, phase-based delivery methodology to follow.
 Agents know what phase they are in, what the entry conditions are, what they are allowed
 to do, and when to stop and hand back to a human. Every phase produces a concrete GitHub
-artefact. Every phase transition is a deliberate human decision.
+artefact. The human remains in control at the key decision points: confirming scope before
+design begins, and approving the final PR before code merges.
 
 The result is AI-assisted development that is **traceable, reviewable, and governed** —
 without sacrificing the speed that makes agentic tooling worth using.
@@ -41,7 +42,7 @@ It provides:
 
 - A **phase-based delivery protocol** that agents follow consistently across projects and stacks
 - **Session types** for each phase — with explicit entry conditions, steps, and exit criteria
-- **Skills** — reusable, named procedures agents invoke for specific tasks (see [Skills](#skills))
+- **Skills** — reusable, named procedures agents invoke for specific tasks (see [Rulebook and Playbooks](#rulebook-and-playbooks))
 - **Language-specific coding standards** that govern how agents write, test, and structure code
 - **A two-layer configuration model** — global template rules plus project-specific overrides
 - **GitHub as the source of truth** — issues track state, branches track work, PRs are the handoff
@@ -79,8 +80,10 @@ your project — the protocol applies equally to infrastructure-as-code as it do
 application code.
 
 **Not a fully autonomous system.**
-Agents do not proceed without human approval at phase boundaries. A human applies the
-label that triggers the next phase. The agent executes; the human decides what comes next.
+Phases 3 and 4 run without human intervention — the agent designs, implements, and raises
+the PR automatically. But the human controls the two decisions that matter most: confirming
+the feature scope before design begins (triggering Phase 3), and approving the final PR
+before code merges. Everything in between is governed by the protocol.
 
 **Not a replacement for engineering judgment.**
 Agents follow the protocol and produce code that passes tests. They flag risks and stop
@@ -113,7 +116,7 @@ flowchart LR
     end
 
     P1 -->|"human confirms\nready to scope"| P2
-    P2 -->|"human applies\nin-design label"| P3
+    P2 -->|"agent applies\nin-design label"| P3
     P3 -->|"auto-applies\nin-development label"| P4
     P4 -->|"workflow creates PR\napplies in-review label"| P4b
     P4b -->|"human merges"| Done["Merged PR"]
@@ -308,8 +311,8 @@ gh extension install eddiecarpenter/gh-agentic
 
 | Command | What it does |
 |---|---|
-| `gh agentic bootstrap` | Creates and configures a new agentic environment (Phase 0a) |
-| `gh agentic inception` | Adds a new domain or tool repo to an existing environment (Phase 0b) |
+| `gh agentic bootstrap` | Creates and configures a new agentic environment |
+| `gh agentic inception` | Adds a new domain or tool repo to an existing environment |
 | `gh agentic sync` | Syncs `base/` from the upstream template |
 | `gh agentic verify` | Detects local drift in template-managed files |
 
@@ -331,41 +334,18 @@ must be named `gh-*` and live in their own repo. Conceptually they are one syste
 
 ### Bootstrap a new environment
 
-Navigate to the folder where you want the new agentic repo to be created:
+Environment setup is handled by the `gh-agentic` CLI extension — not by the agent.
+This keeps setup deterministic and repeatable.
 
 ```bash
-cd ~/Development/my-projects
+gh agentic bootstrap
 ```
 
-Download and run the bootstrap script:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/ai-native-delivery/main/bootstrap.sh -o /tmp/bootstrap.sh \
-  && bash /tmp/bootstrap.sh
-```
-
-> **Tip:** Inspect the script before running it:
-> ```bash
-> curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/ai-native-delivery/main/bootstrap.sh | less
-> ```
-
-> **Optional — verify script integrity before running:**
-> ```bash
-> curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/ai-native-delivery/main/bootstrap.sh -o /tmp/bootstrap.sh \
->   && curl -fsSL https://raw.githubusercontent.com/eddiecarpenter/ai-native-delivery/main/bootstrap.sh.md5 -o /tmp/bootstrap.sh.md5 \
->   && (cd /tmp && md5sum -c bootstrap.sh.md5) \
->   && bash /tmp/bootstrap.sh
-> ```
-
-> **Note:** There will be a short pause after the agent launches while it reads
-> the protocol from the template — this is expected.
-
-The script will:
+The command will:
 1. Verify prerequisites are in place
-2. Ask whether to use Goose or Claude Code
-3. Launch the Phase 0a Environment Bootstrap Session
-4. Guide you through creating and configuring your new agentic environment
-5. Clone the new agentic repo into your current directory
+2. Collect project details interactively
+3. Create and configure the agentic repo (labels, branch protection, project board)
+4. Clone the repo into your current directory
 
 Once complete, open the new agentic repo in your agent and start a Requirements Session (Phase 1).
 
@@ -419,7 +399,7 @@ skills/
 
 | Path | Purpose |
 |---|---|
-| `base/AGENTS.md` | Global agent protocol — session types, git rules, testing, contracts |
+| `base/AGENTS.md` | Rulebook — git rules, testing, build verification, contract safety, working principles |
 | `base/standards/` | Language-specific coding standards (Go, Java, TypeScript, etc.) |
 | `base/skills/` | Built-in skills — managed by template, do not edit |
 | `.goose/recipes/` | Agent session recipes (YAML) — managed by template, do not edit |
@@ -435,15 +415,22 @@ skills/
 
 ## Syncing updates from the template
 
-Syncing is handled by the agent — do not do this manually.
+Syncing is handled by the `gh-agentic` CLI extension — not by the agent.
 
-1. Open an agent session in your agentic repo root
-2. Say: *"Sync template"*
-3. The agent checks for updates, shows you a diff, and asks for confirmation
-4. Review the changes and confirm — the agent commits and cleans up
+```bash
+gh agentic sync
+```
 
-Only `base/` and `TEMPLATE_VERSION` are ever updated by a sync.
-All local files (`AGENTS.local.md`, `REPOS.md`, `CLAUDE.md`, `skills/`, etc.) are never touched.
+The command pulls the latest `base/` from the upstream template, shows you a diff, and
+asks for confirmation before committing. Only `base/` and `TEMPLATE_VERSION` are ever
+updated. All local files (`AGENTS.local.md`, `REPOS.md`, `CLAUDE.md`, `skills/`, etc.)
+are never touched.
+
+> [!IMPORTANT]
+> **If you have an open agent session when you run a sync, you must notify it.**
+> Tell your agent: *"I just synced the template"* — this triggers the `session-init`
+> skill to reload the updated protocol and skills without restarting the session.
+> Working with a stale protocol after a sync can produce incorrect behaviour.
 
 ---
 
