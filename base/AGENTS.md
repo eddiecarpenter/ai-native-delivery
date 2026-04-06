@@ -409,6 +409,11 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
   The pipeline must follow phases in order: Requirements → Scoping → Design → Implementation.
   If the agent believes a phase can be skipped, it must stop and ask the human before proceeding.
   The human decides whether to skip; the agent never skips a phase unilaterally.
+  - When a phase is skipped (with human approval):
+    - Labels and status must still transition through the skipped phase — the board
+      must reflect the correct state for the phase the work is actually in
+    - If scoping is skipped: the requirement transitions `backlog` → `scoping` →
+      `scheduled`, and any features created start at `backlog` (not `in-design`)
 
 ---
 
