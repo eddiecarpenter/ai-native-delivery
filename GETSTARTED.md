@@ -684,3 +684,176 @@ useful beyond the first feature: the agent is not a one-shot code generator,
 it is a participant that understands context.
 
 ---
+
+## Stage 3 — Bug fix (Phase 4c)
+
+### Overview
+
+Stages 1 and 2 followed the **planned delivery** pipeline: requirement →
+scoping → design → development → review → merge. Every phase ran in order,
+producing artefacts that fed the next phase.
+
+Stage 3 is different. Bug fixes are **reactive** — there is no requirements
+conversation, no scoping session, no design phase. You file an issue, assign
+it to the agent, and Phase 4c handles it directly: acknowledge, locate, fix,
+PR.
+
+This is the fastest path through the pipeline and the one you will use most
+often for day-to-day maintenance.
+
+---
+
+### File the bug issue
+
+Create a bug issue in your URL Shortener repo. The agent routes by the `bug`
+label — the label is what triggers the correct behaviour.
+
+> [!NOTE]
+> **Placeholder.** The exact bug issue text below will be replaced with a
+> pre-scripted bug based on a real gap discovered during the end-to-end test
+> run of this guide. For now, use the example below or substitute your own
+> bug found while testing the URL Shortener.
+
+**Example bug issue:**
+
+```bash
+gh issue create \
+  --title "GET /:code returns 200 instead of 301/302 redirect" \
+  --body "$(cat <<'ISSUE_EOF'
+## Bug
+
+When a valid short code is looked up via `GET /:code`, the server returns
+an HTTP 200 with the target URL in the response body instead of performing
+an HTTP 301 or 302 redirect.
+
+## Expected behaviour
+
+`GET /:code` should return an HTTP 301 (or 302) redirect with the `Location`
+header set to the original URL.
+
+## Actual behaviour
+
+`GET /:code` returns HTTP 200 with a JSON body containing the URL. The
+caller is not redirected.
+
+## Steps to reproduce
+
+1. POST /shorten with a valid URL — get back a short code
+2. GET /:code with the returned code
+3. Observe the response status code — it is 200, not 301/302
+ISSUE_EOF
+)" \
+  --label bug
+```
+
+> **Verification checkpoint:** Run `gh issue list --label bug` and confirm
+> the bug issue exists.
+
+---
+
+### Assign to the agent user
+
+The Phase 4c trigger is **issue assignment**. When an issue with the `bug`
+label is assigned to the agent user, a GitHub Actions workflow launches the
+**Issue Session** automatically.
+
+```bash
+gh issue edit <bug-number> --add-assignee <agent-username>
+```
+
+Replace `<agent-username>` with the GitHub username configured as the agent
+user (the `AGENT_USER` variable you set during setup).
+
+---
+
+### Watch Phase 4c
+
+Once assigned, the workflow triggers and the agent takes over. Here is what
+happens:
+
+1. **Acknowledges** — the agent posts a comment on the issue confirming it
+   has picked up the bug
+2. **Routes by label** — sees the `bug` label and enters the bug-fix flow
+   (not the question flow)
+3. **Reads the issue** — extracts the bug description, expected behaviour,
+   actual behaviour, and reproduction steps
+4. **Locates the bug** — searches the codebase for the relevant code,
+   identifies the root cause
+5. **Scope check** — verifies the fix is contained to files directly related
+   to the bug. If the fix would require broader changes, the agent posts a
+   comment and adds a `needs-human` label instead of proceeding
+6. **Creates a fix branch** — `fix/<N>-<description>` where N is the bug
+   issue number
+7. **Implements the fix** — minimal change to resolve the bug
+8. **Writes or updates tests** — ensures the bug is covered by a regression
+   test
+9. **Builds and tests** — runs the full suite to confirm nothing is broken
+10. **Exits cleanly** — the workflow pushes the branch and opens a PR
+
+**What to observe:**
+
+- A workflow run appears in the Actions tab shortly after assignment
+- The agent posts an acknowledgement comment on the bug issue
+- A fix branch appears (check `git fetch && git branch -r`)
+- A PR is opened with the minimal fix and a regression test
+
+```bash
+# Monitor the workflow
+gh run list --limit 5
+
+# Check for the agent's comment on the bug issue
+gh issue view <bug-number>
+
+# Check for the PR
+gh pr list
+```
+
+> **Verification checkpoint:** After the workflow completes, confirm:
+> 1. The agent commented on the bug issue
+> 2. A PR exists with a fix branch
+> 3. The PR contains a minimal change (not a refactor)
+> 4. A regression test exists for the specific bug
+
+---
+
+### Merge
+
+Review and merge the bug-fix PR just as you would any other:
+
+```bash
+gh pr view <pr-number> --web
+# Review the fix, then:
+gh pr merge <pr-number> --squash
+```
+
+When the PR merges, the bug issue is closed automatically.
+
+> **Verification checkpoint:** Confirm the bug issue is closed and the fix
+> is on `main`. Run the tests locally (`go test ./...`) to verify the
+> regression test passes.
+
+---
+
+### What to notice — reactive vs planned
+
+Compare Stage 3 with Stages 1 and 2:
+
+| Aspect | Stages 1 & 2 (Planned) | Stage 3 (Reactive) |
+|---|---|---|
+| **Entry point** | Requirements conversation | Bug issue filed |
+| **Phases** | Requirements → Scoping → Design → Development → Review | Assignment → Fix → Review |
+| **Scoping** | Agent and human define scope together | No scoping — scope is the bug |
+| **Design** | Agent creates task sub-issues | No design — single fix |
+| **Trigger** | `in-design` label | Issue assigned to agent |
+| **Branch** | `feature/<N>-...` | `fix/<N>-...` |
+| **Agent routing** | By pipeline label (`in-design`, `in-development`) | By issue label (`bug`) |
+
+The planned pipeline exists for features — work that needs to be designed
+before it is built. Bug fixes skip the design overhead because the "design"
+is implicit: find the bug, fix it, prove the fix works.
+
+This is not cutting corners. The agent still builds, tests, and opens a
+reviewed PR. The governance is the same — only the path through the pipeline
+is shorter.
+
+---
