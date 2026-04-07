@@ -1,0 +1,32 @@
+name: Publish Release
+
+# Triggered after the release workflow has created and published the GitHub release.
+# For this framework repo there are no binary artefacts to build or upload.
+# The publish step updates TEMPLATE_VERSION on main so downstream repos can
+# compare their installed version against the latest release via:
+#   gh agentic verify
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-template-version:
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          ref: main
+          token: ${{ secrets.GOOSE_AGENT_PAT }}
+
+      - name: Update TEMPLATE_VERSION
+        run: |
+          echo "${{ github.event.release.tag_name }}" > TEMPLATE_VERSION
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add TEMPLATE_VERSION
+          git commit -m "chore: update TEMPLATE_VERSION to ${{ github.event.release.tag_name }}"
+          git push origin main
