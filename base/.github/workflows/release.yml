@@ -61,15 +61,22 @@ jobs:
         run: |
           if [ ! -s ~/.claude/.credentials.json ]; then
             echo "ERROR: ~/.claude/.credentials.json is empty or missing."
-            echo "Ensure CLAUDE_CREDENTIALS_JSON is set to: cat ~/.claude/.credentials.json | base64 | tr -d '\\n'"
+            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\\n'"
             exit 1
           fi
           if ! python3 -c "import json,sys; json.load(open('$HOME/.claude/.credentials.json'))" 2>/dev/null; then
             echo "ERROR: ~/.claude/.credentials.json is not valid JSON."
-            echo "Regenerate with: cat ~/.claude/.credentials.json | base64 | tr -d '\\n'"
+            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\\n'"
             exit 1
           fi
-          echo "Credentials file present and valid JSON."
+          echo "Credentials file is present and valid JSON — testing API access..."
+          TEST_OUTPUT=$(claude -p "Say the word OK and nothing else." --output-format text 2>&1) || {
+            echo "ERROR: Claude Code API test failed. Credentials are present but rejected."
+            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\\n'"
+            echo "Claude output: $TEST_OUTPUT"
+            exit 1
+          }
+          echo "Claude API access confirmed: $TEST_OUTPUT"
 
       - name: Configure environment
         run: |
