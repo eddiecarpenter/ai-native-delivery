@@ -46,11 +46,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: 'lts/*'
+
       - name: Install tools
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y bzip2 curl
-          curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          sudo apt-get update -qq && sudo apt-get install -y bzip2
           mkdir -p ~/.local/bin
           GH_VERSION=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
           curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
@@ -144,11 +147,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: 'lts/*'
+
       - name: Install Goose and Claude Code CLI
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y bzip2 curl
-          curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          sudo apt-get update -qq && sudo apt-get install -y bzip2
           GOOSE_VERSION=$(curl -fsSL https://api.github.com/repos/block/goose/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
           curl -fsSL "https://github.com/block/goose/releases/download/v${GOOSE_VERSION}/goose-x86_64-unknown-linux-gnu.tar.bz2" -o /tmp/goose.tar.bz2
           tar -xj -C ~/.local/bin -f /tmp/goose.tar.bz2
@@ -278,11 +284,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: 'lts/*'
+
       - name: Install tools
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y bzip2 curl
-          curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          sudo apt-get update -qq && sudo apt-get install -y bzip2
           mkdir -p ~/.local/bin
           GH_VERSION=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
           curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
@@ -371,11 +380,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: 'lts/*'
+
       - name: Install tools
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y bzip2 curl
-          curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          sudo apt-get update -qq && sudo apt-get install -y bzip2
           mkdir -p ~/.local/bin
           GH_VERSION=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
           curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
