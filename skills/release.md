@@ -12,17 +12,26 @@ Batch related changes into a meaningful version. Use semantic versioning:
 
 ## How to release
 
-1. Review commits since the last release:
-   ```bash
-   gh release list --limit 1
-   git log --oneline <last-tag>..HEAD
-   ```
-2. Create the release:
-   ```bash
-   gh release create vX.Y.Z --generate-notes --target main
-   ```
+Push a tag — that is the complete release act:
 
-## Note
+```bash
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
 
-`TEMPLATE_VERSION` in this repo is not updated on release — the git tag is the version.
-Downstream repos track their own sync version in their local `TEMPLATE_VERSION` file.
+The automated release chain fires:
+
+1. **`publish-release.yml`** — updates `TEMPLATE_VERSION` to the new tag, creates
+   the GitHub release stub
+2. **`release.yml`** — triggered by the release being published, runs the Goose
+   release recipe, generates AI release notes from commits since the previous tag,
+   updates the release body
+
+No manual steps required after pushing the tag.
+
+## Review commits before tagging (optional)
+
+```bash
+gh release list --limit 1
+git log --oneline <last-tag>..HEAD
+```

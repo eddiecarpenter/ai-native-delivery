@@ -135,6 +135,34 @@ Phases 1 and 2 are conversational — the human drives, the agent captures and s
 Phases 3 and 4 are automated — triggered by GitHub Actions when a label is applied.
 A recovery session handles workflow failures interactively.
 
+### Release
+
+The release cycle is independent of the feature pipeline. When the human is ready
+to publish a new version, pushing a tag triggers the automated release chain:
+
+```mermaid
+flowchart LR
+    subgraph Release ["Release — Human + Automation"]
+        T["Tag push\n(human)"]
+        S["publish-release.yml\nCreates stub release\nUpdates TEMPLATE_VERSION"]
+        N["release.yml\nGoose generates\nAI release notes"]
+    end
+
+    T -->|"triggers"| S
+    S -->|"release: published"| N
+    N --> R["GitHub Release\nwith AI notes"]
+```
+
+| Step | Trigger | Does |
+|---|---|---|
+| Tag push | Human | Declares the version and starts the chain |
+| `publish-release.yml` | `push: tags: v*` | Creates stub GitHub release, updates `TEMPLATE_VERSION` |
+| `release.yml` | `release: published` | Runs Goose release recipe, generates AI notes, updates release body |
+
+The local project supplies its own `publish-release.yml` — using GoReleaser, a build
+script, or a simple stub as shown in `base/docs/examples/`. The framework's `release.yml`
+fires last, regardless of how the release was created, and enhances it with AI notes.
+
 ### Project board automation
 
 The project board is kept in sync automatically — no manual column moves needed.
