@@ -27,6 +27,10 @@ instructions: |
   You are running a Release session for tag {{ tag }} in {{ repo }}.
   Your job is to generate human-readable release notes from git history and update the GitHub release body.
 
+  This is an automated, non-interactive session. Do NOT run session-init.
+  Do NOT ask the user any questions. If something is unclear, make a reasonable
+  assumption and continue.
+
   ## Step 1 — Determine the Previous Tag
 
   List all tags sorted by version, excluding the current tag:
