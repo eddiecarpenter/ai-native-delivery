@@ -71,13 +71,7 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 
 ## Outputs
 
-- One or more Feature issues in the domain repo, each containing:
-  - `## User Story` section with `As a / I want / so that` structure
-  - `## Context` with background and motivation
-  - `## Scope` and `## Out of Scope` sections
-  - `## Acceptance Criteria` with checkboxes (`- [ ]` format)
-  - `## UX Design` (if applicable) with ASCII mockups, flow, error states
-  - `## Parent Requirement` linking back to the originating requirement
+- One or more Feature issues in the domain repo, each written using the `capture-feature.md` template
 - `in-design` label applied — triggers automatic Feature Design Session
 - Parent requirement transitioned from `scoping` to `scheduled`
 
@@ -85,8 +79,8 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 
 - Serial vs parallel decomposition: independent capabilities → separate features; sequential capabilities → one feature with ordered tasks; never create multiple features with implied serial dependencies
 - Push toward MVP — smallest version that delivers real value
-- User story format is mandatory — every feature issue must include `As a / I want / so that`
-- Acceptance criteria must use checkbox format (`- [ ]`) and be outcome-based
+- Feature issue structure and format is defined by `capture-feature.md` — follow it exactly
+- Acceptance criteria must use Given/When/Then format — not checkboxes, not prose
 - UX design must be done now, not deferred to implementation
 - Never accept solution criteria — convert to outcome criteria
 - If an idea is out of scope, capture it in the parking lot

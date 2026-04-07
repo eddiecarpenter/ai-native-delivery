@@ -12,6 +12,19 @@ Apply this skill when writing the body of every Feature issue.
 
 As a <role>, I want <goal>, so that <benefit>.
 
+## Context
+
+Background and motivation for this feature. Why does it exist? What problem does it solve?
+Link to relevant prior decisions or related issues if helpful.
+
+## Scope
+
+What this feature covers. Be specific — this is the implementation boundary.
+
+## Out of Scope
+
+What is explicitly not included. Prevents scope creep and clarifies intent.
+
 ## Acceptance Criteria
 
 Each criterion is a Given/When/Then scenario. Cover at minimum:
@@ -31,14 +44,18 @@ Each criterion is a Given/When/Then scenario. Cover at minimum:
   **when** <action>,
   **then** <expected edge-case outcome>
 
+## UX Design
+
+ASCII mockups, user flow, error states, and edge-case UI behaviour.
+Omit this section for non-UI features.
+
 ## Notes
 
 Implementation constraints, API choices, or technical context known at scoping time.
 Keep this separate from acceptance criteria — criteria define outcomes, notes capture context.
-
 Omit this section if there is nothing to note.
 
-## Parent
+## Parent Requirement
 
 Closes part of #<requirement>
 ```
@@ -61,6 +78,8 @@ same repo, not the agentic repo.
 - User Story is mandatory — every feature issue must include one
 - Acceptance criteria must use Given/When/Then format — not checkboxes, not prose
 - Minimum three criteria: success, failure, edge case — add more as needed
-- Notes capture context — never mix implementation detail into acceptance criteria
-- Parent link is mandatory — every feature traces back to a requirement
+- Context, Scope, and Out of Scope are mandatory — define the boundary explicitly
+- UX Design is mandatory for any feature with user-facing changes — do it now, not during implementation
+- Notes capture implementation context — never mix implementation detail into acceptance criteria
+- Parent Requirement link is mandatory — every feature traces back to a requirement
 - In federated topology, always use the full `owner/repo#N` format for the parent link
