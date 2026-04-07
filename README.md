@@ -351,6 +351,89 @@ Once complete, open the new agentic repo in your agent and start a Requirements 
 
 ---
 
+## Runner model
+
+The agentic pipeline runs agent jobs on GitHub-hosted runners by default. No
+self-hosted infrastructure is required to get started.
+
+### Default runner
+
+All agent jobs use `ubuntu-latest` (GitHub-hosted, ephemeral). Two secrets must
+be configured:
+
+| Secret | Purpose |
+|---|---|
+| `GOOSE_AGENT_PAT` | GitHub PAT with `repo` and `workflow` scopes |
+| `CLAUDE_CREDENTIALS_JSON` | Base64-encoded Claude Code OAuth credentials |
+
+### Cost trade-off
+
+**GitHub-hosted** runners consume GitHub Actions minutes and Claude subscription
+quota. They require no infrastructure setup and are ephemeral (no persistent state
+risk).
+
+**Self-hosted** runners avoid Actions minutes but require you to provision and
+maintain the runner infrastructure. Use dedicated, ephemeral runners where possible
+— see `SECURITY.md` for isolation guidance.
+
+### `RUNNER_LABEL` variable
+
+To route agent jobs to a self-hosted runner, set the `RUNNER_LABEL` repository
+variable:
+
+```bash
+gh variable set RUNNER_LABEL --body "my-self-hosted-label"
+```
+
+When `RUNNER_LABEL` is not set, all agent jobs run on `ubuntu-latest`. No other
+changes are required — the workflow installs Goose and Claude Code CLI
+automatically on every run.
+
+A self-hosted runner must have the following pre-installed:
+
+- Node.js (v18+)
+- `gh` CLI (authenticated)
+- git
+- Network access to GitHub API and Anthropic API
+
+### `GOOSE_PROVIDER` and `GOOSE_MODEL` variables
+
+The Goose provider and model are configurable via repository variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `GOOSE_PROVIDER` | `claude-code` | The Goose LLM provider to use |
+| `GOOSE_MODEL` | `default` | The model name within the provider |
+
+The defaults (`claude-code` / `default`) use Claude Code as the provider, which
+draws from your Claude subscription. Change these when switching to a different
+provider (e.g. `anthropic` for direct API key access) or a specific model.
+
+```bash
+gh variable set GOOSE_PROVIDER --body "anthropic"
+gh variable set GOOSE_MODEL --body "claude-sonnet-4-20250514"
+```
+
+### Credential lifecycle
+
+The `CLAUDE_CREDENTIALS_JSON` secret contains a base64-encoded copy of the Claude
+Code OAuth credentials file (`~/.claude/.credentials.json`).
+
+**Generate and store:**
+
+```bash
+claude auth login
+base64 ~/.claude/.credentials.json | gh secret set CLAUDE_CREDENTIALS_JSON
+```
+
+**When it expires:** Goose runs will fail with an authentication error. The OAuth
+token has a limited lifetime determined by Anthropic's OAuth configuration.
+
+**To renew:** Re-run the generation commands above. This re-authenticates via
+the interactive OAuth flow and updates the secret with fresh credentials.
+
+---
+
 ## Extending the framework
 
 ### Adding local rules
