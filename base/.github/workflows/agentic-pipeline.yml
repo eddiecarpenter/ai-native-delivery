@@ -47,7 +47,9 @@ jobs:
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
       - name: Install Goose
-        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+        run: |
+          curl -fsSL https://github.com/block/goose/releases/latest/download/download_cli.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
@@ -126,7 +128,9 @@ jobs:
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
       - name: Install Goose
-        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+        run: |
+          curl -fsSL https://github.com/block/goose/releases/latest/download/download_cli.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
@@ -245,7 +249,9 @@ jobs:
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
       - name: Install Goose
-        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+        run: |
+          curl -fsSL https://github.com/block/goose/releases/latest/download/download_cli.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
@@ -328,7 +334,9 @@ jobs:
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
       - name: Install Goose
-        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+        run: |
+          curl -fsSL https://github.com/block/goose/releases/latest/download/download_cli.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code

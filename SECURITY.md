@@ -45,7 +45,10 @@ supply chain attacks from compromised tags. Never pin to a mutable tag (`v1`,
 | Action | SHA | Purpose |
 |---|---|---|
 | `actions/checkout` | `v4` (GitHub first-party) | Checkout repository code |
-| `clouatre-labs/setup-goose-action` | `6add528f3872405bbcb6e6c13bf2af3b7d2b81ce` | Install Goose CLI on the runner |
+
+### Goose installation
+
+Goose is installed via the official Block install script (`download_cli.sh`) rather than a third-party GitHub Action. The `clouatre-labs/setup-goose-action` was evaluated but rejected because it performs SLSA attestation verification that Goose releases do not currently publish, causing every run to fail. The official script is sourced directly from the `block/goose` GitHub releases and is the installation method documented by Block.
 
 ### Upgrade guidance
 
