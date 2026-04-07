@@ -1,17 +1,24 @@
 name: Publish Release
 
-# Triggered after the release workflow has created and published the GitHub release.
-# For this framework repo there are no binary artefacts to build or upload.
-# The publish step updates TEMPLATE_VERSION on main so downstream repos can
-# compare their installed version against the latest release via:
-#   gh agentic verify
+# Skeleton release workflow for repos with no build artefacts (framework repos,
+# documentation repos, etc.).
+#
+# Triggered by a tag push. This workflow:
+#   1. Updates TEMPLATE_VERSION on main to the released tag
+#   2. Creates the GitHub release (stub) — which triggers the Release Notes
+#      workflow (release.yml) to generate and update the AI release notes
+#
+# For repos that produce build artefacts (Go binaries, npm packages, etc.),
+# replace this workflow with your build tool's own release workflow
+# (GoReleaser, semantic-release, etc.). See base/docs/examples/ for patterns.
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  update-template-version:
+  publish:
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     permissions:
       contents: write
@@ -24,9 +31,17 @@ jobs:
 
       - name: Update TEMPLATE_VERSION
         run: |
-          echo "${{ github.event.release.tag_name }}" > TEMPLATE_VERSION
+          echo "${{ github.ref_name }}" > TEMPLATE_VERSION
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add TEMPLATE_VERSION
-          git commit -m "chore: update TEMPLATE_VERSION to ${{ github.event.release.tag_name }}"
+          git commit -m "chore: update TEMPLATE_VERSION to ${{ github.ref_name }}"
           git push origin main
+
+      - name: Create GitHub release
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "Release ${{ github.ref_name }}" \
+            --notes "Generating release notes…"
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}

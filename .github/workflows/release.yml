@@ -1,25 +1,26 @@
-name: Release
+name: Release Notes
 
-# Triggered by a version tag push.
-# The human's act of pushing a tag is the complete release authorisation:
-#   git tag v1.2.3
-#   git push origin v1.2.3
+# Triggered when any GitHub release is published — by GoReleaser, by the
+# local publish-release workflow, or by any other means.
 #
-# This workflow runs the Release recipe via Goose, which generates AI release
-# notes from git history and creates the GitHub release.
+# This workflow generates AI release notes from git history and updates
+# the release body. It does not create releases or build artefacts.
 #
-# After this workflow completes, the publish-release.yml workflow fires
-# (triggered by "release: published") for any post-release steps the local
-# project requires — see base/docs/examples/publish-release.yml.
+# How the release is created is entirely the local project's concern:
+#   - GoReleaser projects: GoReleaser creates the release on tag push
+#   - Framework/docs repos: publish-release.yml creates a stub release on tag push
+#   - Any other tool: works the same way
+#
+# In all cases, when the release is published this workflow fires and
+# replaces the release body with AI-generated notes.
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [published]
 
 jobs:
-  release:
-    name: Release
+  release-notes:
+    name: Generate Release Notes
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     permissions:
       contents: write
@@ -73,7 +74,7 @@ jobs:
         run: |
           goose run \
             --recipe .goose/recipes/release.yaml \
-            --params tag=${{ github.ref_name }} \
+            --params tag=${{ github.event.release.tag_name }} \
             --params repo=${{ github.repository }}
         env:
           GOOSE_PATH_ROOT: ${{ github.workspace }}/.goose

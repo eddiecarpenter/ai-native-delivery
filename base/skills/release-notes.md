@@ -88,16 +88,20 @@ These are the changes downstream owners most need to know about before running
 
 Write the release notes to `/tmp/release-notes.md`.
 
-### Step 4 — Create the GitHub Release
+### Step 4 — Update the GitHub Release
+
+The release already exists — it was created by the local project's publish workflow
+(GoReleaser, a stub creation step, or any other means). Update its body with the
+AI-generated notes:
 
 ```bash
-gh release create {{ tag }} \
+gh release edit {{ tag }} \
   --repo {{ repo }} \
-  --title "Release {{ tag }}" \
   --notes-file /tmp/release-notes.md
 ```
 
-If the release already exists, report and exit cleanly — do not attempt to overwrite.
+This replaces whatever notes the release was created with. If the release does not
+exist for any reason, report and exit cleanly — do not attempt to create it.
 
 ### Step 5 — Report
 
