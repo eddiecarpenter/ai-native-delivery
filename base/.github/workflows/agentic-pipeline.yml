@@ -33,7 +33,7 @@ jobs:
       github.event.action == 'labeled' &&
       contains(github.event.issue.labels.*.name, 'feature') &&
       github.event.label.name == 'in-design'
-    runs-on: self-hosted
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     permissions:
       contents: write
       issues: write
@@ -46,9 +46,20 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Install Goose
+        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Restore Claude Code auth
+        run: |
+          mkdir -p ~/.claude
+          echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
+          chmod 0600 ~/.claude/.credentials.json
+
       - name: Configure environment
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           git config user.name "${{ vars.AGENT_USER }}"
           git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
@@ -77,7 +88,7 @@ jobs:
       github.event.action == 'labeled' &&
       contains(github.event.issue.labels.*.name, 'feature') &&
       github.event.label.name == 'in-development'
-    runs-on: self-hosted
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     permissions:
       contents: write
       issues: write
@@ -106,9 +117,20 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Install Goose
+        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Restore Claude Code auth
+        run: |
+          mkdir -p ~/.claude
+          echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
+          chmod 0600 ~/.claude/.credentials.json
+
       - name: Configure environment
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           git config user.name "${{ vars.AGENT_USER }}"
           git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
@@ -190,7 +212,7 @@ jobs:
         startsWith(github.event.pull_request.head.ref, 'feature/') &&
         (github.event.review.state == 'commented' || github.event.review.state == 'changes_requested')
       )
-    runs-on: self-hosted
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     permissions:
       contents: write
       pull-requests: write
@@ -206,9 +228,20 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Install Goose
+        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Restore Claude Code auth
+        run: |
+          mkdir -p ~/.claude
+          echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
+          chmod 0600 ~/.claude/.credentials.json
+
       - name: Configure environment
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           git config user.name "${{ vars.AGENT_USER }}"
           git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
@@ -253,7 +286,7 @@ jobs:
       github.event_name == 'issues' &&
       github.event.action == 'assigned' &&
       github.event.assignee.login == vars.AGENT_USER
-    runs-on: self-hosted
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     permissions:
       contents: write
       pull-requests: write
@@ -270,9 +303,20 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
+      - name: Install Goose
+        uses: clouatre-labs/setup-goose-action@6add528f3872405bbcb6e6c13bf2af3b7d2b81ce
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Restore Claude Code auth
+        run: |
+          mkdir -p ~/.claude
+          echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
+          chmod 0600 ~/.claude/.credentials.json
+
       - name: Configure environment
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           git config user.name "${{ vars.AGENT_USER }}"
           git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
