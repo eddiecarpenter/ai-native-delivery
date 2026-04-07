@@ -81,6 +81,10 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
 - Correctness and maintainability take precedence over cleverness
 - Do not make changes outside the scope of the current task
 - Propose large refactors before implementing them — never execute without approval
+- **Features and enhancements deploy behind a feature switch by default.** Bug fixes
+  deploy directly — no switch. The human may waive the switch during scoping; the
+  decision and reason must be recorded in the feature issue. See
+  `base/concepts/feature-switches.md` for the full taxonomy and implementation guidance.
 - **To cancel a requirement or feature, delete the GitHub Issue.** The agent will detect
   its absence during the next session and will not attempt work against it. Clean up any
   associated feature branch manually if one was already created.

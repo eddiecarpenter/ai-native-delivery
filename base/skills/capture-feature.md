@@ -44,6 +44,25 @@ Each criterion is a Given/When/Then scenario. Cover at minimum:
   **when** <action>,
   **then** <expected edge-case outcome>
 
+## Deployment Strategy
+
+How this feature reaches users. One of:
+
+- **No switch** — deployed and immediately live (bug fixes, or human-approved exception)
+- **Feature switch** — hidden behind a switch until release decision is made
+  - Mode: `permanent disable` (code must not execute) or `toggle` (access control only)
+  - Flag name: `<flag-name>`
+  - Exit condition: remove switch after full rollout — tracked as a follow-up requirement
+- **Functionality switch** — permanent, gated by licence or tier
+  - Flag name: `<flag-name>`
+- **Preview switch** — user opt-in to a new experience while old version remains available
+  - Flag name: `<flag-name>`
+  - Exit condition: remove when old version is retired
+
+If no switch: state the reason (e.g. bug fix, MVP phase, infrastructure change).
+
+See `base/concepts/feature-switches.md` for the full taxonomy.
+
 ## UX Design
 
 ASCII mockups, user flow, error states, and edge-case UI behaviour.
@@ -79,6 +98,9 @@ same repo, not the agentic repo.
 - Acceptance criteria must use Given/When/Then format — not checkboxes, not prose
 - Minimum three criteria: success, failure, edge case — add more as needed
 - Context, Scope, and Out of Scope are mandatory — define the boundary explicitly
+- Deployment Strategy is mandatory — every feature issue must state how it reaches users
+- Features and enhancements default to a feature switch — record the switch type, mode, flag name, and exit condition
+- If the human waives the switch, record the reason explicitly
 - UX Design is mandatory for any feature with user-facing changes — do it now, not during implementation
 - Notes capture implementation context — never mix implementation detail into acceptance criteria
 - Parent Requirement link is mandatory — every feature traces back to a requirement

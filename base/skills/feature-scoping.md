@@ -40,6 +40,18 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
    - **Parallel/serial checkpoint** — asks whether all parts can be built independently or must be sequenced. Independent work → multiple features (parallel). Sequential work → one feature with ordered tasks (same branch, same PR). Never creates multiple features with implied serial dependencies.
    - Acceptance criteria (checkboxes, outcome-based)
    - UX design (if applicable)
+   - **Deployment strategy** — ask: *"How should this feature reach users once deployed?"*
+     Present the options and confirm the type:
+     - **No switch** — deployed and immediately live (appropriate for bug fixes, MVP phase, or infrastructure changes)
+     - **Feature switch** — hidden until a release decision is made (default for features and enhancements)
+       - Confirm mode: `permanent disable` (code must not execute — use when work may be incomplete or breaking) or `toggle` (access control only — use when code is safe but release is pending)
+       - Agree on flag name
+       - Note: switch removal is a follow-up requirement after full rollout
+     - **Functionality switch** — permanent, gated by licence or tier (enters pipeline as a requirement in its own right)
+     - **Preview switch** — user opt-in to a new experience while old version remains (enters pipeline as a requirement in its own right)
+
+     If the human elects no switch for a feature or enhancement, ask for the reason and record it.
+     See `base/concepts/feature-switches.md` for the full taxonomy.
    - Parking lot review
 6. Verifies user story is present and complete before creating the issue
 7. Creates Feature issues in the domain repo with `feature` + `backlog` labels
