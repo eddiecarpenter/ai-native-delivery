@@ -5,32 +5,27 @@ runner isolation, supply chain controls, and credential management.
 
 ---
 
-## Self-Hosted Runner Isolation
+## Runner Isolation
 
 The pipeline defaults to **GitHub-hosted runners** (`ubuntu-latest`). GitHub-hosted
 runners are ephemeral — each job runs on a fresh virtual machine that is destroyed
 after the job completes. There is no persistent state between runs: no leftover
-credentials, no cached source code, no residual build artefacts.
+credentials, no cached source code, no residual build artefacts. This is the
+recommended default.
 
-Self-hosted runners are **opt-in** via the `RUNNER_LABEL` repository variable. Set
-it to the label of your self-hosted runner to route all agent jobs there:
+Self-hosted runners are **opt-in** via the `RUNNER_LABEL` repository variable:
 
 ```bash
-gh variable set RUNNER_LABEL --body "my-self-hosted-label"
+gh variable set RUNNER_LABEL --body "my-runner-scale-set"
 ```
 
-### Persistent state risk (self-hosted only)
+Self-hosted runners introduce persistent state risk — credentials written during one
+job can be visible to subsequent jobs, and multiple repos sharing a runner host share
+the same filesystem. The recommended self-hosted approach is **Kubernetes + Actions Runner
+Controller (ARC)**, which provides ephemeral pod-per-job isolation equivalent to
+GitHub-hosted runners.
 
-Self-hosted runners retain state between jobs unless explicitly configured otherwise.
-This means credentials, source code, and build artefacts from one job may be visible
-to the next. If you opt into self-hosted runners:
-
-- Use **dedicated runners** for this pipeline — do not share with untrusted workloads
-- Use **ephemeral runners** (e.g. auto-scaling with fresh instances per job) where possible
-- Ensure the runner workspace is cleaned between jobs
-- Restrict network access to only what the pipeline requires (GitHub API, Anthropic API)
-
-GitHub-hosted runners have none of these concerns — they are the recommended default.
+See [SELF-HOSTED-RUNNERS.md](SELF-HOSTED-RUNNERS.md) for setup guidance.
 
 ---
 
@@ -44,7 +39,7 @@ supply chain attacks from compromised tags. Never pin to a mutable tag (`v1`,
 
 | Action | SHA | Purpose |
 |---|---|---|
-| `actions/checkout` | `v4` (GitHub first-party) | Checkout repository code |
+| `actions/checkout` | `de0fac2e4500dabe0009e67214ff5f5447ce83dd` (v6.0.2) | Checkout repository code |
 
 ### Goose installation
 
@@ -122,12 +117,6 @@ credential that is renewed when it expires.
 
 ### Self-hosted runner prerequisites
 
-If using a self-hosted runner, the following must be pre-installed:
-
-- **Node.js** (v18+) — required for Claude Code CLI installation
-- **`gh` CLI** — GitHub CLI, authenticated with a token that has `repo` scope
-- **git** — for repository operations
-- **Network access** — to GitHub API (`api.github.com`) and Anthropic API (`api.anthropic.com`)
-
-Goose and Claude Code CLI are installed automatically by the workflow on every
-run, regardless of runner type.
+Goose and Claude Code CLI are installed automatically by the workflow on every run —
+no pre-installation required on the runner host. See [SELF-HOSTED-RUNNERS.md](SELF-HOSTED-RUNNERS.md)
+for full setup guidance including network access requirements.

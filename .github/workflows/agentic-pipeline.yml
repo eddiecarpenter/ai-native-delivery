@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: main
           fetch-depth: 0
@@ -124,7 +124,7 @@ jobs:
           echo "name=$BRANCH" >> $GITHUB_OUTPUT
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ steps.branch.outputs.name }}
           fetch-depth: 0
@@ -210,17 +210,28 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
         run: |
+          BRANCH="${{ steps.branch.outputs.name }}"
+          COMMITS=$(git rev-list --count origin/main..HEAD)
+          if [ "${COMMITS}" -eq 0 ]; then
+            echo "No commits on ${BRANCH} beyond main — nothing to PR. Skipping."
+            exit 0
+          fi
           gh pr create \
             --title "feat: ${{ github.event.issue.title }}" \
             --body "Closes #${{ github.event.issue.number }}" \
             --base main \
-            --head ${{ steps.branch.outputs.name }}
+            --head ${BRANCH}
 
       - name: Apply in-review label
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
         run: |
+          COMMITS=$(git rev-list --count origin/main..HEAD)
+          if [ "${COMMITS}" -eq 0 ]; then
+            echo "No commits — PR was not opened. Leaving issue in-development."
+            exit 0
+          fi
           gh issue edit ${{ github.event.issue.number }} \
             --remove-label "in-development" \
             --add-label "in-review"
@@ -248,7 +259,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ github.event.inputs.branch_name || github.event.pull_request.head.ref }}
           fetch-depth: 0
@@ -336,7 +347,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: main
           fetch-depth: 0
