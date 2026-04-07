@@ -35,8 +35,8 @@ without sacrificing the speed that makes agentic tooling worth using.
 
 ## What this is
 
-An **AI-native software delivery framework** covering the development side of the SDLC:
-requirements capture through to a reviewed, mergeable pull request.
+An **AI-native software delivery framework** covering the full Continuous Delivery pipeline:
+requirements capture through to a versioned, tagged release with AI-generated release notes.
 
 It provides:
 
@@ -71,13 +71,12 @@ The agent is not guessing at intent; the intent was structured by an earlier age
 
 ## What this is not
 
-**Not a CI/CD pipeline.**
-The framework covers the development process — from requirement to merged PR. Deployment,
-environment promotion, and operations are outside its scope. That said, your CD process
-is project-specific and belongs in your domain repo. There is nothing stopping you from
-using this same framework to design, build, and govern your CD pipeline as a feature of
-your project — the protocol applies equally to infrastructure-as-code as it does to
-application code.
+**Not a Continuous Deployment pipeline.**
+The framework covers the full Continuous Delivery process — from requirement through to
+a versioned, tagged release with AI-generated release notes. Deployment execution,
+environment promotion, and production operations are outside its scope and belong in
+the project's own infrastructure. The decision to deploy to production is always a
+human gate; the framework ensures there is always something releasable to deploy.
 
 **Not a fully autonomous system.**
 Phases 3 and 4 run without human intervention — the agent designs, implements, and raises
@@ -519,15 +518,36 @@ are never touched.
 
 ## Releasing a new version
 
-```bash
-gh release create vX.Y.Z --generate-notes --target main
+Releases are triggered by editing `.github/release.yml`. The framework uses the
+Maven SNAPSHOT convention:
+
+```yaml
+version: "0.7.0"        # last released version
+next: "0.8.0-SNAPSHOT"  # currently in development
 ```
 
-GitHub automatically generates release notes from merged PRs since the last tag.
+**To cut a release:**
+
+1. Edit `.github/release.yml` — remove `-SNAPSHOT` from `next`:
+   ```yaml
+   version: "0.7.0"
+   next: "0.8.0"
+   ```
+2. Commit and merge to `main`
+3. The release workflow fires automatically:
+   - Generates AI release notes from commits since the last tag
+   - Writes `.github/RELEASE_NOTES.md`
+   - Creates and pushes git tag `v0.8.0`
+   - Updates the version file: `version: "0.8.0"`, `next: "0.9.0-SNAPSHOT"`
+
+The git tag is the handoff to the local build process. See
+`base/docs/examples/publish-release.yml` for an example workflow that creates the
+GitHub release from the generated notes.
+
 Use [semantic versioning](https://semver.org): `fix:` → patch, `feat:` → minor, breaking change → major.
 
-> Releasing is a deliberate human action. Not every merge needs a release —
-> batch related changes into a meaningful version.
+> Releasing is a deliberate human action — editing the version file is the authorisation.
+> Releases have a cost (AI tokens, build pipeline). Do not release unnecessarily.
 
 ---
 

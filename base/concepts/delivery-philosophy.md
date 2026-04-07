@@ -6,20 +6,22 @@ for making good decisions during scoping, design, and implementation.
 
 ---
 
-## The Framework's Scope: Continuous Delivery
+## The Framework's Scope: Full Continuous Delivery
 
-This framework implements **Continuous Delivery (CD¹)** — the discipline of keeping
-software in a releasable state at all times. Every merge to `main` produces an artefact
-that *could* be deployed to production.
+This framework implements the full **Continuous Delivery** pipeline — from the first
+conversation about a requirement through to a versioned, tagged release ready for
+deployment.
 
-**Continuous Deployment (CD²)** — the automatic deployment of every merge to production
-without human intervention — is explicitly out of scope. The decision to deploy to
-production is a human gate. The execution of that deployment should be automated, but
-the trigger is not.
+The pipeline covers:
+**Requirements → Scoping → Design → Implementation → Release**
 
-The pipeline covers: Requirements → Scoping → Design → Implementation → Releasable artefact.
+**Continuous Deployment** — the automatic loading of a release into a production
+environment without human intervention — is explicitly out of scope. The decision
+to deploy to production is a human gate. The execution of that deployment should
+be automated, but the trigger is not.
 
-It does not cover: Deployment execution, infrastructure provisioning, or production operations.
+The framework does not cover: deployment execution, infrastructure provisioning,
+or production operations. Those belong to the project and the organisation.
 
 ---
 
@@ -46,8 +48,7 @@ A release does not automatically mean customers see new behaviour — that depen
 feature switches. A release is a coordination point: it defines what ships together,
 enables release notes, and creates an auditable history.
 
-Releases are triggered by humans. The release process should be automated but
-human-initiated.
+The framework automates the mechanics of cutting a release. The human decides when.
 
 ### 3. Enablement
 
@@ -76,6 +77,62 @@ organisation loses the ability to decouple delivery velocity from release risk.
 
 Feature switches are the primary mechanism that decouples these events. See
 `base/concepts/feature-switches.md` for the full taxonomy.
+
+---
+
+## The Release Model
+
+### Releases Are Deliberate, Not Automatic
+
+A release has a cost — AI tokens to generate notes, build pipeline execution. Releases
+should never fire unnecessarily. The framework's position: **a release requires a
+deliberate human act to trigger.** There is no automatic release on every merge.
+
+### The Version File
+
+Every repo using this framework maintains `.github/release.yml`:
+
+```yaml
+version: "0.7.0"        # last released version
+next: "0.8.0-SNAPSHOT"  # currently in development
+```
+
+This borrows the Maven SNAPSHOT convention:
+- `x.y.z-SNAPSHOT` means the repo is developing towards version `x.y.z`
+- Removing `-SNAPSHOT` from `next` is the release trigger
+- The human controls both the timing and the version number
+
+### The Release Trigger
+
+A GitHub Actions workflow monitors `.github/release.yml`. When `next` no longer
+contains `-SNAPSHOT`, the release workflow fires:
+
+1. Generate AI release notes from git history since the last tag
+2. Write `.github/RELEASE_NOTES.md` and commit to `main`
+3. Update `version` to the released value
+4. Create and push the git tag
+5. Bump `next` to the next SNAPSHOT
+
+### Handoff to the Local Build
+
+The framework's responsibility ends when the tag is pushed. The git tag is the
+universal handoff point — every language ecosystem knows how to trigger on one.
+
+The release notes are committed to `main` as `.github/RELEASE_NOTES.md`. Any
+downstream workflow triggered by the tag can access this file by checking out the
+tagged commit.
+
+The framework provides an example workflow that creates the GitHub release using
+the notes file. Projects that produce build artefacts extend this example with
+their own build steps. The framework has no knowledge of and no dependency on
+the local build process.
+
+### What the Framework Does NOT Own
+
+- How artefacts are built or what they contain
+- Where artefacts are published (registries, package managers, CDNs)
+- Release scheduling — the human decides when to edit the version file
+- Deployment execution — loading the release into a production environment
 
 ---
 
@@ -150,9 +207,6 @@ To avoid overreach, these areas are explicitly out of scope:
 - **Deployment execution** — how code gets from artefact to production environment
 - **Infrastructure provisioning** — cloud resources, Kubernetes, databases
 - **Production operations** — monitoring, alerting, incident response
-- **Release scheduling** — when to cut a release is a product decision
+- **Build artefacts** — what to build and where to publish it
 - **Integration test infrastructure** — environments, test data, service stubs
-- **Continuous Deployment (CD²)** — automatic production deployment without human gate
-
-These are real engineering concerns. They belong to the repo and the organisation,
-not to the delivery framework.
+- **Continuous Deployment** — automatic production deployment without human gate
