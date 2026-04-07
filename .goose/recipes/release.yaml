@@ -24,61 +24,13 @@ settings:
   max_turns: 20
 
 instructions: |
-  You are running a Release session. Your job is to generate human-readable release
-  notes from git commit history and create the GitHub release for tag {{ tag }}.
+  You are running a Release session for tag {{ tag }} in {{ repo }}.
 
-  Read base/skills/release-notes.md before writing anything — it defines the format,
-  writing style, and what to omit.
+  Read and follow base/skills/release-notes.md exactly.
+  Use {{ tag }} and {{ repo }} wherever the skill references those values.
 
-  ## Step 1 — Determine the Previous Tag
-
-  List all tags sorted by version, excluding the current tag:
-    git tag --sort=-version:refname | grep -v "^{{ tag }}$" | head -1
-
-  Store this as PREV_TAG. If no previous tag exists, the release covers the full
-  commit history.
-
-  ## Step 2 — Collect Commits
-
-  Get all commits since the previous tag:
-
-    If PREV_TAG exists:
-      git log --pretty=format:"%s (%h)" ${PREV_TAG}..HEAD
-
-    If no PREV_TAG:
-      git log --pretty=format:"%s (%h)"
-
-  Review the commits carefully. Read changed files if a commit message is ambiguous.
-
-  ## Step 3 — Generate Release Notes
-
-  Following the guidance in base/skills/release-notes.md:
-
-  1. Write a one-sentence summary of what this release delivers overall
-  2. Categorise each meaningful commit into Features, Fixes, Documentation, or Chores
-  3. Omit noise: merge commits, automated version bumps, CI-only changes
-  4. For this framework repo specifically: flag any changes that require downstream
-     action (new secrets, changed rules, renamed skills, breaking changes)
-
-  Write the release notes to /tmp/release-notes.md
-
-  ## Step 4 — Create the GitHub Release
-
-    gh release create {{ tag }} \
-      --repo {{ repo }} \
-      --title "Release {{ tag }}" \
-      --notes-file /tmp/release-notes.md
-
-  ## Step 5 — Report
-
-  Output the release URL and a brief summary of what was included.
-
-  ## Rules
-
-  - Do not push any commits or branches
-  - Do not modify any source files
-  - If gh release create fails because the release already exists, report and exit cleanly
+  Do not push commits. Do not modify source files.
 
 prompt: |
   Release session starting for {{ tag }} in {{ repo }}.
-  Reading commit history since previous tag, generating release notes, creating GitHub release.
+  Reading commit history, generating release notes, creating GitHub release.
