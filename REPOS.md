@@ -20,10 +20,5 @@ must be reflected in `docs/ARCHITECTURE.md`.
 
 <!-- Add repo entries below this line -->
 
-## gh-agentic
-
-- **Repo:** git@github.com:eddiecarpenter/gh-agentic.git
-- **Stack:** Go
-- **Type:** tool
-- **Status:** active
-- **Description:** GitHub CLI extension that bootstraps and manages agentic development environments. Provides `gh agentic bootstrap` (Phase 0a), `gh agentic inception` (Phase 0b), and `gh agentic sync` (template sync) commands.
+<!-- This repo uses Embedded topology — it is self-contained and does not govern other repos.
+     gh-agentic is a related tool but has its own independent agentic process. -->
