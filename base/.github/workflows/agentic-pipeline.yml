@@ -71,6 +71,16 @@ jobs:
           echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
           chmod 0600 ~/.claude/.credentials.json
 
+
+      - name: Validate Claude Code credentials
+        run: |
+          if [ ! -s ~/.claude/.credentials.json ]; then
+            echo "ERROR: ~/.claude/.credentials.json is empty or missing."
+            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\n'"
+            exit 1
+          fi
+          echo "Credentials file present."
+
       - name: Configure environment
         run: |
           git config user.name "${{ vars.AGENT_USER }}"
@@ -165,6 +175,16 @@ jobs:
           mkdir -p ~/.claude
           echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
           chmod 0600 ~/.claude/.credentials.json
+
+
+      - name: Validate Claude Code credentials
+        run: |
+          if [ ! -s ~/.claude/.credentials.json ]; then
+            echo "ERROR: ~/.claude/.credentials.json is empty or missing."
+            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\n'"
+            exit 1
+          fi
+          echo "Credentials file present."
 
       - name: Configure environment
         run: |
@@ -309,6 +329,16 @@ jobs:
           echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
           chmod 0600 ~/.claude/.credentials.json
 
+
+      - name: Validate Claude Code credentials
+        run: |
+          if [ ! -s ~/.claude/.credentials.json ]; then
+            echo "ERROR: ~/.claude/.credentials.json is empty or missing."
+            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\n'"
+            exit 1
+          fi
+          echo "Credentials file present."
+
       - name: Configure environment
         run: |
           git config user.name "${{ vars.AGENT_USER }}"
@@ -404,6 +434,16 @@ jobs:
           mkdir -p ~/.claude
           echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
           chmod 0600 ~/.claude/.credentials.json
+
+
+      - name: Validate Claude Code credentials
+        run: |
+          if [ ! -s ~/.claude/.credentials.json ]; then
+            echo "ERROR: ~/.claude/.credentials.json is empty or missing."
+            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\n'"
+            exit 1
+          fi
+          echo "Credentials file present."
 
       - name: Configure environment
         run: |
