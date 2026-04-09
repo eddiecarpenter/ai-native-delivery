@@ -48,7 +48,7 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
      with ordered tasks and explain the cost of splitting. Only recommend parallel features
      when the work is substantial enough that parallelism delivers real value. Record the
      recommendation and reasoning in the scoping summary.
-   - Acceptance criteria (checkboxes, outcome-based)
+   - Acceptance criteria — use Given/When/Then format for every criterion (not checkboxes, not prose). Minimum three criteria: one success case, one failure case, and at least one edge case.
    - UX design (if applicable)
    - **Deployment strategy** — ask: *"How should this feature reach users once deployed?"*
      Present the options and confirm the type:
