@@ -225,14 +225,17 @@ jobs:
           git config user.name "${{ vars.AGENT_USER }}"
           git config user.email "${{ vars.AGENT_USER }}@users.noreply.github.com"
 
-      - name: Check branch is not behind main
+      - name: Rebase feature branch onto main
         run: |
           git fetch origin main
-          BEHIND=$(git rev-list --count HEAD..origin/main)
-          if [ "${BEHIND}" -gt 0 ]; then
-            echo "::error::Feature branch is ${BEHIND} commit(s) behind main. Rebase onto main before re-triggering the dev session."
+          git rebase origin/main || {
+            echo "::error::Rebase failed — conflicts require manual resolution."
+            echo "Files in conflict:"
+            git diff --name-only --diff-filter=U
+            git rebase --abort
             exit 1
-          fi
+          }
+          git push origin HEAD:${{ steps.branch.outputs.name }} --force-with-lease
 
       - name: Configure Goose
         run: |
