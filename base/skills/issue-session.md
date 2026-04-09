@@ -1,5 +1,22 @@
 # Issue Session — Stage 4c
 
+## ⛔ Automation-Only — Do Not Execute Interactively
+
+This session is triggered exclusively by GitHub Actions when a GitHub Issue is assigned
+to the agent user. It must never be run manually by an agent in an interactive session.
+
+If you are reading this skill in an interactive session, stop immediately and print:
+
+```
+REFUSED: Issue Session is automation-only.
+It runs automatically when a GitHub Issue is assigned to the agent user.
+Do not execute this session interactively.
+```
+
+Do not proceed past this point in an interactive context.
+
+---
+
 ## Purpose
 
 Handle a GitHub Issue that has been assigned to the agent.

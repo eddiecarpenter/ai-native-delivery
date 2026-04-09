@@ -57,14 +57,31 @@ jobs:
           echo "${{ secrets.CLAUDE_CREDENTIALS_JSON }}" | base64 -d > ~/.claude/.credentials.json
           chmod 0600 ~/.claude/.credentials.json
 
-      - name: Validate Claude Code credentials
+      - name: Validate and refresh Claude Code credentials
+        env:
+          GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
         run: |
           if [ ! -s ~/.claude/.credentials.json ]; then
             echo "ERROR: ~/.claude/.credentials.json is empty or missing."
-            echo "Regenerate: cat ~/.claude/.credentials.json | base64 | tr -d '\\n'"
+            echo "Regenerate: run the refresh-credentials skill locally, then re-run this job."
             exit 1
           fi
-          echo "Credentials file present."
+          CREDS_BEFORE=$(sha256sum ~/.claude/.credentials.json | cut -d' ' -f1)
+          claude -p "hi" > /dev/null || {
+            echo "ERROR: Claude Code authentication failed — session may be revoked."
+            echo "Run the refresh-credentials skill locally to restore the secret."
+            exit 1
+          }
+          echo "Claude Code credentials valid."
+          CREDS_AFTER=$(sha256sum ~/.claude/.credentials.json | cut -d' ' -f1)
+          if [ "$CREDS_BEFORE" != "$CREDS_AFTER" ]; then
+            echo "Credentials rotated — updating CLAUDE_CREDENTIALS_JSON secret"
+            gh secret set CLAUDE_CREDENTIALS_JSON \
+              --repo "${GITHUB_REPOSITORY}" \
+              --body "$(cat ~/.claude/.credentials.json | base64 | tr -d '\n')"
+          else
+            echo "Credentials unchanged — no update needed"
+          fi
 
       - name: Configure environment
         run: |

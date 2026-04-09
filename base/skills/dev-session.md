@@ -37,8 +37,8 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
    - Commits: `feat: [task description] — task N of N (#feature-issue)`
    - Closes the task issue
 5. Verifies each acceptance criterion has test coverage — stops if any criterion is uncovered
-6. When all tasks are closed and criteria verified — exits cleanly
-7. The workflow pushes and opens the PR automatically
+6. When all tasks are closed and criteria verified — prints: `=== Dev Session — Completed ===`
+7. Exits cleanly — the workflow pushes and opens the PR automatically
 
 ## Rules
 

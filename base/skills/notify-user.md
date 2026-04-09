@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Send a notification to the system owner that human action is required.
-Adapts automatically to the execution context — headless or interactive.
+Send an OS notification to the system owner that human action is required or
+a session has completed. Foreground (OS) notifications only — no headless path.
 
 ## When to Use
 
@@ -13,31 +13,36 @@ Call this skill whenever the pipeline reaches a point where the human must act:
 - Feature has been sent to design (automation taking over)
 - Fix has been pushed and the workflow needs confirming
 
-## Context Detection
+## Notification Rules
 
-Check the `GITHUB_ACTIONS` environment variable:
-- `"true"` → running headlessly in a GitHub Actions workflow
-- absent or any other value → running interactively (Claude Code, Goose, terminal)
+- **Always notify** when human input is needed (blocking — the session cannot continue)
+- **Notify on completion** only when the session has been running longer than the
+  configurable threshold (default: 5 minutes / 300 seconds)
+- **Never notify** on completion if the session completed in under the threshold
+  and no human input was required
 
-## How to Notify
+## Session Timing
 
-### Headless (GitHub Actions)
-
-Post a comment on the current issue or PR. This triggers GitHub's notification
-system — email, GitHub Mobile push, and the gh-notify LaunchAgent (if installed).
+Track session start time at the beginning of any session that uses notifications:
 
 ```bash
-# For a PR:
-gh pr comment $PR_NUMBER --body "⚡ **Action required:** $MESSAGE"
-
-# For an issue:
-gh issue comment $ISSUE_NUMBER --body "⚡ **Action required:** $MESSAGE"
+SESSION_START=$(date +%s)
 ```
 
-Replace `$MESSAGE` with a specific, actionable description — include the PR or
-issue number so the human knows exactly where to go.
+Before sending a completion notification, check elapsed time:
 
-### Foreground (Interactive)
+```bash
+SESSION_ELAPSED=$(( $(date +%s) - SESSION_START ))
+SESSION_THRESHOLD=${NOTIFY_THRESHOLD_SECONDS:-300}  # default 5 minutes
+if [ "$SESSION_ELAPSED" -gt "$SESSION_THRESHOLD" ]; then
+  # send completion notification
+fi
+```
+
+The `NOTIFY_THRESHOLD_SECONDS` environment variable can be set to override the
+5-minute default. Set it in the shell environment before launching the session.
+
+## How to Notify
 
 Use the local OS notification system with sound:
 
@@ -57,6 +62,8 @@ fi
 ## Instructions for the Agent
 
 1. Determine the message — be specific (include PR/issue number where relevant)
-2. Detect context: `echo $GITHUB_ACTIONS`
-3. Execute the appropriate method above
+2. Check whether this is a **blocking** notification (input needed) or a **completion** notification:
+   - **Blocking**: send the notification immediately — always
+   - **Completion**: check `SESSION_ELAPSED` against `SESSION_THRESHOLD` — only notify if threshold exceeded
+3. Execute the OS notification command above
 4. Do not skip this step — it is how the system owner knows to act

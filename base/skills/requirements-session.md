@@ -22,13 +22,21 @@ Open Goose and select the **Requirements Session (Stage 1)** recipe.
 3. Converses with the human to distil raw ideas into clear needs
 4. Challenges vague descriptions and solution-framed requirements
 5. Creates GitHub Issues with `requirement` + `backlog` or `draft` labels
-6. Assesses whether the scope is apparent:
+6. **Confirmation gate** — displays a structured summary and confirms with the human:
+   - Issue number and title
+   - Business need summary (one or two sentences)
+   - Labels applied
+   - Asks: *"Does this capture your requirement correctly? (yes / revise)"*
+   - **If revise**: ask what to change, edit or recreate the issue, then present the
+     summary again — loop until confirmed
+   - **If yes**: proceed to step 7
+7. Assesses whether the scope is apparent:
    - **If yes** — complete scoping in this session (see Completing Scoping Early below)
    - **If no** — label the requirement `backlog` and exit; the human will run the
      Scoping Session separately
 
-7. Prints: `=== Requirements Session (Phase 1) — Completed ===`
-8. **EXIT. Do not proceed further — even if the next steps are obvious.**
+8. Prints: `=== Requirements Session (Phase 1) — Completed ===`
+9. **EXIT. Do not proceed further — even if the next steps are obvious.**
 
 ## Completing Scoping Early
 
