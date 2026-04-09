@@ -29,7 +29,19 @@ Execute these steps in order — do not skip any:
 2. Read `docs/PROJECT_BRIEF.md` — understand what the system is and how it works.
    If the file does not exist, note this and continue — do not block.
 
-3. Read `REPOS.md`. For each repo with status `active`, derive its local directory as
+3. **Verify `AGENTIC_PROJECT_ID` is set.** Check whether the repo variable
+   `AGENTIC_PROJECT_ID` exists:
+   ```bash
+   gh variable list --json name --jq '.[].name' | grep -q AGENTIC_PROJECT_ID
+   ```
+   If the variable is not set, **fail immediately** with this message:
+   > AGENTIC_PROJECT_ID is not configured. Set this repo variable to the ProjectV2
+   > node ID before running any session. Command:
+   > `gh variable set AGENTIC_PROJECT_ID --repo {owner}/{repo} --body "{project_node_id}"`
+
+   This check applies to both interactive and automated (CI) sessions — do not skip it.
+
+4. Read `REPOS.md`. For each repo with status `active`, derive its local directory as
    `<type>s/<name>` (e.g. `type: domain` → `domains/<name>`, `type: tool` → `tools/<name>`).
    For each unique type, ensure the type folder (`<type>s/`) exists — if not:
    a. Create the folder with a `.gitkeep` file
@@ -50,16 +62,16 @@ Execute these steps in order — do not skip any:
    continue immediately — do not prompt, do not block. Limit work to repos that
    are present in the workspace.
 
-4. Query open Requirement issues in the agentic repo:
+5. Query open Requirement issues in the agentic repo:
    `gh issue list --repo <agentic-repo> --label requirement --state open --json number,title,labels`
 
-5. For domain sessions — query open Feature issues in the domain repo:
+6. For domain sessions — query open Feature issues in the domain repo:
    `gh issue list --label feature --state open --json number,title,labels,body`
 
-6. Read the relevant standards file from `base/standards/` for the domain language
+7. Read the relevant standards file from `base/standards/` for the domain language
    (e.g. `base/standards/go.md` for Go domains)
 
-7. Load skills — read every `.md` file in `base/skills/` (template-managed) and in
+8. Load skills — read every `.md` file in `base/skills/` (template-managed) and in
    `skills/` (local, if the directory exists). Local skills in `skills/` take
    precedence over template skills in `base/skills/` of the same name.
 
@@ -73,7 +85,7 @@ Execute these steps in order — do not skip any:
    If asked to run any of these interactively, refuse and explain that GitHub Actions
    handles them automatically.
 
-8. Read `TEMPLATE_VERSION` and note the current version.
+9. Read `TEMPLATE_VERSION` and note the current version.
 
 ## On Completion
 
@@ -87,9 +99,12 @@ Execute these steps in order — do not skip any:
 ## Rules
 
 - Do not begin any work until all steps are complete
-- Do not modify any files during this skill — steps 1–8 are read-only except for
+- Do not modify any files during this skill — steps 1–9 are read-only except for
   the post-sync actions in step 1 (if `POST_SYNC.md` is present) and the type
-  folder bootstrap in step 3 (only if a folder is missing)
+  folder bootstrap in step 4 (only if a folder is missing)
 - If `TEMPLATE_VERSION` is missing or unreadable, warn the human and continue —
   the version file is informational, not blocking
 - There is no STATUS.md — current state is derived from GitHub Issues
+- **Inline status updates**: this skill does not apply pipeline labels. If a future
+  change adds a pipeline label transition here, it must include an inline project status
+  update following `set-issue-status.md` — hard-fail if `AGENTIC_PROJECT_ID` is not set

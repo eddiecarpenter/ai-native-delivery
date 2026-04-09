@@ -56,3 +56,7 @@ If the fix requires out-of-scope changes, the agent posts a comment and adds
 - Always post a comment before starting and after finishing
 - If in doubt — stop and ask via a comment rather than guessing
 - Contract changes always require human approval
+- **Inline status updates**: this skill only applies `answered` (not a pipeline label).
+  If a future change adds a pipeline label transition here, it must include an inline
+  project status update following `set-issue-status.md` — hard-fail if
+  `AGENTIC_PROJECT_ID` is not set

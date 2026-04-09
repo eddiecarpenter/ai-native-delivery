@@ -33,7 +33,15 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
 4. Creates Task sub-issues under the Feature (ordered by implementation sequence), ensuring every acceptance criterion is covered by at least one task
 5. Verifies full criteria-to-task coverage before proceeding
 6. Creates the feature branch: `feature/<N>-<description>`
-7. Applies `in-development` label on the Feature issue
+7. Applies `in-development` label on the Feature issue.
+   **Inline status update** — immediately after applying the `in-development` label, set
+   the feature's project status to `In Development` following the pattern in
+   `set-issue-status.md`:
+   - Verify `AGENTIC_PROJECT_ID` is set — hard-fail if not
+   - Resolve the issue node ID
+   - Find or create the project item
+   - Resolve the Status field and option IDs
+   - Set status to `In Development`
 8. Prints: `=== Feature Design Session — Completed ===`
 9. Exits cleanly — no code written, no PR opened
 

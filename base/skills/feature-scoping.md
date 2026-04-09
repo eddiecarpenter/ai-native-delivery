@@ -31,7 +31,14 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 1. Prints: `=== Feature Scoping Session (Phase 2) — Started ===`
 2. Lists available requirements in `backlog` state
 3. Waits for the human to select a requirement
-4. Transitions the requirement from `backlog` to `scoping`
+4. Transitions the requirement from `backlog` to `scoping`.
+   **Inline status update** — immediately after applying the `scoping` label, set the
+   project status to `Scoping` following the pattern in `set-issue-status.md`:
+   - Verify `AGENTIC_PROJECT_ID` is set — hard-fail if not
+   - Resolve the issue node ID
+   - Find or create the project item
+   - Resolve the Status field and option IDs
+   - Set status to `Scoping`
 5. Works through seven artefacts to define the feature.
    **Present each artefact to the human and wait for explicit confirmation before
    proceeding to the next.** Do not batch artefacts or produce the next one until
@@ -78,11 +85,26 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 10. **Explicit trigger confirmation** — presents the full list of agreed features and asks:
     *"Which of these features should be triggered for design now? (list numbers, or 'all')"*
     - Apply `in-design` only to features the human explicitly selects — and remove the `backlog` label in the same operation. A feature carries one status label at a time.
+    - **Inline status update** — for each feature that receives the `in-design` label,
+      immediately set its project status to `In Design` following the pattern in
+      `set-issue-status.md`:
+      - Verify `AGENTIC_PROJECT_ID` is set — hard-fail if not
+      - Resolve the issue node ID
+      - Find or create the project item
+      - Resolve the Status field and option IDs
+      - Set status to `In Design`
     - Features not selected remain at `backlog` with a note in the issue body:
       `> Not triggered during scoping — awaiting human decision.`
     - For features held due to cross-repo dependencies, leave at `backlog` and document
       the dependency in the issue
-11. Transitions the requirement from `scoping` to `scheduled`
+11. Transitions the requirement from `scoping` to `scheduled`.
+    **Inline status update** — immediately after applying the `scheduled` label, set the
+    requirement's project status to `Scheduled` following the pattern in `set-issue-status.md`:
+    - Verify `AGENTIC_PROJECT_ID` is set — hard-fail if not
+    - Resolve the issue node ID
+    - Find or create the project item
+    - Resolve the Status field and option IDs
+    - Set status to `Scheduled`
 12. Prints one of the following exit summaries:
 
     **All features triggered:**

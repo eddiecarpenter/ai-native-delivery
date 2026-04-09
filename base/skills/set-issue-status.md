@@ -15,8 +15,8 @@ contexts: interactive sessions (macOS, Windows, Linux) and automated CI workflow
 - `AGENTIC_PROJECT_ID` repo variable set to the ProjectV2 node ID (e.g. `PVT_kwHOBODmNc4BTwOo`)
 - `GH_TOKEN` set to a PAT with `project` scope (in CI: `GOOSE_AGENT_PAT`)
 
-If `AGENTIC_PROJECT_ID` is not set, skip the status update silently — the repo
-has not configured project sync.
+If `AGENTIC_PROJECT_ID` is not set, **fail with a clear error message** — do not
+skip silently. All repos must have this variable configured before running sessions.
 
 ## Label-to-Status Mapping
 
@@ -136,7 +136,7 @@ gh api graphql -f query='
 ## Rules
 
 - Always set status in the same operation as the label — never as a separate step or session
-- If `AGENTIC_PROJECT_ID` is not set, skip silently — do not error
+- If `AGENTIC_PROJECT_ID` is not set, **hard-fail with a clear error message** — do not skip silently
 - If the issue is not yet in the project, add it first (Step 2 handles this)
 - Never hardcode field IDs or option IDs — always resolve them dynamically (they vary per project)
 - Only pipeline labels have a status mapping — all other labels are ignored

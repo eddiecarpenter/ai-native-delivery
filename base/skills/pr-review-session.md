@@ -50,6 +50,10 @@ Triggered automatically by GitHub Actions when a PR review is submitted with
 - Never merge the PR — leave that for human review
 - If a fix requires a contract change or broad refactor, escalate: post a comment, apply `needs-foreground-review`, and exit without changes
 - When feedback is ambiguous or scope-changing and cannot be resolved with a simple fix, always escalate rather than guessing
+- **Inline status updates**: this skill only applies `needs-foreground-review` (not a
+  pipeline label). If a future change adds a pipeline label transition here, it must
+  include an inline project status update following `set-issue-status.md` — hard-fail
+  if `AGENTIC_PROJECT_ID` is not set
 
 ## Notification
 
