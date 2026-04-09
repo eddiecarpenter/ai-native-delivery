@@ -34,7 +34,8 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
 5. Verifies full criteria-to-task coverage before proceeding
 6. Creates the feature branch: `feature/<N>-<description>`
 7. Applies `in-development` label on the Feature issue
-8. Exits cleanly — no code written, no PR opened
+8. Prints: `=== Feature Design Session — Completed ===`
+9. Exits cleanly — no code written, no PR opened
 
 ## Task Issue Format
 
