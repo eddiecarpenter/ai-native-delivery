@@ -38,6 +38,16 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
    - Feature definition — includes a user story statement in `As a [user], I want [goal], so that [benefit]` format
    - MVP scope
    - **Parallel/serial checkpoint** — asks whether all parts can be built independently or must be sequenced. Independent work → multiple features (parallel). Sequential work → one feature with ordered tasks (same branch, same PR). Never creates multiple features with implied serial dependencies.
+
+     **Three-dimensional cost principle** — before recommending parallel features, weigh:
+     - **Token cost**: each parallel feature requires its own full Design + Dev session
+     - **Build cost**: more branches = more CI runs = more build minutes
+     - **Time overhead**: parallel features require coordination and merge ordering
+
+     If the combined work fits comfortably in a single dev session, recommend one feature
+     with ordered tasks and explain the cost of splitting. Only recommend parallel features
+     when the work is substantial enough that parallelism delivers real value. Record the
+     recommendation and reasoning in the scoping summary.
    - Acceptance criteria (checkboxes, outcome-based)
    - UX design (if applicable)
    - **Deployment strategy** — ask: *"How should this feature reach users once deployed?"*
@@ -53,13 +63,24 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
      If the human elects no switch for a feature or enhancement, ask for the reason and record it.
      See `base/concepts/feature-switches.md` for the full taxonomy.
    - Parking lot review
-6. Verifies user story is present and complete before creating the issue
-7. Creates Feature issues in the domain repo with `feature` + `backlog` labels
-8. Wires sub-issue relationship: Feature → parent Requirement
-9. Applies `in-design` to features that are ready to proceed. For features held due to
-   cross-repo dependencies, leave at `backlog` and document the dependency in the issue.
-10. Transitions the requirement from `scoping` to `scheduled`
-11. Prints one of the following exit summaries:
+6. **Impact delta on rejection or modification** — when the human rejects or modifies
+   a proposed feature after others have already been accepted:
+   - Re-evaluate all previously accepted features: does this rejection or change affect
+     their scope, dependencies, or ordering?
+   - Surface only features flagged as affected and ask the human to re-confirm them
+   - Features not flagged are not re-presented — they remain accepted as-is
+7. Verifies user story is present and complete before creating the issue
+8. Creates Feature issues in the domain repo with `feature` + `backlog` labels
+9. Wires sub-issue relationship: Feature → parent Requirement
+10. **Explicit trigger confirmation** — presents the full list of agreed features and asks:
+    *"Which of these features should be triggered for design now? (list numbers, or 'all')"*
+    - Apply `in-design` only to features the human explicitly selects
+    - Features not selected remain at `backlog` with a note in the issue body:
+      `> Not triggered during scoping — awaiting human decision.`
+    - For features held due to cross-repo dependencies, leave at `backlog` and document
+      the dependency in the issue
+11. Transitions the requirement from `scoping` to `scheduled`
+12. Prints one of the following exit summaries:
 
     **All features triggered:**
     ```
@@ -90,13 +111,15 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 ## Rules
 
 - Serial vs parallel decomposition: independent capabilities → separate features; sequential capabilities → one feature with ordered tasks; never create multiple features with implied serial dependencies
+- **Three-dimensional cost principle**: before recommending parallel features, weigh token cost, build cost, and time overhead against the parallelism benefit. Batch small independent changes into one feature with ordered tasks unless the work is substantial enough that parallelism delivers real value.
 - Push toward MVP — smallest version that delivers real value
 - Feature issue structure and format is defined by `capture-feature.md` — follow it exactly
 - Acceptance criteria must use Given/When/Then format — not checkboxes, not prose
 - UX design must be done now, not deferred to implementation
 - Never accept solution criteria — convert to outcome criteria
 - If an idea is out of scope, capture it in the parking lot
-- Apply `in-design` only when the human confirms the feature is ready
+- **Explicit trigger confirmation**: never apply `in-design` automatically to all agreed features. Present the list and apply only to features the human explicitly selects. Features not selected remain at `backlog`.
+- **Impact delta on changes**: when the human rejects or modifies a feature, re-evaluate previously accepted features for impact and re-confirm only those affected
 
 ## Notification
 
