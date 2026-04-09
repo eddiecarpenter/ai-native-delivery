@@ -32,7 +32,10 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 2. Lists available requirements in `backlog` state
 3. Waits for the human to select a requirement
 4. Transitions the requirement from `backlog` to `scoping`
-5. Works through seven artefacts to define the feature:
+5. Works through seven artefacts to define the feature.
+   **Present each artefact to the human and wait for explicit confirmation before
+   proceeding to the next.** Do not batch artefacts or produce the next one until
+   the human has approved or revised the current one.
    - Raw idea summary
    - Problem statement
    - Feature definition — includes a user story statement in `As a [user], I want [goal], so that [benefit]` format
