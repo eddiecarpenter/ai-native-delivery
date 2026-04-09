@@ -74,7 +74,7 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
 9. Wires sub-issue relationship: Feature → parent Requirement
 10. **Explicit trigger confirmation** — presents the full list of agreed features and asks:
     *"Which of these features should be triggered for design now? (list numbers, or 'all')"*
-    - Apply `in-design` only to features the human explicitly selects
+    - Apply `in-design` only to features the human explicitly selects — and remove the `backlog` label in the same operation. A feature carries one status label at a time.
     - Features not selected remain at `backlog` with a note in the issue body:
       `> Not triggered during scoping — awaiting human decision.`
     - For features held due to cross-repo dependencies, leave at `backlog` and document
