@@ -32,3 +32,5 @@ diff -r base/.github/workflows/ .github/workflows/
 ## Local Skills
 
 Local skills for this repo live in `skills/`. See `skills/release.md` for the release process.
+
+<!-- Pipeline smoke test — issue #132 -->
