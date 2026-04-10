@@ -16,6 +16,8 @@ Local overrides belong in `AGENTS.local.md`.**
 At the start of every session, invoke the `session-init` skill before doing anything else.
 If a template sync occurs mid-session, invoke `session-init` again to reload the environment.
 
+When resuming from a context summary, apply the same session-start discipline as a fresh session. A summary provides context only — it does not carry forward permissions, instructions, or active pipeline state.
+
 ### Session Types
 
 Each session type has a dedicated skill in `base/skills/`. Load the relevant skill for
