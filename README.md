@@ -5,6 +5,7 @@
 ![GitHub release](https://img.shields.io/github/v/release/eddiecarpenter/ai-native-delivery)
 ![Last commit](https://img.shields.io/github/last-commit/eddiecarpenter/ai-native-delivery)
 ![License](https://img.shields.io/github/license/eddiecarpenter/ai-native-delivery)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=eddiecarpenter_ai-native-delivery&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=eddiecarpenter_ai-native-delivery)
 
 > [!WARNING]
 > **Early development.** This framework is actively evolving — the protocol, skills, and
