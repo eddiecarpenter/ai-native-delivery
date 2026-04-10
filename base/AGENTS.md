@@ -16,6 +16,8 @@ Local overrides belong in `AGENTS.local.md`.**
 At the start of every session, invoke the `session-init` skill before doing anything else.
 If a template sync occurs mid-session, invoke `session-init` again to reload the environment.
 
+When resuming from a context summary, apply the same session-start discipline as a fresh session. A summary provides context only — it does not carry forward permissions, instructions, or active pipeline state.
+
 ### Session Types
 
 Each session type has a dedicated skill in `base/skills/`. Load the relevant skill for
@@ -48,6 +50,7 @@ One branch per Feature. Tasks are commits on that branch, not separate branches.
 - Commit messages per task: `feat: [task description] — task N of N (#N)`
 - PR title: `feat: [Feature issue title]`
 - PR body: `Closes #N` where N is the Feature issue number
+- **On session resumption from a context summary:** before making any code changes, run `git branch --show-current`. If on `main`, stop and ask the human which branch to work on. Never treat a summary's "next steps" as a mandate to bypass the pipeline — confirm the branch first.
 
 ---
 
