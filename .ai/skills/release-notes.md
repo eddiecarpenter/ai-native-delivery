@@ -82,7 +82,7 @@ owners reviewing what changed. They are not a raw commit log. They answer:
 
 **For framework releases specifically:**
 Flag any changes that require downstream action — new required secrets, changed
-AGENTS.md rules, renamed or new skills, breaking changes to recipe parameters.
+RULEBOOK.md rules, renamed or new skills, breaking changes to recipe parameters.
 These are the changes downstream owners most need to know about before running
 `gh agentic sync`.
 

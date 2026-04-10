@@ -250,7 +250,7 @@ and tool repos registered in `REPOS.md`. Best for multi-service systems or team 
 
 The framework separates **rules** from **procedures** into two distinct layers:
 
-**`.ai/AGENTS.md` is the rulebook.** It is always active — every rule in it applies to
+**`.ai/RULEBOOK.md` is the rulebook.** It is always active — every rule in it applies to
 every agent, every session, every phase. It governs git discipline, testing, build
 verification, contract safety, and working principles. Agents read it once at session
 start and operate within its boundaries for the entire session.
@@ -260,15 +260,15 @@ specific session type or task. Skills are invoked explicitly when needed — the
 always active. A skill tells the agent what to do; the rulebook tells the agent how to
 behave while doing it.
 
-| | Rulebook (`.ai/AGENTS.md`) | Playbooks (`.ai/skills/`) |
+| | Rulebook (`.ai/RULEBOOK.md`) | Playbooks (`.ai/skills/`) |
 |---|---|---|
 | **When active** | Always — every session | Invoked explicitly for a specific session or task |
 | **Contains** | Rules, constraints, universal principles | Step-by-step procedures, templates, named workflows |
 | **Use for** | Git rules, testing standards, contract safety | Session procedures, issue templates, named workflows |
-| **Override** | Local rules in `AGENTS.md` extend it | Local skills in `skills/` override base skills of the same name |
+| **Override** | Local rules in `LOCALRULES.md` extend it | Local skills in `skills/` override base skills of the same name |
 | **Example** | Never commit directly to `main` | How to run a Feature Design session |
 
-If it is a constraint that must always apply, it belongs in the rulebook (`AGENTS.md`
+If it is a constraint that must always apply, it belongs in the rulebook (`LOCALRULES.md`
 for project-specific rules). If it is a procedure invoked for a specific task, it belongs
 in a skill.
 
@@ -284,7 +284,7 @@ Skills live in two places:
 ## Agent runtimes
 
 The framework is designed for **model independence**. Agent behaviour is governed by the
-protocol — `.ai/AGENTS.md`, skills, and standards files — not by the AI model underneath.
+protocol — `.ai/RULEBOOK.md`, skills, and standards files — not by the AI model underneath.
 This means you are not locked into a single provider. You can run different runtimes for
 different phases, swap models as better options emerge, or migrate to a new provider
 without changing your delivery process.
@@ -465,15 +465,16 @@ the interactive OAuth flow and updates the secret with fresh credentials.
 
 ### Adding local rules
 
-Project-specific rules belong in `AGENTS.md`. These are always active — every
-agent session in the repo reads this file. Use rules for:
+Project-specific rules belong in `LOCALRULES.md`. This file is optional — if it does
+not exist, no local rules are applied. When present, it is always active — every
+agent session in the repo reads it. Use rules for:
 
 - Team conventions (branching strategy, commit message format)
 - Prohibited actions (never modify this config file, always ask before adding dependencies)
 - Project-specific standards (logging patterns, error handling conventions)
 - Always-on context (links to external systems, domain glossary)
 
-Rules extend the global protocol in `.ai/AGENTS.md`. Local rules take precedence where
+Rules extend the global protocol in `.ai/RULEBOOK.md`. Local rules take precedence where
 they conflict.
 
 ### Adding local skills
@@ -509,17 +510,17 @@ skills/
 
 | Path | Purpose |
 |---|---|
-| `.ai/AGENTS.md` | Rulebook — git rules, testing, build verification, contract safety, working principles |
+| `.ai/RULEBOOK.md` | Rulebook — git rules, testing, build verification, contract safety, working principles |
 | `.ai/standards/` | Language-specific coding standards (Go, Java, TypeScript, etc.) |
 | `.ai/skills/` | Built-in skills — managed by template, do not edit |
 | `.goose/recipes/` | Agent session recipes (YAML) — managed by template, do not edit |
 | `.github/workflows/` | Reusable GitHub Actions workflow definitions |
-| `CLAUDE.md` | Entry point — loads `.ai/AGENTS.md` and `AGENTS.md` |
-| `AGENTS.md` | Local rules — project-specific, never overwritten by sync |
-| `REPOS.md` | Repository registry — all domains, tools, and other repos in the project |
+| `CLAUDE.md` | Entry point — loads `AGENTS.md` |
+| `AGENTS.md` | Template-managed include — loads `.ai/RULEBOOK.md` and `LOCALRULES.md` |
+| `LOCALRULES.md` | Local rules — project-specific, optional, never overwritten by sync |
+| `REPOS.md` | Repository registry — all domains, tools, and other repos (multi-repo topology only) |
 | `skills/` | Local skills — project-specific, override base skills of the same name |
-| `.ai/config.yml` | Records which template repo this environment was bootstrapped from |
-| `.ai/config.yml` | Records the template version last synced |
+| `.ai/config.yml` | Template source and version last synced |
 
 ---
 
@@ -533,7 +534,7 @@ gh agentic sync
 
 The command pulls the latest `.ai/` from the upstream template, shows you a diff, and
 asks for confirmation before committing. Only `.ai/` and `.ai/config.yml` are ever
-updated. All local files (`AGENTS.md`, `REPOS.md`, `CLAUDE.md`, `skills/`, etc.)
+updated. All local files (`LOCALRULES.md`, `REPOS.md`, `CLAUDE.md`, `skills/`, etc.)
 are never touched.
 
 > [!IMPORTANT]
@@ -595,7 +596,7 @@ Ways to get involved:
 
 - **Try it** — bootstrap an environment and run a feature through the pipeline
 - **Report gaps** — open an issue describing where the protocol broke down or fell short
-- **Propose improvements** — suggest changes to `.ai/AGENTS.md`, a standards file, or a skill
+- **Propose improvements** — suggest changes to `.ai/RULEBOOK.md`, a standards file, or a skill
 - **Share your stack** — if you add standards for a language or framework not yet covered, a PR is welcome
 - **Discuss** — use [GitHub Discussions](https://github.com/eddiecarpenter/ai-native-delivery/discussions) for questions, ideas, and war stories
 

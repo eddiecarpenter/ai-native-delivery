@@ -42,13 +42,13 @@ requires only rewrapping the skills. The skills themselves remain unchanged.
 - No vendor-specific syntax — no Claude-specific formatting, no Goose-specific references
 - No model assumptions — do not assume a specific context window, reasoning style, or API
 - One skill per phase — single responsibility
-- Skills reference `AGENTS.md` as the source of truth for process rules
+- Skills reference `.ai/RULEBOOK.md` as the source of truth for process rules
 
 ## Governance
 
 **Skills are read-only.** Never modify a skill locally.
 
-- Customisation of agent behaviour belongs in `AGENTS.md`
+- Customisation of agent behaviour belongs in `LOCALRULES.md`
 - If a skill needs to change, raise it against `eddiecarpenter/ai-native-delivery`
   and let it flow in via `gh agentic sync`
 - `gh agentic verify` detects and flags any local modifications to `.ai/skills/*.md`

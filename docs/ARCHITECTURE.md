@@ -16,7 +16,7 @@ of three layers:
 
 | Repo | Type | Purpose |
 |---|---|---|
-| `eddiecarpenter/ai-native-delivery` | Template | Holds `.ai/AGENTS.md`, language standards, workflow definitions. Never cloned directly — consumed via `gh repo create --template`. |
+| `eddiecarpenter/ai-native-delivery` | Template | Holds `.ai/RULEBOOK.md`, language standards, workflow definitions. Never cloned directly — consumed via `gh repo create --template`. |
 | `eddiecarpenter/gh-agentic` | Tool | GitHub CLI extension. Bootstraps environments, registers repos, syncs .ai/. |
 
 ---
@@ -31,9 +31,9 @@ Used for standalone tools, libraries, and small projects.
 ```
 my-project/
 ├── CLAUDE.md
-├── AGENTS.md
-├── REPOS.md             ← empty or unused
-├── .ai/                ← synced from template
+├── AGENTS.md            ← template-managed include file
+├── LOCALRULES.md        ← optional local overrides
+├── .ai/                 ← synced from template
 ├── cmd/
 └── internal/
 ```
@@ -46,7 +46,8 @@ collection of domain and tool repos. Each domain/tool repo is independent.
 ```
 my-org-agentic/          ← control plane
 ├── CLAUDE.md
-├── AGENTS.md
+├── AGENTS.md            ← template-managed include file
+├── LOCALRULES.md        ← optional local overrides
 ├── REPOS.md             ← registry of all domain/tool repos
 ├── .ai/
 └── docs/
@@ -74,7 +75,7 @@ tools/
 | 4 | Development | AI agent | Implements tasks, commits, closes issues |
 
 Phases 0a and 0b are deterministic — no AI involved.
-Phases 1-4 are AI-driven — the agent reads context from `CLAUDE.md` and `AGENTS.md`.
+Phases 1-4 are AI-driven — the agent reads context from `CLAUDE.md`, `AGENTS.md`, and `LOCALRULES.md`.
 
 ---
 
@@ -84,10 +85,12 @@ Agent behaviour is defined in two layers:
 
 | File | Scope | Modified by |
 |---|---|---|
-| `.ai/AGENTS.md` | Global — all projects | Template sync only (`gh agentic sync`) |
-| `AGENTS.md` | Local — this project only | Human, never overwritten by sync |
+| `.ai/RULEBOOK.md` | Global — all projects | Template sync only (`gh agentic sync`) |
+| `AGENTS.md` | Include glue — template-managed | Template sync only |
+| `LOCALRULES.md` | Local — this project only | Human, never overwritten by sync |
 
-`CLAUDE.md` loads both via `@.ai/AGENTS.md` and `@AGENTS.md`.
+`CLAUDE.md` loads `AGENTS.md`, which includes `.ai/RULEBOOK.md` and `LOCALRULES.md`.
+`LOCALRULES.md` is optional — if absent, no local rules are applied.
 
 `.ai/` is read-only for AI agents — changes must go through the template repo
 (`eddiecarpenter/ai-native-delivery`) and flow in via `gh agentic sync`.
