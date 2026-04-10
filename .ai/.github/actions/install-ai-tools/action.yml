@@ -28,22 +28,26 @@ runs:
     - name: Resolve Goose version
       id: goose-version
       shell: bash
+      env:
+        INPUT_GOOSE_VERSION: ${{ inputs.goose-version }}
       run: |
-        if [ "${{ inputs.goose-version }}" = "latest" ]; then
+        if [ "${INPUT_GOOSE_VERSION}" = "latest" ]; then
           GOOSE_VERSION=$(curl -fsSL https://api.github.com/repos/block/goose/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
         else
-          GOOSE_VERSION="${{ inputs.goose-version }}"
+          GOOSE_VERSION="${INPUT_GOOSE_VERSION}"
         fi
         echo "version=${GOOSE_VERSION}" >> $GITHUB_OUTPUT
 
     - name: Resolve Claude CLI version
       id: claude-version
       shell: bash
+      env:
+        INPUT_CLAUDE_VERSION: ${{ inputs.claude-cli-version }}
       run: |
-        if [ "${{ inputs.claude-cli-version }}" = "latest" ]; then
+        if [ "${INPUT_CLAUDE_VERSION}" = "latest" ]; then
           CLAUDE_VERSION=$(npm view @anthropic-ai/claude-code version 2>/dev/null || echo "unknown")
         else
-          CLAUDE_VERSION="${{ inputs.claude-cli-version }}"
+          CLAUDE_VERSION="${INPUT_CLAUDE_VERSION}"
         fi
         echo "version=${CLAUDE_VERSION}" >> $GITHUB_OUTPUT
 
@@ -73,12 +77,15 @@ runs:
     - name: Install Claude Code CLI
       if: steps.cache-claude.outputs.cache-hit != 'true'
       shell: bash
+      env:
+        INPUT_CLAUDE_VERSION: ${{ inputs.claude-cli-version }}
+        TOOL_CACHE: ${{ runner.tool_cache }}
       run: |
-        npm config set prefix "${{ runner.tool_cache }}/claude-cli"
-        if [ "${{ inputs.claude-cli-version }}" = "latest" ]; then
+        npm config set prefix "${TOOL_CACHE}/claude-cli"
+        if [ "${INPUT_CLAUDE_VERSION}" = "latest" ]; then
           npm install -g @anthropic-ai/claude-code
         else
-          npm install -g @anthropic-ai/claude-code@${{ inputs.claude-cli-version }}
+          npm install -g "@anthropic-ai/claude-code@${INPUT_CLAUDE_VERSION}"
         fi
 
     - name: Restore Claude CLI from cache

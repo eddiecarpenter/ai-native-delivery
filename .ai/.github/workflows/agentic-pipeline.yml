@@ -271,6 +271,8 @@ jobs:
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           BRANCH="${{ steps.branch.outputs.name }}"
           COMMITS=$(git rev-list --count origin/main..HEAD)
@@ -279,8 +281,8 @@ jobs:
             exit 0
           fi
           gh pr create \
-            --title "feat: ${{ github.event.issue.title }}" \
-            --body "Closes #${{ github.event.issue.number }}" \
+            --title "feat: ${ISSUE_TITLE}" \
+            --body "Closes #${ISSUE_NUMBER}" \
             --base main \
             --head ${BRANCH}
 
@@ -614,8 +616,10 @@ jobs:
     steps:
       - name: Extract feature issue number
         id: feature
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"
+          BRANCH="${PR_HEAD_REF}"
           ISSUE_NUMBER=$(echo "${BRANCH}" | sed 's|feature/\([0-9]*\)-.*|\1|')
           echo "issue_number=${ISSUE_NUMBER}" >> $GITHUB_OUTPUT
 
@@ -853,6 +857,7 @@ jobs:
       - name: Delete feature branch
         env:
           GH_TOKEN: ${{ secrets.GOOSE_AGENT_PAT }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          gh api repos/${{ github.repository }}/git/refs/heads/${{ github.head_ref }} --method DELETE
-          echo "Deleted branch ${{ github.head_ref }}"
+          gh api repos/${{ github.repository }}/git/refs/heads/${HEAD_REF} --method DELETE
+          echo "Deleted branch ${HEAD_REF}"
