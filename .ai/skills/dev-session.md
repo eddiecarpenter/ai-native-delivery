@@ -30,9 +30,21 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
 1. Verifies it is on the correct feature branch — never works on main
 2. Reads the Feature issue and extracts acceptance criteria for end-of-session verification
 3. Queries open Task sub-issues on the Feature, ordered by issue number
-4. If `recovery.md` does not exist at session start, proceed as a fresh start — no
-   recovery behaviour occurs
-5. For each Task in order:
+4. **Recovery detection** — before processing tasks, check for `recovery.md`:
+   - If `recovery.md` **does not exist**: proceed as a fresh start — no recovery
+     behaviour occurs. Continue to step 5.
+   - If `recovery.md` **exists**: read it and perform the branch mismatch check:
+     - Compare the `Branch` field in `recovery.md` with `git branch --show-current`
+     - If they **do not match**: warn the human with the mismatch details and ask
+       whether to (a) treat this as a fresh start and overwrite `recovery.md`, or
+       (b) stop so the human can investigate. **Do not proceed until the human responds.**
+     - If they **match**: enter **recovery mode**:
+       - Parse the `## Completed Tasks` section to get the list of already-completed
+         task issue numbers
+       - Verify each completed task's GitHub issue is actually closed
+       - Log: `Recovery mode active — skipping N completed tasks: #X, #Y, #Z`
+       - Skip those tasks in step 5 — resume from the first incomplete task
+5. For each Task in order (skipping tasks completed in recovery mode):
    - Reads the task issue and understands what must be built
    - Implements the work described
    - Builds and tests — stops immediately on failure and reports the exact error
