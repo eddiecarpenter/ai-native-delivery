@@ -4,13 +4,13 @@ name: Publish Release
 # documentation repos, etc.).
 #
 # Triggered by a tag push. This workflow:
-#   1. Updates TEMPLATE_VERSION on main to the released tag
+#   1. Updates version: in .ai/config.yml on main to the released tag
 #   2. Creates the GitHub release (stub) — which triggers the Release Notes
 #      workflow (release.yml) to generate and update the AI release notes
 #
 # For repos that produce build artefacts (Go binaries, npm packages, etc.),
 # replace this workflow with your build tool's own release workflow
-# (GoReleaser, semantic-release, etc.). See base/docs/examples/ for patterns.
+# (GoReleaser, semantic-release, etc.). See .ai/docs/examples/ for patterns.
 
 on:
   push:
@@ -29,13 +29,13 @@ jobs:
           ref: main
           token: ${{ secrets.GOOSE_AGENT_PAT }}
 
-      - name: Update TEMPLATE_VERSION
+      - name: Update version in .ai/config.yml
         run: |
-          echo "${{ github.ref_name }}" > TEMPLATE_VERSION
+          sed -i "s/^version:.*/version: ${{ github.ref_name }}/" .ai/config.yml
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add TEMPLATE_VERSION
-          git commit -m "chore: update TEMPLATE_VERSION to ${{ github.ref_name }}"
+          git add .ai/config.yml
+          git commit -m "chore: update version to ${{ github.ref_name }}"
           git push origin main
 
       - name: Create GitHub release
