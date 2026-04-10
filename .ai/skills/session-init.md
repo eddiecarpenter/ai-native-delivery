@@ -41,7 +41,9 @@ Execute these steps in order — do not skip any:
 
    This check applies to both interactive and automated (CI) sessions — do not skip it.
 
-4. Read `REPOS.md`. For each repo with status `active`, derive its local directory as
+4. Check whether `REPOS.md` exists in the repository root.
+   - If it does not exist: this is a single-repo (Embedded) topology — skip this step entirely and continue.
+   - If it exists: read it. For each repo with status `active`, derive its local directory as
    `<type>s/<name>` (e.g. `type: domain` → `domains/<name>`, `type: tool` → `tools/<name>`).
    For each unique type, ensure the type folder (`<type>s/`) exists — if not:
    a. Create the folder with a `.gitkeep` file
