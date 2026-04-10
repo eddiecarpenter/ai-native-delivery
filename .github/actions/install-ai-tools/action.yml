@@ -1,0 +1,121 @@
+name: Install AI Tools
+description: >
+  Install Goose and Claude Code CLI with caching support.
+  Optionally installs gh CLI for jobs that need it.
+
+inputs:
+  goose-version:
+    description: 'Goose version to install (default: latest)'
+    required: false
+    default: 'latest'
+  claude-cli-version:
+    description: 'Claude Code CLI version to install (default: latest)'
+    required: false
+    default: 'latest'
+  install-gh-cli:
+    description: 'Whether to install gh CLI (default: true)'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Install system dependencies
+      shell: bash
+      run: |
+        sudo apt-get update -qq && sudo apt-get install -y bzip2 libgomp1
+
+    - name: Resolve Goose version
+      id: goose-version
+      shell: bash
+      run: |
+        if [ "${{ inputs.goose-version }}" = "latest" ]; then
+          GOOSE_VERSION=$(curl -fsSL https://api.github.com/repos/block/goose/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+        else
+          GOOSE_VERSION="${{ inputs.goose-version }}"
+        fi
+        echo "version=${GOOSE_VERSION}" >> $GITHUB_OUTPUT
+
+    - name: Resolve Claude CLI version
+      id: claude-version
+      shell: bash
+      run: |
+        if [ "${{ inputs.claude-cli-version }}" = "latest" ]; then
+          CLAUDE_VERSION=$(npm view @anthropic-ai/claude-code version 2>/dev/null || echo "unknown")
+        else
+          CLAUDE_VERSION="${{ inputs.claude-cli-version }}"
+        fi
+        echo "version=${CLAUDE_VERSION}" >> $GITHUB_OUTPUT
+
+    - name: Cache Goose binary
+      id: cache-goose
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+      with:
+        path: ~/.local/bin/goose
+        key: goose-${{ steps.goose-version.outputs.version }}
+
+    - name: Install Goose
+      if: steps.cache-goose.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p ~/.local/bin
+        GOOSE_VERSION="${{ steps.goose-version.outputs.version }}"
+        curl -fsSL "https://github.com/block/goose/releases/download/v${GOOSE_VERSION}/goose-x86_64-unknown-linux-gnu.tar.bz2" -o /tmp/goose.tar.bz2
+        tar -xj -C ~/.local/bin -f /tmp/goose.tar.bz2
+
+    - name: Cache Claude Code CLI
+      id: cache-claude
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+      with:
+        path: ${{ runner.tool_cache }}/claude-cli
+        key: claude-cli-${{ steps.claude-version.outputs.version }}
+
+    - name: Install Claude Code CLI
+      if: steps.cache-claude.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        npm config set prefix "${{ runner.tool_cache }}/claude-cli"
+        if [ "${{ inputs.claude-cli-version }}" = "latest" ]; then
+          npm install -g @anthropic-ai/claude-code
+        else
+          npm install -g @anthropic-ai/claude-code@${{ inputs.claude-cli-version }}
+        fi
+
+    - name: Restore Claude CLI from cache
+      if: steps.cache-claude.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        npm config set prefix "${{ runner.tool_cache }}/claude-cli"
+
+    - name: Resolve gh CLI version
+      if: inputs.install-gh-cli == 'true'
+      id: gh-version
+      shell: bash
+      run: |
+        GH_VERSION=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+        echo "version=${GH_VERSION}" >> $GITHUB_OUTPUT
+
+    - name: Cache gh CLI
+      if: inputs.install-gh-cli == 'true'
+      id: cache-gh
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+      with:
+        path: ~/.local/bin/gh
+        key: gh-cli-${{ steps.gh-version.outputs.version }}
+
+    - name: Install gh CLI
+      if: inputs.install-gh-cli == 'true' && steps.cache-gh.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p ~/.local/bin
+        GH_VERSION="${{ steps.gh-version.outputs.version }}"
+        curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
+        tar -xz -C /tmp -f /tmp/gh.tar.gz
+        mv /tmp/gh_${GH_VERSION}_linux_amd64/bin/gh ~/.local/bin/gh
+
+    - name: Add tools to PATH
+      shell: bash
+      run: |
+        mkdir -p ~/.local/bin
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "${{ runner.tool_cache }}/claude-cli/bin" >> $GITHUB_PATH
