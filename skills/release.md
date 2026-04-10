@@ -21,7 +21,7 @@ git push origin vX.Y.Z
 
 The automated release chain fires:
 
-1. **`publish-release.yml`** — updates `TEMPLATE_VERSION` to the new tag, creates
+1. **`publish-release.yml`** — updates `.ai/config.yml` to the new tag, creates
    the GitHub release stub
 2. **`release.yml`** — triggered by the release being published, runs the Goose
    release recipe, generates AI release notes from commits since the previous tag,

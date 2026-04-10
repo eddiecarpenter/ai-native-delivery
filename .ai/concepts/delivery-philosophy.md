@@ -76,7 +76,7 @@ enablement, every code change is a release, every release is an enablement, and 
 organisation loses the ability to decouple delivery velocity from release risk.
 
 Feature switches are the primary mechanism that decouples these events. See
-`base/concepts/feature-switches.md` for the full taxonomy.
+`.ai/concepts/feature-switches.md` for the full taxonomy.
 
 ---
 
@@ -104,7 +104,7 @@ the timing and the version number. How the project manages its internal versioni
 
 ### The Framework Release Workflow
 
-A GitHub Actions workflow in `base/.github/workflows/release.yml` triggers on any
+A GitHub Actions workflow in `.ai/.github/workflows/release.yml` triggers on any
 `v*` tag push:
 
 1. Determine the previous tag from git history
@@ -121,7 +121,7 @@ The local project provides its own build workflow, triggered by
 `on: release: types: [published]`. This trigger fires only after the framework
 has created and published the release — eliminating race conditions.
 
-The framework provides an example at `base/docs/examples/publish-release.yml`.
+The framework provides an example at `.ai/docs/examples/publish-release.yml`.
 Projects copy and adapt it. The framework does not manage or sync it.
 
 ### What the Framework Does NOT Own
@@ -175,7 +175,7 @@ A system not designed for integration testing cannot be cheaply retrofitted. The
 identifies contract boundaries and flags them during scoping; the human decides the
 testing strategy.
 
-See `base/AGENTS.md` → Testing → Integration Tests for the enforcement rules.
+See `.ai/AGENTS.md` → Testing → Integration Tests for the enforcement rules.
 
 ---
 
@@ -194,7 +194,7 @@ Feature switches restore the safety of continuous merging:
 - Releases are a business decision, not a technical constraint
 
 This is the framework's default: **features and enhancements deploy behind a feature switch**.
-See `base/concepts/feature-switches.md` for the full taxonomy, modes, and lifecycle.
+See `.ai/concepts/feature-switches.md` for the full taxonomy, modes, and lifecycle.
 
 ---
 

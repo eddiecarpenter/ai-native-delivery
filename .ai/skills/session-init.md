@@ -19,7 +19,7 @@ repo state, rules, and skills before doing any work.
 Execute these steps in order — do not skip any:
 
 1. Check whether `POST_SYNC.md` exists in the repository root.
-   - If it exists: invoke the `post-sync` skill (from `base/skills/post-sync.md`).
+   - If it exists: invoke the `post-sync` skill (from `.ai/skills/post-sync.md`).
      - If the post-sync skill **exits** (automated session): session-init also exits
        immediately — do not execute any further steps.
      - If the post-sync skill **completes** (interactive session): continue with the
@@ -68,12 +68,12 @@ Execute these steps in order — do not skip any:
 6. For domain sessions — query open Feature issues in the domain repo:
    `gh issue list --label feature --state open --json number,title,labels,body`
 
-7. Read the relevant standards file from `base/standards/` for the domain language
-   (e.g. `base/standards/go.md` for Go domains)
+7. Read the relevant standards file from `.ai/standards/` for the domain language
+   (e.g. `.ai/standards/go.md` for Go domains)
 
-8. Load skills — read every `.md` file in `base/skills/` (template-managed) and in
+8. Load skills — read every `.md` file in `.ai/skills/` (template-managed) and in
    `skills/` (local, if the directory exists). Local skills in `skills/` take
-   precedence over template skills in `base/skills/` of the same name.
+   precedence over template skills in `.ai/skills/` of the same name.
 
    **Automation-only skills** — the following skills are loaded for reference only.
    They must never be executed in an interactive session:

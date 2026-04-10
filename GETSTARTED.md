@@ -154,13 +154,13 @@ The command runs interactively. It will ask for:
 | Pipeline labels | `backlog`, `requirement`, `feature`, `task`, `in-design`, `in-development`, `in-review`, etc. — the pipeline uses labels to track state and trigger automation |
 | Branch protection on `main` | All changes must go through a reviewed PR |
 | GitHub Project board | Visual tracking: Backlog → Scoping → Scheduled → In Design → In Development → In Review → Done |
-| `base/` directory | The framework's protocol, skills, and standards |
+| `.ai/` directory | The framework's protocol, skills, and standards |
 | `.goose/recipes/` | Pre-configured agent session recipes for every pipeline phase |
 | `.github/workflows/` | GitHub Actions workflows that trigger automated phases |
 
 > **Verification checkpoint:** Open the repo in your browser (`gh repo view --web`).
 > You should see the pipeline labels in the Issues tab and the Project board
-> linked to the repo. The `base/` directory should contain `AGENTS.md`,
+> linked to the repo. The `.ai/` directory should contain `AGENTS.md`,
 > `skills/`, and `standards/`.
 
 **Board status:** The project board is now live but empty — no issues exist yet.
@@ -468,7 +468,7 @@ Review the URL Shortener code with these questions in mind:
 - **Are there tests for every criterion?** The agent should have written
   tests for success, failure, and edge cases
 - **Is the code clean and idiomatic?** The agent follows the standards in
-  `base/standards/`, but check that the code reads well
+  `.ai/standards/`, but check that the code reads well
 - **Does the commit history tell a story?** Each commit corresponds to one
   task, in order — you can trace each commit back to a task issue
 
@@ -917,7 +917,7 @@ The agent will:
 6. Re-trigger the pipeline if needed
 
 For the full Foreground Recovery protocol, see
-[`base/skills/foreground-recovery.md`](base/skills/foreground-recovery.md).
+[`.ai/skills/foreground-recovery.md`](.ai/skills/foreground-recovery.md).
 
 ### Common failure modes
 
@@ -970,10 +970,10 @@ training ground.
 
 Understand the framework in depth:
 
-- **[`base/AGENTS.md`](base/AGENTS.md)** — the rulebook. Git rules, testing
+- **[`.ai/AGENTS.md`](.ai/AGENTS.md)** — the rulebook. Git rules, testing
   standards, contract safety, working principles. Always active in every
   session.
-- **[`base/skills/`](base/skills/)** — the playbooks. Step-by-step
+- **[`.ai/skills/`](.ai/skills/)** — the playbooks. Step-by-step
   procedures for each session type: requirements, scoping, design,
   development, PR review, foreground recovery, and more.
 
@@ -981,7 +981,7 @@ Understand the framework in depth:
 
 Customise the framework for your project:
 
-- **[`AGENTS.local.md`](AGENTS.local.md)** — project-specific rules that
+- **[`AGENTS.md`](AGENTS.md)** — project-specific rules that
   extend the global protocol. Team conventions, prohibited actions, domain
   glossary, links to external systems. Always active.
 - **[`skills/`](skills/)** — project-specific skills (named procedures).
@@ -995,7 +995,7 @@ README.
 
 - **[README.md](README.md)** — full framework overview, pipeline diagram,
   topology options, configuration model
-- **[`base/standards/`](base/standards/)** — language-specific coding
+- **[`.ai/standards/`](.ai/standards/)** — language-specific coding
   standards (Go, and more to come)
 - **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — system architecture
   documentation (if present in your project)

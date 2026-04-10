@@ -52,7 +52,7 @@ When upgrading a pinned action:
 
 1. Review the release notes and diff between the old and new SHA
 2. Verify the new SHA by checking out the action repo and inspecting the code
-3. Update the SHA in `base/.github/workflows/agentic-pipeline.yml`
+3. Update the SHA in `.ai/.github/workflows/agentic-pipeline.yml`
 4. Copy the updated workflow to `.github/workflows/agentic-pipeline.yml`
 5. Test the pipeline on a feature branch before merging to `main`
 6. Commit both workflow files together

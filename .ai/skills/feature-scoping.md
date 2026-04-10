@@ -71,7 +71,7 @@ The full requirement label lifecycle: **Backlog → Scoping → Scheduled → Do
      - **Preview switch** — user opt-in to a new experience while old version remains (enters pipeline as a requirement in its own right)
 
      If the human elects no switch for a feature or enhancement, ask for the reason and record it.
-     See `base/concepts/feature-switches.md` for the full taxonomy.
+     See `.ai/concepts/feature-switches.md` for the full taxonomy.
    - Parking lot review
 6. **Impact delta on rejection or modification** — when the human rejects or modifies
    a proposed feature after others have already been accepted:

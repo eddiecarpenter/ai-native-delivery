@@ -10,7 +10,7 @@
 > **Early development.** This framework is actively evolving — the protocol, skills, and
 > tooling are being refined with every project that uses it. Core concepts are stable, but
 > breaking changes can and do happen between releases. Always review the release notes before
-> syncing `base/` into a project. Feedback, issues, and contributions are very welcome.
+> syncing `.ai/` into a project. Feedback, issues, and contributions are very welcome.
 
 ---
 
@@ -91,7 +91,7 @@ scope trade-offs, and final PR approval remain with the human.
 
 **Not opinionated about application architecture.**
 The protocol is language- and framework-agnostic. Language-specific standards live in
-`base/standards/` and govern _how_ code is written — not how applications are structured.
+`.ai/standards/` and govern _how_ code is written — not how applications are structured.
 
 ---
 
@@ -144,7 +144,7 @@ to publish a new version, pushing a tag triggers the automated release chain:
 flowchart LR
     subgraph Release ["Release — Human + Automation"]
         T["Tag push\n(human)"]
-        S["publish-release.yml\nCreates stub release\nUpdates TEMPLATE_VERSION"]
+        S["publish-release.yml\nCreates stub release\nUpdates .ai/config.yml"]
         N["release.yml\nGoose generates\nAI release notes"]
     end
 
@@ -156,11 +156,11 @@ flowchart LR
 | Step | Trigger | Does |
 |---|---|---|
 | Tag push | Human | Declares the version and starts the chain |
-| `publish-release.yml` | `push: tags: v*` | Creates stub GitHub release, updates `TEMPLATE_VERSION` |
+| `publish-release.yml` | `push: tags: v*` | Creates stub GitHub release, updates `.ai/config.yml` |
 | `release.yml` | `release: published` | Runs Goose release recipe, generates AI notes, updates release body |
 
 The local project supplies its own `publish-release.yml` — using GoReleaser, a build
-script, or a simple stub as shown in `base/docs/examples/`. The framework's `release.yml`
+script, or a simple stub as shown in `.ai/docs/examples/`. The framework's `release.yml`
 fires last, regardless of how the release was created, and enhances it with AI notes.
 
 ### Project board automation
@@ -250,7 +250,7 @@ and tool repos registered in `REPOS.md`. Best for multi-service systems or team 
 
 The framework separates **rules** from **procedures** into two distinct layers:
 
-**`base/AGENTS.md` is the rulebook.** It is always active — every rule in it applies to
+**`.ai/AGENTS.md` is the rulebook.** It is always active — every rule in it applies to
 every agent, every session, every phase. It governs git discipline, testing, build
 verification, contract safety, and working principles. Agents read it once at session
 start and operate within its boundaries for the entire session.
@@ -260,15 +260,15 @@ specific session type or task. Skills are invoked explicitly when needed — the
 always active. A skill tells the agent what to do; the rulebook tells the agent how to
 behave while doing it.
 
-| | Rulebook (`base/AGENTS.md`) | Playbooks (`base/skills/`) |
+| | Rulebook (`.ai/AGENTS.md`) | Playbooks (`.ai/skills/`) |
 |---|---|---|
 | **When active** | Always — every session | Invoked explicitly for a specific session or task |
 | **Contains** | Rules, constraints, universal principles | Step-by-step procedures, templates, named workflows |
 | **Use for** | Git rules, testing standards, contract safety | Session procedures, issue templates, named workflows |
-| **Override** | Local rules in `AGENTS.local.md` extend it | Local skills in `skills/` override base skills of the same name |
+| **Override** | Local rules in `AGENTS.md` extend it | Local skills in `skills/` override base skills of the same name |
 | **Example** | Never commit directly to `main` | How to run a Feature Design session |
 
-If it is a constraint that must always apply, it belongs in the rulebook (`AGENTS.local.md`
+If it is a constraint that must always apply, it belongs in the rulebook (`AGENTS.md`
 for project-specific rules). If it is a procedure invoked for a specific task, it belongs
 in a skill.
 
@@ -276,7 +276,7 @@ Skills live in two places:
 
 | Path | Managed by | Purpose |
 |---|---|---|
-| `base/skills/` | Template (read-only) | Global playbooks, available to all projects |
+| `.ai/skills/` | Template (read-only) | Global playbooks, available to all projects |
 | `skills/` | You | Local playbooks — project-specific, override base skills of the same name |
 
 ---
@@ -284,7 +284,7 @@ Skills live in two places:
 ## Agent runtimes
 
 The framework is designed for **model independence**. Agent behaviour is governed by the
-protocol — `base/AGENTS.md`, skills, and standards files — not by the AI model underneath.
+protocol — `.ai/AGENTS.md`, skills, and standards files — not by the AI model underneath.
 This means you are not locked into a single provider. You can run different runtimes for
 different phases, swap models as better options emerge, or migrate to a new provider
 without changing your delivery process.
@@ -340,7 +340,7 @@ gh extension install eddiecarpenter/gh-agentic
 |---|---|
 | `gh agentic bootstrap` | Creates and configures a new agentic environment |
 | `gh agentic inception` | Adds a new domain or tool repo to an existing environment |
-| `gh agentic sync` | Syncs `base/` from the upstream template |
+| `gh agentic sync` | Syncs `.ai/` from the upstream template |
 | `gh agentic verify` | Detects local drift in template-managed files |
 
 The separation between `gh-agentic` and this repo is a GitHub CLI constraint — extensions
@@ -465,7 +465,7 @@ the interactive OAuth flow and updates the secret with fresh credentials.
 
 ### Adding local rules
 
-Project-specific rules belong in `AGENTS.local.md`. These are always active — every
+Project-specific rules belong in `AGENTS.md`. These are always active — every
 agent session in the repo reads this file. Use rules for:
 
 - Team conventions (branching strategy, commit message format)
@@ -473,7 +473,7 @@ agent session in the repo reads this file. Use rules for:
 - Project-specific standards (logging patterns, error handling conventions)
 - Always-on context (links to external systems, domain glossary)
 
-Rules extend the global protocol in `base/AGENTS.md`. Local rules take precedence where
+Rules extend the global protocol in `.ai/AGENTS.md`. Local rules take precedence where
 they conflict.
 
 ### Adding local skills
@@ -497,11 +497,11 @@ skills/
 ## Using this as your own template
 
 1. Fork this repo to your own GitHub account or organisation
-2. Update `TEMPLATE_SOURCE` to point to your fork
+2. Update `.ai/config.yml` to point to your fork
 3. Mark your fork as a GitHub template repo (Settings → Template repository)
 4. Update the bootstrap URL in your fork's `README.md` to point to your fork
 
-> All projects bootstrapped from your fork will sync `base/` from your fork, not from this repo.
+> All projects bootstrapped from your fork will sync `.ai/` from your fork, not from this repo.
 
 ---
 
@@ -509,17 +509,17 @@ skills/
 
 | Path | Purpose |
 |---|---|
-| `base/AGENTS.md` | Rulebook — git rules, testing, build verification, contract safety, working principles |
-| `base/standards/` | Language-specific coding standards (Go, Java, TypeScript, etc.) |
-| `base/skills/` | Built-in skills — managed by template, do not edit |
+| `.ai/AGENTS.md` | Rulebook — git rules, testing, build verification, contract safety, working principles |
+| `.ai/standards/` | Language-specific coding standards (Go, Java, TypeScript, etc.) |
+| `.ai/skills/` | Built-in skills — managed by template, do not edit |
 | `.goose/recipes/` | Agent session recipes (YAML) — managed by template, do not edit |
 | `.github/workflows/` | Reusable GitHub Actions workflow definitions |
-| `CLAUDE.md` | Entry point — loads `base/AGENTS.md` and `AGENTS.local.md` |
-| `AGENTS.local.md` | Local rules — project-specific, never overwritten by sync |
+| `CLAUDE.md` | Entry point — loads `.ai/AGENTS.md` and `AGENTS.md` |
+| `AGENTS.md` | Local rules — project-specific, never overwritten by sync |
 | `REPOS.md` | Repository registry — all domains, tools, and other repos in the project |
 | `skills/` | Local skills — project-specific, override base skills of the same name |
-| `TEMPLATE_SOURCE` | Records which template repo this environment was bootstrapped from |
-| `TEMPLATE_VERSION` | Records the template version last synced |
+| `.ai/config.yml` | Records which template repo this environment was bootstrapped from |
+| `.ai/config.yml` | Records the template version last synced |
 
 ---
 
@@ -531,9 +531,9 @@ Syncing is handled by the `gh-agentic` CLI extension — not by the agent.
 gh agentic sync
 ```
 
-The command pulls the latest `base/` from the upstream template, shows you a diff, and
-asks for confirmation before committing. Only `base/` and `TEMPLATE_VERSION` are ever
-updated. All local files (`AGENTS.local.md`, `REPOS.md`, `CLAUDE.md`, `skills/`, etc.)
+The command pulls the latest `.ai/` from the upstream template, shows you a diff, and
+asks for confirmation before committing. Only `.ai/` and `.ai/config.yml` are ever
+updated. All local files (`AGENTS.md`, `REPOS.md`, `CLAUDE.md`, `skills/`, etc.)
 are never touched.
 
 > [!IMPORTANT]
@@ -564,7 +564,7 @@ Use [semantic versioning](https://semver.org): `fix:` → patch, `feat:` → min
 
 For projects that produce build artefacts, provide a workflow in your repo that
 triggers on `on: release: types: [published]` — it fires after the framework has
-created the release. See `base/docs/examples/publish-release.yml` for a starting point.
+created the release. See `.ai/docs/examples/publish-release.yml` for a starting point.
 
 > Releasing is a deliberate human action — pushing the tag is the authorisation.
 > Releases have a cost (AI tokens, build pipeline). Do not release unnecessarily.
@@ -595,7 +595,7 @@ Ways to get involved:
 
 - **Try it** — bootstrap an environment and run a feature through the pipeline
 - **Report gaps** — open an issue describing where the protocol broke down or fell short
-- **Propose improvements** — suggest changes to `base/AGENTS.md`, a standards file, or a skill
+- **Propose improvements** — suggest changes to `.ai/AGENTS.md`, a standards file, or a skill
 - **Share your stack** — if you add standards for a language or framework not yet covered, a PR is welcome
 - **Discuss** — use [GitHub Discussions](https://github.com/eddiecarpenter/ai-native-delivery/discussions) for questions, ideas, and war stories
 

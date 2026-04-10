@@ -3,7 +3,7 @@
 ## Purpose
 
 Extract the live GitHub Project configuration and save it as the canonical
-template in `base/project-template.json`. This ensures that board customisations
+template in `.ai/project-template.json`. This ensures that board customisations
 (status column names, colours, descriptions, views, description, and readme)
 flow to all downstream environments via `gh agentic sync`.
 
@@ -74,7 +74,7 @@ Execute these steps in order — do not skip any step.
 
    Filter the `fields` response for the field named `Status`.
 
-3. **Write `base/project-template.json`** — format the extracted data using
+3. **Write `.ai/project-template.json`** — format the extracted data using
    the following JSON schema:
 
    ```json
@@ -118,7 +118,7 @@ Execute these steps in order — do not skip any step.
 5. **Commit** — stage and commit the file:
 
    ```
-   chore: update base/project-template.json from live project
+   chore: update .ai/project-template.json from live project
    ```
 
 6. **Remind the human** — after committing, remind them to raise a PR so the
@@ -139,8 +139,8 @@ this priority order to determine the correct status for each item:
 ## Rules
 
 - **Template repo only** — this operation belongs in the `ai-native-delivery`
-  template repo. Never modify `base/` in downstream repos. Downstream repos
-  receive `base/project-template.json` via `gh agentic sync`.
+  template repo. Never modify `.ai/` in downstream repos. Downstream repos
+  receive `.ai/project-template.json` via `gh agentic sync`.
 - Do not modify the live project during this skill — it is read-only extraction.
 - If the GraphQL query returns no status field, stop and report the error to
   the human.

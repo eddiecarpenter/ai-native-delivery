@@ -12,7 +12,7 @@ framework. They encode the process knowledge for each phase of software delivery
 ## Architecture
 
 ```
-Skill (base/skills/*.md)
+Skill (.ai/skills/*.md)
   └── wrapped by Goose Recipe (.goose/recipes/*.yaml)
         └── triggered by GitHub Actions (.github/workflows/*.yml)
 ```
@@ -48,10 +48,10 @@ requires only rewrapping the skills. The skills themselves remain unchanged.
 
 **Skills are read-only.** Never modify a skill locally.
 
-- Customisation of agent behaviour belongs in `AGENTS.local.md`
+- Customisation of agent behaviour belongs in `AGENTS.md`
 - If a skill needs to change, raise it against `eddiecarpenter/ai-native-delivery`
   and let it flow in via `gh agentic sync`
-- `gh agentic verify` detects and flags any local modifications to `base/skills/*.md`
+- `gh agentic verify` detects and flags any local modifications to `.ai/skills/*.md`
 
 ## Relationship to Recipes
 
@@ -76,4 +76,4 @@ instructions: |
 
 The `instructions` field contains the skill. Everything else is recipe infrastructure.
 In the current implementation the skill is embedded directly in the recipe YAML.
-The `base/skills/*.md` files are the human-readable reference documentation for each skill.
+The `.ai/skills/*.md` files are the human-readable reference documentation for each skill.

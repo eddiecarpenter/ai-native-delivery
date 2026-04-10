@@ -76,7 +76,7 @@ owners reviewing what changed. They are not a raw commit log. They answer:
 
 **What to omit:**
 - Merge commits (`Merge pull request #N from ...`)
-- Automated commits (`chore: update TEMPLATE_VERSION`, `chore: sync ...`)
+- Automated commits (`chore: update .ai/config.yml`, `chore: sync ...`)
 - Minor CI or tooling changes with no user impact
 - Commits that duplicate another commit in the same release
 

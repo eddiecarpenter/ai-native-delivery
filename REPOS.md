@@ -2,7 +2,7 @@
 
 This file is the authoritative list of all repositories that make up the solution.
 Each entry is an independently deployable monorepo with its own codebase and GitHub
-Issues. Coding standards are global and defined in `base/standards/`.
+Issues. Coding standards are global and defined in `.ai/standards/`.
 
 Repos are cloned into a local directory named after the plural of their type — e.g.
 `type: domain` clones into `domains/<name>`, `type: tool` clones into `tools/<name>`.

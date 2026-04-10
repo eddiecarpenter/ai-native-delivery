@@ -21,12 +21,12 @@ This repo is the **Organisation control plane** for the ai-native-delivery ecosy
 
 ## What is built here
 
-- `base/AGENTS.md` — the global agent rulebook, consumed by all downstream projects
-- `base/skills/` — playbooks for each pipeline session type
-- `base/standards/` — language-specific build, test, and coding standards
-- `base/.github/workflows/` — the agentic pipeline workflow definitions
-- `base/concepts/` — architectural concepts and delivery philosophy
-- `base/docs/examples/` — annotated examples for downstream projects
+- `.ai/AGENTS.md` — the global agent rulebook, consumed by all downstream projects
+- `.ai/skills/` — playbooks for each pipeline session type
+- `.ai/standards/` — language-specific build, test, and coding standards
+- `.ai/.github/workflows/` — the agentic pipeline workflow definitions
+- `.ai/concepts/` — architectural concepts and delivery philosophy
+- `.ai/docs/examples/` — annotated examples for downstream projects
 
 ## How changes flow
 
@@ -36,7 +36,7 @@ via `gh agentic sync`.
 
 ## Key conventions
 
-- `base/` is read-only for AI agents in downstream projects — changes must originate here
-- `AGENTS.local.md` in each downstream project holds project-specific overrides
-- Template version is tracked in `TEMPLATE_VERSION` and updated automatically on each release
+- `.ai/` is read-only for AI agents in downstream projects — changes must originate here
+- `AGENTS.md` in each downstream project holds project-specific overrides
+- Template version is tracked in `.ai/config.yml` and updated automatically on each release
 - Releases are triggered by `git tag vX.Y.Z && git push origin vX.Y.Z`

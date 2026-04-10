@@ -85,7 +85,7 @@ When the scope is clear enough to define the Feature(s) without a separate sessi
 - Label `draft` if still being refined, `backlog` when agreed
 - Completing scoping early is not skipping it — the Feature issue artefact must still be
   produced with all required sections (user story, acceptance criteria, parent link)
-- Never defer a phase without checking with the human first — see `base/AGENTS.md`
+- Never defer a phase without checking with the human first — see `.ai/AGENTS.md`
 
 ## Next Step
 

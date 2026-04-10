@@ -16,8 +16,8 @@ of three layers:
 
 | Repo | Type | Purpose |
 |---|---|---|
-| `eddiecarpenter/ai-native-delivery` | Template | Holds `base/AGENTS.md`, language standards, workflow definitions. Never cloned directly — consumed via `gh repo create --template`. |
-| `eddiecarpenter/gh-agentic` | Tool | GitHub CLI extension. Bootstraps environments, registers repos, syncs base/. |
+| `eddiecarpenter/ai-native-delivery` | Template | Holds `.ai/AGENTS.md`, language standards, workflow definitions. Never cloned directly — consumed via `gh repo create --template`. |
+| `eddiecarpenter/gh-agentic` | Tool | GitHub CLI extension. Bootstraps environments, registers repos, syncs .ai/. |
 
 ---
 
@@ -31,9 +31,9 @@ Used for standalone tools, libraries, and small projects.
 ```
 my-project/
 ├── CLAUDE.md
-├── AGENTS.local.md
+├── AGENTS.md
 ├── REPOS.md             ← empty or unused
-├── base/                ← synced from template
+├── .ai/                ← synced from template
 ├── cmd/
 └── internal/
 ```
@@ -46,9 +46,9 @@ collection of domain and tool repos. Each domain/tool repo is independent.
 ```
 my-org-agentic/          ← control plane
 ├── CLAUDE.md
-├── AGENTS.local.md
+├── AGENTS.md
 ├── REPOS.md             ← registry of all domain/tool repos
-├── base/
+├── .ai/
 └── docs/
 
 domains/
@@ -67,7 +67,7 @@ tools/
 |---|---|---|---|
 | 0a | Bootstrap | `gh agentic bootstrap` | Creates repo, scaffolds project, configures GitHub |
 | 0b | Inception | `gh agentic inception` | Registers a new domain or tool repo |
-| — | Template Sync | `gh agentic sync` | Updates `base/` from upstream template |
+| — | Template Sync | `gh agentic sync` | Updates `.ai/` from upstream template |
 | 1 | Requirements | AI agent | Captures business needs as GitHub Issues |
 | 2 | Scoping | AI agent + human | Decomposes requirements into features |
 | 3 | Feature Design | AI agent | Decomposes features into tasks, creates branch |
@@ -84,12 +84,12 @@ Agent behaviour is defined in two layers:
 
 | File | Scope | Modified by |
 |---|---|---|
-| `base/AGENTS.md` | Global — all projects | Template sync only (`gh agentic sync`) |
-| `AGENTS.local.md` | Local — this project only | Human, never overwritten by sync |
+| `.ai/AGENTS.md` | Global — all projects | Template sync only (`gh agentic sync`) |
+| `AGENTS.md` | Local — this project only | Human, never overwritten by sync |
 
-`CLAUDE.md` loads both via `@base/AGENTS.md` and `@AGENTS.local.md`.
+`CLAUDE.md` loads both via `@.ai/AGENTS.md` and `@AGENTS.md`.
 
-`base/` is read-only for AI agents — changes must go through the template repo
+`.ai/` is read-only for AI agents — changes must go through the template repo
 (`eddiecarpenter/ai-native-delivery`) and flow in via `gh agentic sync`.
 
 ---
@@ -99,11 +99,11 @@ Agent behaviour is defined in two layers:
 Each project records its template source and last synced version:
 
 ```
-TEMPLATE_SOURCE   → eddiecarpenter/ai-native-delivery
-TEMPLATE_VERSION  → v0.1.0
+.ai/config.yml   → eddiecarpenter/ai-native-delivery
+.ai/config.yml  → v0.1.0
 ```
 
-`gh agentic sync` fetches the latest release, copies `base/` into the project,
+`gh agentic sync` fetches the latest release, copies `.ai/` into the project,
 shows a diff, and asks for confirmation before committing.
 
 ---

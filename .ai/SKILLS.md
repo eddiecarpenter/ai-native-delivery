@@ -9,7 +9,7 @@
 | `skills/pr-review-session.md` | Stage 4b | Automatic — PR review submitted | Process inline review comments |
 | `skills/issue-session.md` | Stage 4c | Automatic — issue assigned to agent | Fix bugs or answer questions |
 | `skills/foreground-recovery.md` | Recovery | Human (interactive) | Diagnose and fix workflow failures |
-| `skills/update-project-template.md` | Utility | Human (interactive) | Extract live project config into `base/project-template.json` |
+| `skills/update-project-template.md` | Utility | Human (interactive) | Extract live project config into `.ai/project-template.json` |
 
 See [`docs/skills-framework.md`](docs/skills-framework.md) for the full framework definition,
 architecture, authoring rules, and governance.

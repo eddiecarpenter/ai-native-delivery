@@ -47,7 +47,7 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
 - Never claim a task complete without running build and tests
 - A feature is not complete until all acceptance criteria have test coverage
 - Report exact command output on any failure
-- Follow the standards in `base/standards/<stack>.md` exactly
+- Follow the standards in `.ai/standards/<stack>.md` exactly
 - **Inline status updates**: this skill does not apply pipeline labels (the workflow
   applies `in-review`). If a future change adds a pipeline label transition here, it
   must include an inline project status update following `set-issue-status.md` —
