@@ -35,8 +35,16 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .ai/config.yml
-          git diff --cached --quiet && echo "version already up to date — skipping commit" || \
-            (git commit -m "chore: update version to ${{ github.ref_name }}" && git push origin main)
+          if git diff --cached --quiet; then
+            echo "version already up to date — skipping commit"
+          else
+            git commit -m "chore: update version to ${{ github.ref_name }}"
+            git push origin main
+            # Move the tag to include the version bump commit
+            git tag -f ${{ github.ref_name }}
+            git push origin -f refs/tags/${{ github.ref_name }}
+            echo "Tag ${{ github.ref_name }} moved to version-bump commit"
+          fi
 
       - name: Create GitHub release
         run: |
