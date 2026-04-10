@@ -175,7 +175,7 @@ A system not designed for integration testing cannot be cheaply retrofitted. The
 identifies contract boundaries and flags them during scoping; the human decides the
 testing strategy.
 
-See `.ai/AGENTS.md` → Testing → Integration Tests for the enforcement rules.
+See `.ai/RULEBOOK.md` → Testing → Integration Tests for the enforcement rules.
 
 ---
 

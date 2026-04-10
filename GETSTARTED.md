@@ -160,7 +160,7 @@ The command runs interactively. It will ask for:
 
 > **Verification checkpoint:** Open the repo in your browser (`gh repo view --web`).
 > You should see the pipeline labels in the Issues tab and the Project board
-> linked to the repo. The `.ai/` directory should contain `AGENTS.md`,
+> linked to the repo. The `.ai/` directory should contain `RULEBOOK.md`,
 > `skills/`, and `standards/`.
 
 **Board status:** The project board is now live but empty — no issues exist yet.
@@ -970,7 +970,7 @@ training ground.
 
 Understand the framework in depth:
 
-- **[`.ai/AGENTS.md`](.ai/AGENTS.md)** — the rulebook. Git rules, testing
+- **[`.ai/RULEBOOK.md`](.ai/RULEBOOK.md)** — the rulebook. Git rules, testing
   standards, contract safety, working principles. Always active in every
   session.
 - **[`.ai/skills/`](.ai/skills/)** — the playbooks. Step-by-step
@@ -981,9 +981,9 @@ Understand the framework in depth:
 
 Customise the framework for your project:
 
-- **[`AGENTS.md`](AGENTS.md)** — project-specific rules that
+- **[`LOCALRULES.md`](LOCALRULES.md)** — project-specific rules that
   extend the global protocol. Team conventions, prohibited actions, domain
-  glossary, links to external systems. Always active.
+  glossary, links to external systems. Optional — create it when needed.
 - **[`skills/`](skills/)** — project-specific skills (named procedures).
   Your release process, deployment checklist, incident runbook templates.
   A local skill with the same filename as a base skill overrides it.

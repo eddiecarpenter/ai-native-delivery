@@ -121,7 +121,7 @@ e.g. `TestDebitQuota_InsufficientBalance_ReturnsOutOfFunds`
 
 ## Contract Structures — Go-Specific Rules
 
-For the full contract framework and approval rules, see AGENTS.md — "Contract Rules".
+For the full contract framework and approval rules, see `.ai/RULEBOOK.md` — "Contract Rules".
 
 **Kafka event structs** in `internal/events/` are identified by:
 - Structs with a field typed as `*EventType` (e.g. `WholesaleContractEventType`)

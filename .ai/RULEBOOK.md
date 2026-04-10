@@ -7,7 +7,7 @@ and every action, regardless of which skill is being executed.
 For the **playbooks** — the step-by-step procedures for each session type — see `.ai/skills/`.
 
 **This file is managed by the `ai-native-delivery` template. Do not edit manually.
-Local overrides belong in `AGENTS.md`.**
+Local overrides belong in `LOCALRULES.md`.**
 
 ---
 
@@ -157,11 +157,13 @@ If a change to the global protocol or standards is needed:
 3. Push and raise a PR for human review
 4. Once merged and tagged, use `gh agentic sync` to pull the update into this repo
 
-For project-specific overrides, add them to `AGENTS.md` — that is what it is for.
+For project-specific overrides, add them to `LOCALRULES.md` — that is what it is for.
+`LOCALRULES.md` is optional: if it does not exist, no local rules are applied.
+`AGENTS.md` is template-managed and must not be edited directly.
 
 The sync intentionally overwrites all files under `.ai/`. If `gh agentic verify` reports
 drift in `.ai/`, it means files have been accidentally modified. The sync will discard
-those changes — this is correct behaviour. Local customisations belong in `AGENTS.md`
+those changes — this is correct behaviour. Local customisations belong in `LOCALRULES.md`
 and `skills/`, not in `.ai/`.
 
 ---
@@ -193,7 +195,7 @@ Neither should ever be modified locally.
 by the template and can be freely created and edited. A local skill with the same
 filename as a template skill in `.ai/skills/` takes precedence.
 
-- Customisation of agent behaviour belongs in `AGENTS.md`
+- Customisation of agent behaviour belongs in `LOCALRULES.md`
 - If a recipe needs to change, raise it against `eddiecarpenter/ai-native-delivery`
   and let it flow in via `gh agentic sync`
 - `gh agentic verify` detects and flags any local modifications to recipe files
