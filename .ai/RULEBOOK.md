@@ -1,4 +1,4 @@
-# AGENTS.md — Agent Rulebook
+# RULEBOOK.md — Agent Rulebook
 
 This file is the **rulebook** for all AI agents operating in this repository and all
 domain repos. Rules here are always active — they govern every session, every phase,
