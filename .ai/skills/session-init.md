@@ -87,6 +87,10 @@ Execute these steps in order — do not skip any:
    If asked to run any of these interactively, refuse and explain that GitHub Actions
    handles them automatically.
 
+   **Note:** `dev-session.md` checks for `recovery.md` at startup. If found, it
+   enters recovery mode — skipping completed tasks and resuming from where the
+   previous session left off. See `dev-session.md` for full details.
+
 9. Read `.ai/config.yml` and note the template source and version.
 
 ## On Completion
