@@ -61,8 +61,20 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
      next task. It ensures that if the session dies, the next session can resume from
      the recorded state.
 6. Verifies each acceptance criterion has test coverage — stops if any criterion is uncovered
-7. When all tasks are closed and criteria verified — prints: `=== Dev Session — Completed ===`
-8. Exits cleanly — the workflow pushes and opens the PR automatically
+7. **Archive `recovery.md`** — after all tasks are complete and criteria verified:
+   - If `recovery.md` **does not exist** (e.g. a single-task feature that completed on
+     first run before any recovery write, or the file was never created): skip archival
+     gracefully — do not fail.
+   - If `recovery.md` **exists**:
+     ```bash
+     mkdir -p recovery-logs
+     git mv recovery.md recovery-logs/recovery-log-<feature-issue-number>.md
+     git add recovery-logs/
+     git commit -m "chore: archive recovery.md for #<feature-issue-number>"
+     ```
+   - This must happen *before* the branch is pushed and the PR is opened.
+8. When all tasks are closed and criteria verified — prints: `=== Dev Session — Completed ===`
+9. Exits cleanly — the workflow pushes and opens the PR automatically
 
 ## recovery.md Format
 
