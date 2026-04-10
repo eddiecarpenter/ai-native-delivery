@@ -665,6 +665,16 @@ jobs:
             echo "Could not extract issue number from branch — skipping"
             exit 0
           fi
+          # Verify the extracted number is an open issue (not a PR or non-existent)
+          ISSUE_TYPE=$(gh api repos/${{ github.repository }}/issues/${ISSUE} --jq '.pull_request // "issue"' 2>/dev/null || echo "")
+          if [ -z "${ISSUE_TYPE}" ]; then
+            echo "Issue #${ISSUE} does not exist — branch may not correspond to a pipeline issue, skipping"
+            exit 0
+          fi
+          if [ "${ISSUE_TYPE}" != "issue" ]; then
+            echo "Issue #${ISSUE} is a pull request, not a feature issue — skipping"
+            exit 0
+          fi
           gh issue edit ${ISSUE} \
             --repo ${{ github.repository }} \
             --remove-label "in-review" \
