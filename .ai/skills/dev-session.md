@@ -55,6 +55,16 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
      git push
      echo "=== Intra-task checkpoint pushed ==="
      ```
+   - When a complete unit of work is done (a module and its tests written and
+     passing), commits and pushes the code immediately — does not wait for the
+     full task to be complete:
+     ```bash
+     git add -A
+     git commit -m "feat: <unit description> (#feature-issue)"
+     git push
+     echo "=== Unit committed and pushed ==="
+     ```
+     Then updates `recovery.md` to reflect the completed unit and pushes again.
    - Builds and tests — stops immediately on failure and reports the exact error
    - Commits: `feat: [task description] — task N of N (#feature-issue)`
    - Closes the task issue

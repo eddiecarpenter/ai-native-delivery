@@ -110,6 +110,16 @@ instructions: |
     git push
     echo "=== Intra-task checkpoint pushed ==="
 
+  When a complete unit of work is done (a module and its tests are written and
+  passing), commit and push the code immediately — do not wait for the full task:
+
+    git add -A
+    git commit -m "feat: <unit description> (#{{ feature_issue }})"
+    git push
+    echo "=== Unit committed and pushed ==="
+
+  Then update `recovery.md` to reflect the completed unit and push again.
+
   ### 4c — Build and Test
   Read `.ai/standards/<stack>.md` for the exact build and test commands.
   Run the full build and test suite.
