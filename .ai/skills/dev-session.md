@@ -56,6 +56,7 @@ Triggered automatically by GitHub Actions when a Feature issue is labelled `in-d
      git add recovery.md
      git commit -m "chore: update recovery.md — task N of N (#feature-issue)"
      git push
+     echo "=== Checkpoint saved — task N of N complete, recovery.md pushed ==="
      ```
      This must happen *after* each successful task commit and *before* starting the
      next task. It ensures that if the session dies, the next session can resume from
