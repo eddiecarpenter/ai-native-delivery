@@ -34,7 +34,7 @@ runs:
         INPUT_GOOSE_VERSION: ${{ inputs.goose-version }}
       run: |
         if [ "${INPUT_GOOSE_VERSION}" = "latest" ]; then
-          GOOSE_VERSION=$(curl -fsSL https://api.github.com/repos/block/goose/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+          GOOSE_VERSION=$(curl --proto '=https' --tlsv1.2 -fsSL https://api.github.com/repos/block/goose/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
         else
           GOOSE_VERSION="${INPUT_GOOSE_VERSION}"
         fi
@@ -66,7 +66,7 @@ runs:
       run: |
         mkdir -p ~/.local/bin
         GOOSE_VERSION="${{ steps.goose-version.outputs.version }}"
-        curl -fsSL "https://github.com/block/goose/releases/download/v${GOOSE_VERSION}/goose-x86_64-unknown-linux-gnu.tar.bz2" -o /tmp/goose.tar.bz2
+        curl --proto '=https' --tlsv1.2 -fsSL "https://github.com/block/goose/releases/download/v${GOOSE_VERSION}/goose-x86_64-unknown-linux-gnu.tar.bz2" -o /tmp/goose.tar.bz2
         tar -xj -C ~/.local/bin -f /tmp/goose.tar.bz2
 
     - name: Cache Claude Code CLI
@@ -101,7 +101,7 @@ runs:
       id: gh-version
       shell: bash
       run: |
-        GH_VERSION=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+        GH_VERSION=$(curl --proto '=https' --tlsv1.2 -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
         echo "version=${GH_VERSION}" >> $GITHUB_OUTPUT
 
     - name: Cache gh CLI
@@ -118,7 +118,7 @@ runs:
       run: |
         mkdir -p ~/.local/bin
         GH_VERSION="${{ steps.gh-version.outputs.version }}"
-        curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
+        curl --proto '=https' --tlsv1.2 -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
         tar -xz -C /tmp -f /tmp/gh.tar.gz
         mv /tmp/gh_${GH_VERSION}_linux_amd64/bin/gh ~/.local/bin/gh
 

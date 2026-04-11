@@ -137,7 +137,7 @@ jobs:
       - name: Resolve gh CLI version
         id: gh-pre-version
         run: |
-          GH_VERSION=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+          GH_VERSION=$(curl --proto '=https' --tlsv1.2 -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
           echo "version=${GH_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Cache gh CLI
@@ -153,7 +153,7 @@ jobs:
           GH_VERSION: ${{ steps.gh-pre-version.outputs.version }}
         run: |
           mkdir -p ~/.local/bin
-          curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
+          curl --proto '=https' --tlsv1.2 -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
           tar -xz -C /tmp -f /tmp/gh.tar.gz
           mv /tmp/gh_${GH_VERSION}_linux_amd64/bin/gh ~/.local/bin/gh
 
