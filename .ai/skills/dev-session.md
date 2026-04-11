@@ -88,13 +88,16 @@ After each task commit, write `recovery.md` to the repo root with exactly this s
 |---------------------|------------------------------------|
 | Feature issue       | #<feature-issue-number>            |
 | Branch              | <current-branch-name>              |
+| Last commit         | <git rev-parse --short HEAD>       |
 | Total tasks         | <total-task-count>                 |
 | Last updated        | <ISO 8601 timestamp>               |
 
 ## Completed Tasks
 
-- [x] #<issue-number> — <task-title>
-- [x] #<issue-number> — <task-title>
+### #<issue-number> — <task-title>
+- **Implemented:** <one or two sentences describing what was built>
+- **Files changed:** <comma-separated list of key files>
+- **Decisions:** <any decisions made that affect remaining tasks, or "None">
 
 ## Remaining Tasks
 
@@ -105,9 +108,10 @@ After each task commit, write `recovery.md` to the repo root with exactly this s
 **Field definitions:**
 - **Feature issue** — the parent Feature issue number (e.g. `#197`)
 - **Branch** — the current branch name from `git branch --show-current`
+- **Last commit** — short SHA from `git rev-parse --short HEAD`
 - **Total tasks** — the total number of Task sub-issues at session start
 - **Last updated** — ISO 8601 timestamp (`date -u +%Y-%m-%dT%H:%M:%SZ`)
-- **Completed Tasks** — each task committed and closed so far, in order
+- **Completed Tasks** — each task as a subsection with implementation summary, files changed, and decisions
 - **Remaining Tasks** — each task not yet completed; mark the next task with `← current`
 
 ## Rules

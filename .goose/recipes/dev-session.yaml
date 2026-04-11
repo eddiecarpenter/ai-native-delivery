@@ -120,16 +120,21 @@ instructions: |
   |---------------------|------------------------------------|
   | Feature issue       | #<feature-issue-number>            |
   | Branch              | <current-branch-name>              |
+  | Last commit         | <git rev-parse --short HEAD>       |
   | Total tasks         | <total-task-count>                 |
   | Last updated        | <ISO 8601 timestamp>               |
 
   ## Completed Tasks
 
-  - [x] #<issue-number> — <task-title>
+  ### #<issue-number> — <task-title>
+  - **Implemented:** <one or two sentences describing what was built>
+  - **Files changed:** <comma-separated list of key files>
+  - **Decisions:** <any decisions made that affect remaining tasks, or "None">
 
   ## Remaining Tasks
 
   - [ ] #<issue-number> — <task-title> ← current
+  - [ ] #<issue-number> — <task-title>
   ```
 
   Then commit and push immediately:
