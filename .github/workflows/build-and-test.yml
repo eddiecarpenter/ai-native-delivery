@@ -13,6 +13,8 @@ on:
 jobs:
   build-and-test:
     name: Build and Test
+    # Skip gracefully on non-Go repos (e.g. the template repo itself has no go.mod)
+    if: hashFiles('go.mod') != ''
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
 
     steps:
