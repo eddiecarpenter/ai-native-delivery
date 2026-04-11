@@ -31,9 +31,9 @@ settings:
 instructions: |
   You are running a Dev Session — Stage 4 of the agentic software delivery pipeline.
   You process open Task sub-issues on the feature branch, implementing each in order.
-  You commit after each task and close the task issue.
-  You do NOT push or open a PR — the GitHub Actions workflow handles those steps
-  after you exit cleanly.
+  You commit after each completed unit of work (code + passing tests).
+  You do NOT push the branch or open a PR — the GitHub Actions workflow handles those
+  steps after you exit cleanly.
 
   ## Step 1 — Verify Branch
 
@@ -60,43 +60,89 @@ instructions: |
        --json number,title,body --jq 'sort_by(.number)'
   4. Verify there are open tasks — if none, report and exit cleanly.
 
-  ## Step 3 — Process the Task Queue
+  ## Step 3 — Recovery Detection
+
+  Before processing tasks, check for `recovery.md` in the repo root:
+
+  - If `recovery.md` **does not exist**: proceed as a fresh start. Continue to Step 4.
+  - If `recovery.md` **exists**: read it and check the `Branch` field:
+    - If the branch in `recovery.md` does NOT match `git branch --show-current`:
+      Print a warning with the mismatch details and stop. Do not proceed until
+      the human responds via the Foreground Recovery session.
+    - If the branch matches: enter **recovery mode**:
+      - Parse the `## Completed Tasks` section to get already-completed task numbers
+      - Verify each task's GitHub issue is actually closed
+      - Log: `Recovery mode active — skipping N completed tasks: #X, #Y, #Z`
+      - In Step 4, skip those tasks and resume from the first incomplete task
+
+  ## Step 4 — Process the Task Queue
 
   Process tasks in ascending issue number order. Do not change the order.
+  Skip any tasks already completed in recovery mode (Step 3).
 
   For EACH open task:
 
-  ### 3a — Read the Task
+  ### 4a — Read the Task
   Read the task issue in full:
     gh issue view <task-number> --repo {{ repo }}
   Understand what must be built before touching any code.
 
-  ### 3b — Implement
+  ### 4b — Implement
   Implement the task against its acceptance criteria.
   Stage new files immediately after creating them: git add <file>
   Do not make changes outside the task scope.
 
-  ### 3c — Build and Test
-  Read base/standards/<stack>.md for the exact build and test commands.
+  ### 4c — Build and Test
+  Read `.ai/standards/<stack>.md` for the exact build and test commands.
   Run the full build and test suite.
   If build fails — diagnose and fix. Do not move to the next task.
   If tests fail — diagnose and fix. Do not move to the next task.
   If you cannot fix the failure — stop and exit with a clear error message.
   The workflow will turn red. A human will investigate via Foreground Recovery.
 
-  ### 3d — Commit the Task
+  ### 4d — Commit the Task
   Count total tasks (open at start) and current position:
     git add -A
     git commit -m "feat: <task description> — task N of N (#{{ feature_issue }})"
 
   Append significant decisions to DECISIONS.md in ADR format (if applicable).
 
-  ### 3e — Close the Task Issue
+  ### 4e — Close the Task Issue
     gh issue close <task-number> --repo {{ repo }}
+
+  ### 4f — Write and push recovery.md
+  After the task commit and close, write `recovery.md` to the repo root:
+
+  ```markdown
+  # Recovery State
+
+  | Field               | Value                              |
+  |---------------------|------------------------------------|
+  | Feature issue       | #<feature-issue-number>            |
+  | Branch              | <current-branch-name>              |
+  | Total tasks         | <total-task-count>                 |
+  | Last updated        | <ISO 8601 timestamp>               |
+
+  ## Completed Tasks
+
+  - [x] #<issue-number> — <task-title>
+
+  ## Remaining Tasks
+
+  - [ ] #<issue-number> — <task-title> ← current
+  ```
+
+  Then commit and push immediately:
+    git add recovery.md
+    git commit -m "chore: update recovery.md — task N of N (#{{ feature_issue }})"
+    git push
+
+  This must happen before starting the next task. It ensures the session can be
+  resumed if the runner dies.
 
   Proceed to the next task.
 
-  ## Step 4 — Verify Acceptance Criteria Coverage
+  ## Step 5 — Verify Acceptance Criteria Coverage
 
   When all task issues are closed, verify acceptance criteria before declaring complete:
   1. Review each acceptance criterion extracted in Step 2
@@ -107,12 +153,25 @@ instructions: |
 
   If the feature issue had no acceptance criteria section (older format), skip this step.
 
-  ## Step 5 — All Tasks Complete
+  ## Step 6 — Archive recovery.md
+
+  After all tasks are complete and criteria verified:
+  - If `recovery.md` does NOT exist: skip this step gracefully.
+  - If `recovery.md` exists:
+      mkdir -p recovery-logs
+      git mv recovery.md recovery-logs/recovery-log-{{ feature_issue }}.md
+      git add recovery-logs/
+      git commit -m "chore: archive recovery.md for #{{ feature_issue }}"
+
+  This must happen before the branch is pushed and the PR is opened.
+
+  ## Step 7 — All Tasks Complete
 
   When all task issues are closed and acceptance criteria are verified:
-  1. Exit cleanly with a success message listing what was built
-  2. Do NOT push — the workflow pushes after this recipe exits
-  3. Do NOT open a PR — the workflow opens the PR with "Closes #{{ feature_issue }}"
+  1. Print: `=== Dev Session — Completed ===`
+  2. Notify the user: "PR is ready for your review."
+  3. Exit cleanly — do NOT push the branch, do NOT open a PR.
+     The workflow pushes and opens the PR after this recipe exits.
 
   ## Rules
 
