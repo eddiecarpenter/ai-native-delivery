@@ -20,8 +20,10 @@ on:
 jobs:
   publish:
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    permissions:
-      contents: write
+    # NOTE: Do NOT add 'permissions: contents: write' here and do NOT use github.token
+    # for the release creation step. GitHub does not trigger downstream workflows
+    # (e.g. release.yml) for events created by GITHUB_TOKEN — only PAT-created events
+    # propagate. GOOSE_AGENT_PAT must be used for the release create API call.
     steps:
       - name: Checkout main
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
